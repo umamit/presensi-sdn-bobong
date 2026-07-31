@@ -26,16 +26,19 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nip || !fullName || !email) {
-      alert('Mohon lengkapi data NIP, Nama Lengkap, dan Email guru.');
+    if (!nip || !fullName) {
+      alert('Mohon lengkapi data NIP dan Nama Lengkap guru.');
       return;
     }
 
+    const cleanNip = nip.trim();
+    const autoEmail = `${cleanNip}@sdnegeribobong.sch.id`;
+
     const newTeacher: UserProfile = {
       id: `usr-${Date.now()}`,
-      nip: nip.trim(),
+      nip: cleanNip,
       fullName: fullName.trim(),
-      email: email.trim(),
+      email: autoEmail,
       role,
       subject,
       phone,
@@ -43,7 +46,7 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
     };
 
     onAddTeacher(newTeacher);
-    alert(`Akun untuk ${fullName} berhasil didaftarkan! NIP: ${nip}`);
+    alert(`Akun untuk ${fullName} berhasil didaftarkan! NIP: ${cleanNip}`);
 
     // Reset Form
     setNip('');
@@ -108,11 +111,11 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
                     {u.role.toUpperCase()}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#8e8e93', lineHeight: '1.4' }}>
+                <div style={{ fontSize: '0.78rem', color: '#8e8e93', lineHeight: '1.4' }}>
                   NIP: <strong style={{ color: '#ffffff' }}>{u.nip}</strong> &nbsp;·&nbsp; {u.subject || 'Guru'}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#8e8e93', lineHeight: '1.4', marginTop: '0.25rem' }}>
-                  Email: {u.email} &nbsp;·&nbsp; Pass: <code style={{ color: '#0a84ff', background: 'rgba(10,132,255,0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontFamily: 'monospace' }}>{u.password || 'sdnbobong123'}</code>
+                <div style={{ fontSize: '0.75rem', color: '#8e8e93', lineHeight: '1.4', marginTop: '0.2rem' }}>
+                  Pass: <code style={{ color: '#0a84ff', background: 'rgba(10,132,255,0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontFamily: 'monospace' }}>{u.password || 'sdnbobong123'}</code>
                 </div>
               </div>
             ))}
@@ -159,28 +162,15 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Email Sekolah</label>
-                <input
-                  type="email"
-                  placeholder="rina@sdnegeribobong.sch.id"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input"
-                  required
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Jabatan / Guru Kelas</label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Guru Kelas III"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  className="glass-input"
-                />
-              </div>
+            <div>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Jabatan / Guru Kelas</label>
+              <input
+                type="text"
+                placeholder="Contoh: Guru Kelas III"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="glass-input"
+              />
             </div>
 
             <div>
