@@ -18,15 +18,20 @@ export default defineConfig({
         name: 'Presensi Guru - SD Negeri Bobong',
         short_name: 'SDN Bobong',
         description: 'Aplikasi Presensi Online Berbasis Geolocation GPS untuk Guru & Staff SD Negeri Bobong',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        start_url: '/',
+        scope: '/',
+        id: 'sdn-bobong-presensi',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
+        categories: ['education', 'productivity'],
         icons: [
           {
             src: 'icon-192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'icon-512.png',
