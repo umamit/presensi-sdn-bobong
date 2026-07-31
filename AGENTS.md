@@ -22,3 +22,7 @@
 ## 5. Menjaga Kode Tetap Clean Slate
 - **Tidak ada Mock Data Palsu**: Jangan menambahkan data dummy/placeholder tambahan yang tidak perlu.
 - **Gunakan HANYA 19 Guru Resmi SD Negeri Bobong**: Jaga file data agar tidak membengkak dengan data tidak relevan.
+
+## 6. Prinsip Utamakan Layar Smartphone (Mobile-First)
+- **Desain Khusus Smartphone**: Sebelum membuat/mengubah UI (halaman, modal, tombol, tabel, atau form), SELALU rancang dan uji untuk layar smartphone HP (width 320px–430px) terlebih dahulu.
+- **Tanpa Overlap & Tanpa Horizontal Scroll Liar**: Komponen harus fleksibel (flex-col/responsive grid), tombol minimal 44px, dan modal harus muat tanpa terpotong di HP.
