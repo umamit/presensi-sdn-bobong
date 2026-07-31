@@ -69,38 +69,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* METRIC SUMMARY CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div className="glass-panel" style={{ padding: '1.1rem 1.25rem', borderLeft: '4px solid var(--primary)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Total Tenaga Pengajar</span>
-            <Users size={18} color="var(--primary)" />
-          </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff' }}>{totalGuru} Guru</div>
+      {/* EXECUTIVE MINIMALIST STAT BAR (Apple Settings Style) */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'rgba(28, 28, 30, 0.6)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        padding: '0.85rem 1.5rem',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <Users size={16} color="#8e8e93" />
+          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Total Guru:</span>
+          <strong style={{ fontSize: '0.95rem', color: '#ffffff' }}>{totalGuru} Guru</strong>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.1rem 1.25rem', borderLeft: '4px solid #10b981' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Hadir Tepat Waktu</span>
-            <CheckCircle size={18} color="#10b981" />
-          </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#34d399' }}>{totalHadir}</div>
+        <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <CheckCircle size={16} color="#30d158" />
+          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Hadir:</span>
+          <strong style={{ fontSize: '0.95rem', color: '#30d158' }}>{totalHadir}</strong>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.1rem 1.25rem', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Terlambat</span>
-            <Clock size={18} color="#f59e0b" />
-          </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fbbf24' }}>{totalTerlambat}</div>
+        <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <Clock size={16} color="#ff9f0a" />
+          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Terlambat:</span>
+          <strong style={{ fontSize: '0.95rem', color: '#ff9f0a' }}>{totalTerlambat}</strong>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.1rem 1.25rem', borderLeft: '4px solid #ef4444' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Belum Presensi</span>
-            <AlertTriangle size={18} color="#ef4444" />
-          </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f87171' }}>{totalBelumAbsen}</div>
+        <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <AlertTriangle size={16} color="#ff453a" />
+          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Belum Absen:</span>
+          <strong style={{ fontSize: '0.95rem', color: '#ff453a' }}>{totalBelumAbsen}</strong>
         </div>
       </div>
 
