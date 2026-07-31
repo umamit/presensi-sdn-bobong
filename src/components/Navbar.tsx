@@ -34,17 +34,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand & School Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           <div style={{
-            background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
             width: '42px',
             height: '42px',
-            borderRadius: 'var(--radius-sm)',
+            borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
-            boxShadow: 'var(--shadow-glow)'
+            overflow: 'hidden',
+            border: '2px solid rgba(99, 102, 241, 0.4)',
+            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
           }}>
-            <School size={24} />
+            <img 
+              src="/logo-sdn-bobong.jpg" 
+              alt="Logo SD Negeri Bobong" 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
