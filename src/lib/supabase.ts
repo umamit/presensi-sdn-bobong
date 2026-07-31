@@ -34,43 +34,213 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
 
 export const MOCK_USERS: UserProfile[] = [
   {
-    id: 'usr-guru-1',
-    nip: '198504122010011005',
-    fullName: 'Drs. Ahmad Fauzi, M.Pd',
-    email: 'ahmad.fauzi@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas VI',
-    phone: '081234567890',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
-  },
-  {
-    id: 'usr-guru-2',
-    nip: '199008232015022003',
-    fullName: 'Siti Nurhaliza, S.Pd',
-    email: 'siti.nurhaliza@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Agama & BP',
-    phone: '082198765432',
+    id: 'usr-1',
+    nip: '199610272019032006',
+    fullName: 'Husnita Usman, M.Pd.',
+    email: 'husnita.usman@sdnegeribobong.sch.id',
+    role: 'admin',
+    subject: 'Plt. Kepala Sekolah / Bahasa Inggris',
+    password: 'sdnbobong123',
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
   },
   {
-    id: 'usr-admin-1',
-    nip: '197801012005011001',
-    fullName: 'Budi Santoso, S.Pd (Kepala Sekolah)',
-    email: 'admin@sdnegeribobong.sch.id',
+    id: 'usr-2',
+    nip: '101501',
+    fullName: 'Syawal',
+    email: 'syawal@sdnegeribobong.sch.id',
     role: 'admin',
-    subject: 'Kepala Sekolah / Admin',
-    phone: '081122334455',
+    subject: 'Ketua Komite / Perwakilan Masyarakat',
+    password: 'sdnbobong123',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-3',
+    nip: '198004042009042005',
+    fullName: 'Wa Sutini Idris',
+    email: 'wa.sutini@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Tata Usaha / Administrasi Sekolah',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-4',
+    nip: '198808152011012009',
+    fullName: 'YUSNIAR, S.Pd., Gr.',
+    email: 'yusniar@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Bendahara Sekolah / Wali Kelas 4B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-5',
+    nip: '197111032006042004',
+    fullName: 'DJAYANI A.GAFAR, A.Ma',
+    email: 'djayani@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 1B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-6',
+    nip: '199510012025212017',
+    fullName: 'RINI LAILA, S.Pd., Gr',
+    email: 'rini.laila@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 1A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-7',
+    nip: '199512022025212010',
+    fullName: 'AYU LESTARI, S.Pd., Gr',
+    email: 'ayu.lestari@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 2A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-8',
+    nip: '199007102020012015',
+    fullName: 'MARDIANA, S.Pd',
+    email: 'mardiana@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 2B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-9',
+    nip: '198503092010012009',
+    fullName: 'Jumraeni La Mbone',
+    email: 'jumraeni@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 2C',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-10',
+    nip: '199705072025212015',
+    fullName: 'FITRI HAMZA, S.Pd., Gr',
+    email: 'fitri.hamza@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 3A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-11',
+    nip: '197708182023212000',
+    fullName: 'SUKMA ANI, S.Pd., Gr',
+    email: 'sukma.ani@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 3B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-12',
+    nip: '101502',
+    fullName: 'Surahmi Wambes, S.Pd',
+    email: 'surahmi.wambes@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 4A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-13',
+    nip: '198805012025211027',
+    fullName: 'MAHARUDIN, S.Pd., Gr',
+    email: 'maharudin@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 5A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-14',
+    nip: '198509162009032002',
+    fullName: 'SURYANI NARIA, M.Pd',
+    email: 'suryani.naria@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 5B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-15',
+    nip: '199108202014092001',
+    fullName: 'Hasnia La Kepe',
+    email: 'hasnia.lakepe@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 6A',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-16',
+    nip: '101504',
+    fullName: 'SISKA ANDAYANI, S.Pd',
+    email: 'siska.andayani@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Guru Kelas 6B',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-17',
+    nip: '198707082015031002',
+    fullName: 'Abdul Kadir, S.Pd.I., Gr., M.Pd',
+    email: 'abdul.kadir@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Pendidikan Agama Islam',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-18',
+    nip: '101505',
+    fullName: 'SUKMAWATI ARSAN, S.Pd.I',
+    email: 'sukmawati.arsan@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Pendidikan Agama Islam',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-19',
+    nip: '101503',
+    fullName: 'KRISMAN',
+    email: 'krisman@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Tenaga Administrasi',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=250&q=80'
+  },
+  {
+    id: 'usr-20',
+    nip: '198004042009042006',
+    fullName: 'WA ODE SAMRIDA',
+    email: 'waode.samrida@sdnegeribobong.sch.id',
+    role: 'guru',
+    subject: 'Tenaga Administrasi',
+    password: 'sdnbobong123',
+    avatarUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=250&q=80'
   }
 ];
 
 export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [
   {
     id: 'att-1',
-    userId: 'usr-guru-1',
-    userName: 'Drs. Ahmad Fauzi, M.Pd',
-    userNip: '198504122010011005',
+    userId: 'usr-6',
+    userName: 'RINI LAILA, S.Pd., Gr',
+    userNip: '199510012025212017',
     date: new Date().toISOString().split('T')[0],
     checkInTime: new Date(new Date().setHours(6, 50, 0)).toISOString(),
     checkInLat: -1.955544,
@@ -81,9 +251,9 @@ export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [
   },
   {
     id: 'att-2',
-    userId: 'usr-guru-2',
-    userName: 'Siti Nurhaliza, S.Pd',
-    userNip: '199008232015022003',
+    userId: 'usr-7',
+    userName: 'AYU LESTARI, S.Pd., Gr',
+    userNip: '199512022025212010',
     date: new Date().toISOString().split('T')[0],
     checkInTime: new Date(new Date().setHours(7, 25, 0)).toISOString(),
     checkInLat: -1.955540,
