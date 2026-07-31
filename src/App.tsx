@@ -5,7 +5,13 @@ import {
   MOCK_ATTENDANCE_INITIAL,
   MOCK_LEAVES_INITIAL,
   INITIAL_SCHOOL_SETTINGS,
-  isSupabaseConfigured
+  isSupabaseConfigured,
+  fetchAttendanceLive,
+  saveAttendanceLive,
+  updateCheckOutLive,
+  fetchLeavesLive,
+  saveLeaveLive,
+  updateLeaveStatusLive
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { GuruDashboard } from './components/GuruDashboard';
@@ -16,7 +22,7 @@ import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
 
 export const App: React.FC = () => {
-  // Application Data States (persisted to localStorage for continuous demo)
+  // Application Data States
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('presensi_current_user');
     if (saved) {
@@ -62,6 +68,18 @@ export const App: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isPwaInstallable, setIsPwaInstallable] = useState(false);
 
+  // Synchronize Live Data if Supabase is connected
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchAttendanceLive().then(liveAtt => {
+        if (liveAtt && liveAtt.length > 0) setAttendanceRecords(liveAtt);
+      });
+      fetchLeavesLive().then(liveLeaves => {
+        if (liveLeaves && liveLeaves.length > 0) setLeaveRequests(liveLeaves);
+      });
+    }
+  }, []);
+
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -83,7 +101,7 @@ export const App: React.FC = () => {
     }
   };
 
-  // Sync to localStorage
+  // Sync to localStorage as fallback
   useEffect(() => {
     localStorage.setItem('presensi_current_user', JSON.stringify(currentUser));
   }, [currentUser]);
@@ -101,7 +119,7 @@ export const App: React.FC = () => {
   }, [leaveRequests]);
 
   // Handlers for Presensi
-  const handleCheckIn = (newRecord: Partial<AttendanceRecord>) => {
+  const handleCheckIn = async (newRecord: Partial<AttendanceRecord>) => {
     const fullRecord: AttendanceRecord = {
       id: `att-${Date.now()}`,
       userId: newRecord.userId!,
@@ -117,15 +135,23 @@ export const App: React.FC = () => {
     };
 
     setAttendanceRecords(prev => [fullRecord, ...prev]);
+
+    if (isSupabaseConfigured) {
+      await saveAttendanceLive(fullRecord);
+    }
   };
 
-  const handleCheckOut = (recordId: string, checkOutTime: string) => {
+  const handleCheckOut = async (recordId: string, checkOutTime: string) => {
     setAttendanceRecords(prev =>
       prev.map(r => (r.id === recordId ? { ...r, checkOutTime } : r))
     );
+
+    if (isSupabaseConfigured) {
+      await updateCheckOutLive(recordId, checkOutTime);
+    }
   };
 
-  const handleLeaveSubmit = (req: Partial<LeaveRequest>) => {
+  const handleLeaveSubmit = async (req: Partial<LeaveRequest>) => {
     const fullReq: LeaveRequest = {
       id: `lv-${Date.now()}`,
       userId: req.userId!,
@@ -141,14 +167,21 @@ export const App: React.FC = () => {
     };
 
     setLeaveRequests(prev => [fullReq, ...prev]);
+
+    if (isSupabaseConfigured) {
+      await saveLeaveLive(fullReq);
+    }
   };
 
-  const handleUpdateLeaveStatus = (requestId: string, newStatus: 'approved' | 'rejected') => {
+  const handleUpdateLeaveStatus = async (requestId: string, newStatus: 'approved' | 'rejected') => {
     setLeaveRequests(prev =>
       prev.map(l => (l.id === requestId ? { ...l, status: newStatus } : l))
     );
 
-    // Jika disetujui, buatkan pula record di presensi sebagai izin
+    if (isSupabaseConfigured) {
+      await updateLeaveStatusLive(requestId, newStatus);
+    }
+
     if (newStatus === 'approved') {
       const targetReq = leaveRequests.find(l => l.id === requestId);
       if (targetReq) {
@@ -162,6 +195,9 @@ export const App: React.FC = () => {
           notes: `Izin Disetujui: ${targetReq.description}`
         };
         setAttendanceRecords(prev => [leaveAtt, ...prev]);
+        if (isSupabaseConfigured) {
+          await saveAttendanceLive(leaveAtt);
+        }
       }
     }
   };
@@ -184,7 +220,7 @@ export const App: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `rekap_presensi_guru_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `rekap_presensi_sdn_bobong_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

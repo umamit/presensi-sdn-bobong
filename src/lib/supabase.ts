@@ -73,9 +73,9 @@ export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [
     userNip: '198504122010011005',
     date: new Date().toISOString().split('T')[0],
     checkInTime: new Date(new Date().setHours(6, 50, 0)).toISOString(),
-    checkInLat: -6.1684,
-    checkInLng: 106.8330,
-    distanceMeters: 15,
+    checkInLat: -1.955544,
+    checkInLng: 124.384388,
+    distanceMeters: 12,
     status: 'hadir',
     notes: 'Presensi Masuk Tepat Waktu'
   },
@@ -85,12 +85,12 @@ export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [
     userName: 'Siti Nurhaliza, S.Pd',
     userNip: '199008232015022003',
     date: new Date().toISOString().split('T')[0],
-    checkInTime: new Date(new Date().setHours(7, 12, 0)).toISOString(),
-    checkInLat: -6.1686,
-    checkInLng: 106.8332,
-    distanceMeters: 22,
+    checkInTime: new Date(new Date().setHours(7, 25, 0)).toISOString(),
+    checkInLat: -1.955540,
+    checkInLng: 124.384390,
+    distanceMeters: 18,
     status: 'terlambat',
-    notes: 'Macet jalan raya'
+    notes: 'Macet jalan'
   }
 ];
 
@@ -109,3 +109,133 @@ export const MOCK_LEAVES_INITIAL: LeaveRequest[] = [
     createdAt: new Date().toISOString()
   }
 ];
+
+// ==========================================
+// SUPABASE LIVE DATA SERVICES
+// ==========================================
+
+export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.warn('Error fetching attendance from Supabase:', error.message);
+    return null;
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    userId: item.user_id,
+    userName: item.user_name,
+    userNip: item.user_nip,
+    date: item.date,
+    checkInTime: item.check_in_time,
+    checkOutTime: item.check_out_time,
+    checkInLat: item.check_in_lat,
+    checkInLng: item.check_in_lng,
+    distanceMeters: item.distance_meters,
+    status: item.status,
+    notes: item.notes
+  }));
+}
+
+export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from('attendance').insert([{
+    user_id: rec.userId,
+    user_name: rec.userName,
+    user_nip: rec.userNip,
+    date: rec.date,
+    check_in_time: rec.checkInTime,
+    check_in_lat: rec.checkInLat,
+    check_in_lng: rec.checkInLng,
+    distance_meters: rec.distanceMeters,
+    status: rec.status,
+    notes: rec.notes
+  }]);
+
+  if (error) {
+    console.error('Error saving attendance to Supabase:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function updateCheckOutLive(id: string, checkOutTime: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from('attendance')
+    .update({ check_out_time: checkOutTime })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating checkout in Supabase:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function fetchLeavesLive(): Promise<LeaveRequest[] | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.warn('Error fetching leave_requests from Supabase:', error.message);
+    return null;
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    userId: item.user_id,
+    userName: item.user_name,
+    userNip: item.user_nip,
+    startDate: item.start_date,
+    endDate: item.end_date,
+    leaveType: item.leave_type,
+    description: item.description,
+    documentUrl: item.document_url,
+    status: item.status,
+    createdAt: item.created_at
+  }));
+}
+
+export async function saveLeaveLive(req: LeaveRequest): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from('leave_requests').insert([{
+    user_id: req.userId,
+    user_name: req.userName,
+    user_nip: req.userNip,
+    start_date: req.startDate,
+    end_date: req.endDate,
+    leave_type: req.leaveType,
+    description: req.description,
+    document_url: req.documentUrl,
+    status: req.status
+  }]);
+
+  if (error) {
+    console.error('Error saving leave request to Supabase:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function updateLeaveStatusLive(id: string, status: 'approved' | 'rejected'): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from('leave_requests')
+    .update({ status })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating leave status in Supabase:', error.message);
+    return false;
+  }
+  return true;
+}
