@@ -118,12 +118,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
           <div>
             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem', fontWeight: 500 }}>
-              NIP atau Email Sekolah
+              Nomor Induk Pegawai (NIP)
             </label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
-                placeholder="Masukkan NIP atau email..."
+                placeholder="Masukkan Nomor NIP..."
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 className="glass-input"
