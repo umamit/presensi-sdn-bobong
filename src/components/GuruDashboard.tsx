@@ -76,12 +76,12 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       },
       (error) => {
         console.warn('GPS Error:', error.message);
-        setGpsError('Izin akses lokasi belum diberikan pada browser Mac Anda. Aktifkan lokasi browser atau gunakan tombol simulasi di bawah untuk menguji.');
+        setGpsError('Perangkat ini belum mengizinkan akses lokasi. Klik tombol di bawah untuk mengizinkan akses GPS perangkat Anda.');
         setUserCoords(null);
         setDistance(null);
         setGpsLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -104,7 +104,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
   };
 
-  // Run GPS fetch on component mount
+  // Langsung minta lokasi GPS perangkat saat komponen dibuka
   useEffect(() => {
     fetchGpsLocation();
   }, [schoolSettings]);
