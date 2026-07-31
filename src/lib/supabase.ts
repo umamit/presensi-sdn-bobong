@@ -308,7 +308,8 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
     checkInLng: item.check_in_lng,
     distanceMeters: item.distance_meters,
     status: item.status,
-    notes: item.notes
+    notes: item.notes,
+    selfieUrl: item.selfie_url
   }));
 }
 
@@ -324,7 +325,8 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: rec.notes
+    notes: rec.notes,
+    selfie_url: rec.selfieUrl
   }]);
 
   if (error) {
@@ -332,6 +334,37 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     return false;
   }
   return true;
+}
+
+// Upload selfie foto ke Supabase Storage
+export async function uploadSelfie(imageDataUrl: string, userId: string): Promise<string | null> {
+  // Jika Supabase belum tersambung, kembalikan data URL langsung (disimpan lokal)
+  if (!supabase) return imageDataUrl;
+
+  try {
+    // Konversi base64 data URL menjadi Blob
+    const res = await fetch(imageDataUrl);
+    const blob = await res.blob();
+
+    const fileName = `selfies/${userId}_${Date.now()}.jpg`;
+    const { data, error } = await supabase.storage
+      .from('presensi-selfies')
+      .upload(fileName, blob, { contentType: 'image/jpeg', upsert: false });
+
+    if (error) {
+      console.warn('Error uploading selfie to Supabase Storage:', error.message);
+      return imageDataUrl; // Fallback ke base64 lokal
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('presensi-selfies')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  } catch (err) {
+    console.warn('Selfie upload error, using local base64:', err);
+    return imageDataUrl; // Fallback ke base64 lokal
+  }
 }
 
 export async function updateCheckOutLive(id: string, checkOutTime: string): Promise<boolean> {

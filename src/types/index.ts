@@ -27,6 +27,7 @@ export interface AttendanceRecord {
   distanceMeters?: number;
   status: AttendanceStatus;
   notes?: string;
+  selfieUrl?: string;
 }
 
 export interface SchoolSettings {

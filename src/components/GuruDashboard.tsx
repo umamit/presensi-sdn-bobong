@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
 import { calculateDistanceMeters, formatTime, formatDateIndo, isPointInPolygon } from '../utils/haversine';
-import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck } from 'lucide-react';
+import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck, Camera } from 'lucide-react';
 import { GeofenceMap } from './GeofenceMap';
+import { SelfieModal } from './SelfieModal';
 
 interface GuruDashboardProps {
   user: UserProfile;
@@ -29,8 +30,10 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [gpsError, setGpsError] = useState<string | null>(null);
-  const [isSimulated, setIsSimulated] = useState<boolean>(false);
-  const [notes, setNotes] = useState<string>('');
+  const [isSimulated, setIsSimulated] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [isSelfieOpen, setIsSelfieOpen] = useState(false);
+  const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
   // Update clock every second
   useEffect(() => {
@@ -116,7 +119,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || inPolygon;
 
-  // Handle Absen Masuk Click
+  // Handle Absen Masuk Click — Buka kamera selfie terlebih dahulu
   const handleCheckInSubmit = () => {
     if (!isInRadius) {
       alert(`Gagal Absen: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
@@ -125,12 +128,11 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-    
-    // Tentukan status terlambat atau hadir berdasarkan jam kerja sekolah
     const isLate = nowTimeStr > schoolSettings.workStartTime;
     const status = isLate ? 'terlambat' : 'hadir';
 
-    onCheckIn({
+    // Simpan data absen sementara, tunggu selfie dikonfirmasi
+    setPendingCheckIn({
       userId: user.id,
       userName: user.fullName,
       userNip: user.nip,
@@ -142,6 +144,23 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       status: status,
       notes: notes || (isLate ? 'Presensi Masuk (Terlambat)' : 'Presensi Masuk Tepat Waktu')
     });
+
+    // Buka modal kamera selfie
+    setIsSelfieOpen(true);
+  };
+
+  // Setelah selfie dikonfirmasi, simpan rekap presensi dengan URL foto
+  const handleSelfieCapture = (imageDataUrl: string) => {
+    if (!pendingCheckIn) return;
+    onCheckIn({ ...pendingCheckIn, selfieUrl: imageDataUrl });
+    setPendingCheckIn(null);
+    setIsSelfieOpen(false);
+  };
+
+  // Tutup modal selfie tanpa menyimpan
+  const handleSelfieClose = () => {
+    setPendingCheckIn(null);
+    setIsSelfieOpen(false);
   };
 
   // Handle Absen Pulang Click
@@ -151,6 +170,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   };
 
   return (
+    <>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
       
       {/* LEFT COLUMN: Main Presensi GPS Card */}
@@ -376,5 +396,15 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       </div>
 
     </div>
+
+    {/* Selfie Modal - Muncul saat Absen Masuk ditekan */}
+    {isSelfieOpen && (
+      <SelfieModal
+        guruName={user.fullName}
+        onCapture={handleSelfieCapture}
+        onClose={handleSelfieClose}
+      />
+    )}
+  </>
   );
 };
