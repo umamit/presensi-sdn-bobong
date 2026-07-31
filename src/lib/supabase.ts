@@ -225,50 +225,9 @@ export const MOCK_USERS: UserProfile[] = [
   }
 ];
 
-export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [
-  {
-    id: 'att-1',
-    userId: 'usr-6',
-    userName: 'RINI LAILA, S.Pd., Gr',
-    userNip: '199510012025212017',
-    date: new Date().toISOString().split('T')[0],
-    checkInTime: new Date(new Date().setHours(6, 50, 0)).toISOString(),
-    checkInLat: -1.955544,
-    checkInLng: 124.384388,
-    distanceMeters: 12,
-    status: 'hadir',
-    notes: 'Presensi Masuk Tepat Waktu'
-  },
-  {
-    id: 'att-2',
-    userId: 'usr-7',
-    userName: 'AYU LESTARI, S.Pd., Gr',
-    userNip: '199512022025212010',
-    date: new Date().toISOString().split('T')[0],
-    checkInTime: new Date(new Date().setHours(7, 25, 0)).toISOString(),
-    checkInLat: -1.955540,
-    checkInLng: 124.384390,
-    distanceMeters: 18,
-    status: 'terlambat',
-    notes: 'Macet jalan'
-  }
-];
+export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [];
 
-export const MOCK_LEAVES_INITIAL: LeaveRequest[] = [
-  {
-    id: 'lv-1',
-    userId: 'usr-guru-2',
-    userName: 'Siti Nurhaliza, S.Pd',
-    userNip: '199008232015022003',
-    startDate: '2026-08-03',
-    endDate: '2026-08-04',
-    leaveType: 'sakit',
-    description: 'Demam tinggi dan pemeriksaan dokter.',
-    documentUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=500&q=80',
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  }
-];
+export const MOCK_LEAVES_INITIAL: LeaveRequest[] = [];
 
 // ==========================================
 // SUPABASE LIVE DATA SERVICES
