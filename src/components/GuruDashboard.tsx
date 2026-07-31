@@ -75,9 +75,10 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         setGpsLoading(false);
       },
       (error) => {
-        console.warn('GPS Error, fallback ke posisi terdekat:', error.message);
-        setGpsError('Lokasi GPS tidak diizinkan. Menggunakan fitur tes lokasi terdekat.');
-        simulateLocation(true);
+        console.warn('GPS Error:', error.message);
+        setGpsError('Izin akses lokasi belum diberikan pada browser Mac Anda. Aktifkan lokasi browser atau gunakan tombol simulasi di bawah untuk menguji.');
+        setUserCoords(null);
+        setDistance(null);
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
