@@ -7,7 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
+      workbox: {
+        skipWaiting: true,       // Langsung aktifkan service worker baru
+        clientsClaim: true,      // Ambil kendali semua tab sekaligus
+        cleanupOutdatedCaches: true // Hapus cache lama otomatis
+      },
       manifest: {
         name: 'Presensi Guru - SD Negeri Bobong',
         short_name: 'SDN Bobong',
@@ -38,3 +44,4 @@ export default defineConfig({
     })
   ]
 });
+
