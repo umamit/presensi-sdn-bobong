@@ -65,7 +65,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         width: '100%',
         maxWidth: '440px',
         padding: '2.25rem 2rem',
-        boxShadow: 'var(--shadow-glow)'
+        background: '#1c1c1e',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)'
       }}>
         
         {/* Header Logo & School Branding */}
