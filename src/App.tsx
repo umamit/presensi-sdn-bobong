@@ -28,7 +28,15 @@ export const App: React.FC = () => {
   // All registered users list (Admin can add new teachers)
   const [allUsers, setAllUsers] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('presensi_all_users');
-    return saved ? JSON.parse(saved) : MOCK_USERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.warn('Failed to parse saved users, resetting to defaults');
+      }
+    }
+    return MOCK_USERS;
   });
 
   // Active Authenticated Session
@@ -75,10 +83,12 @@ export const App: React.FC = () => {
 
   // Synchronize Live Data if Supabase is connected
   useEffect(() => {
+    fetchUsersLive().then(liveUsers => {
+      if (liveUsers && liveUsers.length > 0) {
+        setAllUsers(liveUsers);
+      }
+    });
     if (isSupabaseConfigured) {
-      fetchUsersLive().then(liveUsers => {
-        if (liveUsers && liveUsers.length > 0) setAllUsers(liveUsers);
-      });
       fetchAttendanceLive().then(liveAtt => {
         if (liveAtt && liveAtt.length > 0) setAttendanceRecords(liveAtt);
       });
