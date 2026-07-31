@@ -100,24 +100,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     );
   };
 
-  // Simulasi lokasi untuk kemudahan demo/pengujian
-  const simulateLocation = (inRadius: boolean) => {
-    setIsSimulated(true);
-    setGpsError(null);
-    if (inRadius) {
-      // Koordinat di dalam Polygon KML area presensi SD Negeri Bobong
-      const lat = schoolSettings.latitude;
-      const lng = schoolSettings.longitude;
-      setUserCoords({ lat, lng });
-      setDistance(calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude));
-    } else {
-      // Koordinat di luar area presensi (~450m)
-      const lat = schoolSettings.latitude + 0.004;
-      const lng = schoolSettings.longitude + 0.004;
-      setUserCoords({ lat, lng });
-      setDistance(calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude));
-    }
-  };
+
 
   // Langsung minta lokasi GPS perangkat saat komponen dibuka
   useEffect(() => {
@@ -281,26 +264,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
             </div>
           )}
 
-          {/* Location Simulator Switches for Testing */}
-          <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Compass size={12} /> Simulasi GPS (Demo):
-            </span>
-            <button
-              onClick={() => simulateLocation(true)}
-              className="btn btn-secondary"
-              style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', background: isSimulated && isInRadius ? 'rgba(16,185,129,0.2)' : undefined }}
-            >
-              <Navigation size={12} color="#34d399" /> Dalam Radius (15m)
-            </button>
-            <button
-              onClick={() => simulateLocation(false)}
-              className="btn btn-secondary"
-              style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', background: isSimulated && !isInRadius ? 'rgba(239,68,68,0.2)' : undefined }}
-            >
-              <MapPin size={12} color="#f87171" /> Di Luar Radius (450m)
-            </button>
-          </div>
+
 
           {/* Visual Geofence Polygon Map Component */}
           <GeofenceMap
