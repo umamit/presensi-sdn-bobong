@@ -57,54 +57,56 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
 
   return (
     <div className="modal-backdrop">
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '640px', padding: '1.5rem', background: '#0f172a' }}>
+      <div className="glass-panel" style={{ width: '100%', maxWidth: '640px', padding: '1.25rem', background: '#1c1c1e', maxHeight: '90vh', overflowY: 'auto' }}>
         
         {/* Header Modal */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users color="var(--primary)" /> Kelola Akun Guru SD Negeri Bobong
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Users size={18} color="var(--primary)" /> Kelola Akun Guru
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}>
             <X size={20} />
           </button>
         </div>
 
         {/* Tab Buttons */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.65rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveTab('list')}
             className="btn btn-secondary"
-            style={{ fontSize: '0.85rem', padding: '0.45rem 1rem', background: activeTab === 'list' ? 'var(--primary-light)' : undefined, borderColor: activeTab === 'list' ? 'var(--primary)' : undefined }}
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', flex: 1, minWidth: '130px', background: activeTab === 'list' ? 'var(--primary-light)' : undefined, borderColor: activeTab === 'list' ? 'var(--primary)' : undefined }}
           >
-            <Users size={16} /> Daftar Akun Guru ({allUsers.length})
+            <Users size={14} /> Daftar Guru ({allUsers.length})
           </button>
           <button
             onClick={() => setActiveTab('add')}
             className="btn btn-primary"
-            style={{ fontSize: '0.85rem', padding: '0.45rem 1rem' }}
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem', flex: 1, minWidth: '130px' }}
           >
-            <UserPlus size={16} /> Tambah Akun Guru Baru
+            <UserPlus size={14} /> Tambah Akun
           </button>
         </div>
 
         {/* TAB 1: Daftar Guru */}
         {activeTab === 'list' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '380px', overflowY: 'auto' }}>
             {allUsers.map((u) => (
-              <div key={u.id} className="glass-panel" style={{ padding: '0.85rem 1rem', background: 'rgba(15,23,42,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{u.fullName}</strong>
-                    <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.7rem' }}>
-                      {u.role.toUpperCase()}
+              <div key={u.id} className="ios-group" style={{ padding: '0.75rem 0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '160px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      <strong style={{ color: '#fff', fontSize: '0.88rem' }}>{u.fullName}</strong>
+                      <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
+                        {u.role.toUpperCase()}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.15rem' }}>
+                      NIP: <strong>{u.nip}</strong> • {u.subject || 'Guru'}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', wordBreak: 'break-all' }}>
+                      Email: {u.email} &nbsp;·&nbsp; Pass: <code>{u.password || 'sdnbobong123'}</code>
                     </span>
                   </div>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>
-                    NIP: <strong>{u.nip}</strong> • {u.subject || 'Guru'}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                    Email: {u.email} • Password: <code>{u.password || 'sdnbobong123'}</code>
-                  </span>
                 </div>
               </div>
             ))}
@@ -113,10 +115,10 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
 
         {/* TAB 2: Form Tambah Guru Baru */}
         {activeTab === 'add' && (
-          <form onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <form onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <div>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>NIP Guru</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>NIP Guru</label>
                 <input
                   type="text"
                   placeholder="Contoh: 199201012020011002"
@@ -127,20 +129,20 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Peran (Role)</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Peran (Role)</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as 'guru' | 'admin')}
                   className="glass-input"
                 >
-                  <option value="guru" style={{ background: '#0f172a' }}>Guru Pengajar</option>
-                  <option value="admin" style={{ background: '#0f172a' }}>Admin / Kepala Sekolah</option>
+                  <option value="guru" style={{ background: '#1c1c1e' }}>Guru Pengajar</option>
+                  <option value="admin" style={{ background: '#1c1c1e' }}>Admin / Kepala Sekolah</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Nama Lengkap & Gelar</label>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Nama Lengkap & Gelar</label>
               <input
                 type="text"
                 placeholder="Contoh: Rina Amalia, S.Pd"
@@ -151,9 +153,9 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <div>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Email Sekolah</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Email Sekolah</label>
                 <input
                   type="email"
                   placeholder="rina@sdnegeribobong.sch.id"
@@ -164,7 +166,7 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Jabatan / Guru Kelas</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Jabatan / Guru Kelas</label>
                 <input
                   type="text"
                   placeholder="Contoh: Guru Kelas III"
@@ -176,7 +178,7 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
             </div>
 
             <div>
-              <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Password Awal (Default Sekolah)</label>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Password Awal (Default Sekolah)</label>
               <input
                 type="text"
                 value={password}
@@ -186,12 +188,12 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
               <button type="button" onClick={() => setActiveTab('list')} className="btn btn-secondary" style={{ flex: 1 }}>
                 Batal
               </button>
               <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                <UserPlus size={16} /> Daftarkan Akun Guru
+                <UserPlus size={15} /> Daftarkan
               </button>
             </div>
           </form>
