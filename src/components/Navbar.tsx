@@ -55,7 +55,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
                 Presensi<span style={{ color: 'var(--secondary)' }}>Guru</span>
               </h1>
-              <span className="badge badge-izin" style={{ fontSize: '0.7rem' }}>PWA Ready</span>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
               <MapPin size={12} color="var(--secondary)" /> {schoolName}
