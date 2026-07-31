@@ -234,3 +234,17 @@ export async function fetchUsersLive(): Promise<UserProfile[] | null> {
     password: item.password
   }));
 }
+
+export async function updateUserPasswordLive(userId: string, newPassword: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from('users')
+    .update({ password: newPassword })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating user password in Supabase:', error.message);
+    return false;
+  }
+  return true;
+}

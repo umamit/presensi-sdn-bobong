@@ -12,7 +12,8 @@ import {
   fetchLeavesLive,
   saveLeaveLive,
   updateLeaveStatusLive,
-  fetchUsersLive
+  fetchUsersLive,
+  updateUserPasswordLive
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { LoginPage } from './components/LoginPage';
@@ -265,6 +266,20 @@ export const App: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const handleUpdateUserPassword = async (userId: string, newPass: string) => {
+    setAllUsers(prev =>
+      prev.map(u => (u.id === userId ? { ...u, password: newPass } : u))
+    );
+    if (currentUser && currentUser.id === userId) {
+      const updated = { ...currentUser, password: newPass };
+      setCurrentUser(updated);
+      localStorage.setItem('presensi_active_user', JSON.stringify(updated));
+    }
+    if (isSupabaseConfigured) {
+      await updateUserPasswordLive(userId, newPass);
+    }
+  };
+
   // If user is not logged in, render LoginPage
   if (!currentUser) {
     return (
@@ -302,6 +317,7 @@ export const App: React.FC = () => {
             onCheckIn={handleCheckIn}
             onCheckOut={handleCheckOut}
             onOpenLeaveModal={() => setIsLeaveModalOpen(true)}
+            onUpdatePassword={handleUpdateUserPassword}
           />
         ) : (
           <AdminDashboard

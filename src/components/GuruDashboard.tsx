@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
 import { calculateDistanceMeters, formatTime, formatDateIndo, isPointInPolygon } from '../utils/haversine';
-import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck, Camera, HelpCircle } from 'lucide-react';
+import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck, Camera, HelpCircle, Key } from 'lucide-react';
 import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
 import { GuideModal } from './GuideModal';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
 interface GuruDashboardProps {
   user: UserProfile;
@@ -13,6 +14,7 @@ interface GuruDashboardProps {
   onCheckIn: (record: Partial<AttendanceRecord>) => void;
   onCheckOut: (recordId: string, checkOutTime: string) => void;
   onOpenLeaveModal: () => void;
+  onUpdatePassword: (userId: string, newPass: string) => void;
 }
 
 export const GuruDashboard: React.FC<GuruDashboardProps> = ({
@@ -21,7 +23,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   attendanceRecords,
   onCheckIn,
   onCheckOut,
-  onOpenLeaveModal
+  onOpenLeaveModal,
+  onUpdatePassword
 }) => {
   // Live clock state
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -35,6 +38,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [notes, setNotes] = useState('');
   const [isSelfieOpen, setIsSelfieOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isChangePassOpen, setIsChangePassOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
   // Filter attendance records for current user
@@ -370,7 +374,11 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
             <strong style={{ fontSize: '0.9rem', color: '#fff', display: 'block' }}>Butuh Bantuan Atau Ajukan Izin?</strong>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Baca petunjuk cara absen atau ajukan surat izin ke sekolah</span>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button onClick={() => setIsChangePassOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
+              <Key size={16} color="var(--primary)" />
+              <span>Ubah Sandi</span>
+            </button>
             <button onClick={() => setIsGuideOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
               <HelpCircle size={16} color="var(--secondary)" />
               <span>Panduan Absen</span>
@@ -428,6 +436,15 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     {/* Guide Modal - Muncul saat tombol Panduan ditekan */}
     {isGuideOpen && (
       <GuideModal onClose={() => setIsGuideOpen(false)} />
+    )}
+
+    {/* Change Password Modal */}
+    {isChangePassOpen && (
+      <ChangePasswordModal
+        currentUser={user}
+        onClose={() => setIsChangePassOpen(false)}
+        onUpdatePassword={onUpdatePassword}
+      />
     )}
   </>
   );
