@@ -105,7 +105,7 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
           setFaceDetected(isFacePresent);
 
           if (!isFacePresent) {
-            setLivenessStatusMsg('❌ Wajah tidak terdeteksi. Harap pas menghadap kamera.');
+            setLivenessStatusMsg('Wajah tidak terdeteksi. Harap pas menghadap kamera.');
           } else {
             // Simulasi deteksi pergerakan kedip mata (Liveness Eye Blink Detector)
             // Mengukur fluktuasi kontras piksel area mata atas secara berkala
@@ -127,9 +127,9 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
             }
 
             if (!hasBlinked) {
-              setLivenessStatusMsg('👀 Wajah Terdeteksi! Silakan KEDIPKAN MATA 1 kali...');
+              setLivenessStatusMsg('Wajah Terdeteksi! Silakan KEDIPKAN MATA 1 kali...');
             } else {
-              setLivenessStatusMsg('✅ Verifikasi Kehidupan Berhasil! Silakan ambil foto.');
+              setLivenessStatusMsg('Verifikasi Kehidupan Berhasil! Silakan ambil foto.');
             }
           }
         }
@@ -169,7 +169,7 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
 
       ctx.font = 'bold 13px Inter, sans-serif';
       ctx.fillStyle = '#34d399';
-      ctx.fillText(`📍 SDN Bobong • ${nowStr}`, 20, canvas.height - 22);
+      ctx.fillText(`SDN Bobong • ${nowStr}`, 20, canvas.height - 22);
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
       setCapturedImage(dataUrl);

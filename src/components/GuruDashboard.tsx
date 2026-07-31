@@ -255,7 +255,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
               {formatDateIndo(currentTime.toISOString())}
             </div>
             <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.25rem', background: 'rgba(99,102,241,0.12)', padding: '0.3rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
-              🌅 Pagi: Masuk 06.00-08.00 • Pulang 11.45-12.00 | ☀️ Siang: Masuk 12.00-12.30 • Pulang 16.00-16.45 WIT
+              Shift Pagi: Masuk 06.00-08.00 • Pulang 11.45-12.00 | Shift Siang: Masuk 12.00-12.30 • Pulang 16.00-16.45 WIT
             </div>
           </div>
         </div>
