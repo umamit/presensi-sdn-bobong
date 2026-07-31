@@ -41,7 +41,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'admin',
     subject: 'Plt. Kepala Sekolah / Bahasa Inggris',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-3',
@@ -51,7 +50,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Tata Usaha / Administrasi Sekolah',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-4',
@@ -61,7 +59,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Bendahara Sekolah / Wali Kelas 4B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-5',
@@ -71,7 +68,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 1B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-6',
@@ -81,7 +77,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 1A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-7',
@@ -91,7 +86,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 2A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-8',
@@ -101,7 +95,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 2B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-9',
@@ -111,7 +104,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 2C',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-10',
@@ -121,7 +113,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 3A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-11',
@@ -131,7 +122,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 3B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-12',
@@ -141,7 +131,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 4A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-13',
@@ -151,7 +140,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 5A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-14',
@@ -161,7 +149,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 5B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-15',
@@ -171,7 +158,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 6A',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-16',
@@ -181,7 +167,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Guru Kelas 6B',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-17',
@@ -191,7 +176,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Pendidikan Agama Islam',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-18',
@@ -201,7 +185,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Pendidikan Agama Islam',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-19',
@@ -211,7 +194,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Tenaga Administrasi',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=250&q=80'
   },
   {
     id: 'usr-20',
@@ -221,7 +203,6 @@ export const MOCK_USERS: UserProfile[] = [
     role: 'guru',
     subject: 'Tenaga Administrasi',
     password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=250&q=80'
   }
 ];
 
