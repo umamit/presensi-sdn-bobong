@@ -11,7 +11,8 @@ import {
   updateCheckOutLive,
   fetchLeavesLive,
   saveLeaveLive,
-  updateLeaveStatusLive
+  updateLeaveStatusLive,
+  fetchUsersLive
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { LoginPage } from './components/LoginPage';
@@ -75,6 +76,9 @@ export const App: React.FC = () => {
   // Synchronize Live Data if Supabase is connected
   useEffect(() => {
     if (isSupabaseConfigured) {
+      fetchUsersLive().then(liveUsers => {
+        if (liveUsers && liveUsers.length > 0) setAllUsers(liveUsers);
+      });
       fetchAttendanceLive().then(liveAtt => {
         if (liveAtt && liveAtt.length > 0) setAttendanceRecords(liveAtt);
       });

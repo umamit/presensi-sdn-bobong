@@ -34,179 +34,7 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   checkOutEndTime: '17:00'
 };
 
-export const MOCK_USERS: UserProfile[] = [
-  {
-    id: 'usr-1',
-    nip: '199610272019032006',
-    fullName: 'Husnita Usman, M.Pd.',
-    email: 'husnita.usman@sdnegeribobong.sch.id',
-    role: 'admin',
-    subject: 'Plt. Kepala Sekolah / Bahasa Inggris',
-    password: '230900',
-  },
-  {
-    id: 'usr-3',
-    nip: '198004042009042005',
-    fullName: 'Wa Sutini Idris',
-    email: 'wa.sutini@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Tata Usaha / Administrasi Sekolah',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-4',
-    nip: '198808152011012009',
-    fullName: 'YUSNIAR, S.Pd., Gr.',
-    email: 'yusniar@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Bendahara Sekolah / Wali Kelas 4B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-5',
-    nip: '197111032006042004',
-    fullName: 'DJAYANI A.GAFAR, A.Ma',
-    email: 'djayani@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 1B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-6',
-    nip: '199510012025212017',
-    fullName: 'RINI LAILA, S.Pd., Gr',
-    email: 'rini.laila@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 1A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-7',
-    nip: '199512022025212010',
-    fullName: 'AYU LESTARI, S.Pd., Gr',
-    email: 'ayu.lestari@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 2A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-8',
-    nip: '199007102020012015',
-    fullName: 'MARDIANA, S.Pd',
-    email: 'mardiana@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 2B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-9',
-    nip: '198503092010012009',
-    fullName: 'Jumraeni La Mbone',
-    email: 'jumraeni@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 2C',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-10',
-    nip: '199705072025212015',
-    fullName: 'FITRI HAMZA, S.Pd., Gr',
-    email: 'fitri.hamza@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 3A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-11',
-    nip: '197708182023212000',
-    fullName: 'SUKMA ANI, S.Pd., Gr',
-    email: 'sukma.ani@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 3B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-12',
-    nip: '101502',
-    fullName: 'Surahmi Wambes, S.Pd',
-    email: 'surahmi.wambes@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 4A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-13',
-    nip: '198805012025211027',
-    fullName: 'MAHARUDIN, S.Pd., Gr',
-    email: 'maharudin@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 5A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-14',
-    nip: '198509162009032002',
-    fullName: 'SURYANI NARIA, M.Pd',
-    email: 'suryani.naria@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 5B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-15',
-    nip: '199108202014092001',
-    fullName: 'Hasnia La Kepe',
-    email: 'hasnia.lakepe@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 6A',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-16',
-    nip: '101504',
-    fullName: 'SISKA ANDAYANI, S.Pd',
-    email: 'siska.andayani@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Guru Kelas 6B',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-17',
-    nip: '198707082015031002',
-    fullName: 'Abdul Kadir, S.Pd.I., Gr., M.Pd',
-    email: 'abdul.kadir@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Pendidikan Agama Islam',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-18',
-    nip: '101505',
-    fullName: 'SUKMAWATI ARSAN, S.Pd.I',
-    email: 'sukmawati.arsan@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Pendidikan Agama Islam',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-19',
-    nip: '101503',
-    fullName: 'KRISMAN',
-    email: 'krisman@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Tenaga Administrasi',
-    password: 'sdnbobong123',
-  },
-  {
-    id: 'usr-20',
-    nip: '198004042009042006',
-    fullName: 'WA ODE SAMRIDA',
-    email: 'waode.samrida@sdnegeribobong.sch.id',
-    role: 'guru',
-    subject: 'Tenaga Administrasi',
-    password: 'sdnbobong123',
-  }
-];
+export const MOCK_USERS: UserProfile[] = [];
 
 export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [];
 
@@ -373,4 +201,26 @@ export async function updateLeaveStatusLive(id: string, status: 'approved' | 're
     return false;
   }
   return true;
+}
+
+export async function fetchUsersLive(): Promise<UserProfile[] | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('users')
+    .select('*');
+
+  if (error) {
+    console.warn('Error fetching users from Supabase:', error.message);
+    return null;
+  }
+
+  return data.map(item => ({
+    id: item.id,
+    nip: item.nip,
+    fullName: item.full_name,
+    email: item.email,
+    role: item.role,
+    subject: item.subject,
+    password: item.password
+  }));
 }
