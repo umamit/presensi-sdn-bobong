@@ -135,7 +135,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               Area GPS Presensi: {schoolSettings.schoolName}
             </strong>
             <span style={{ fontSize: '0.78rem', color: '#8e8e93' }}>
-              Koordinat ({schoolSettings.latitude}, {schoolSettings.longitude}) • Max Radius: <strong>{schoolSettings.radiusMeters}m</strong> • Jam Operasional: {schoolSettings.workStartTime} - {schoolSettings.workEndTime} WIT
+              Koordinat ({schoolSettings.latitude}, {schoolSettings.longitude}) • Max Radius: <strong>{schoolSettings.radiusMeters}m</strong> • Shift Pagi (06:00-12:00) & Shift Siang (12:00-16:45) WIT
             </span>
           </div>
         </div>

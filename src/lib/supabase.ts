@@ -28,10 +28,14 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
     [-1.955692, 124.384539],
     [-1.955389, 124.384530]
   ],
-  checkInOpenTime: '06:00',
-  workStartTime: '07:15',
-  workEndTime: '16:00',
-  checkOutEndTime: '17:00'
+  pagiCheckInOpen: '06:00',
+  pagiWorkStart: '08:00',
+  pagiCheckOutStart: '11:45',
+  pagiCheckOutEnd: '12:00',
+  siangCheckInOpen: '12:00',
+  siangWorkStart: '12:30',
+  siangCheckOutStart: '16:00',
+  siangCheckOutEnd: '16:45'
 };
 
 export const MOCK_USERS: UserProfile[] = [

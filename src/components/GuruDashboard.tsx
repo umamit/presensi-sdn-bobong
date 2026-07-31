@@ -147,13 +147,26 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     
-    // Cek apakah presensi dibuka (mulai jam 06:00)
-    if (nowTimeStr < (schoolSettings.checkInOpenTime || '06:00')) {
-      alert(`Presensi masuk belum dibuka. Presensi dibuka mulai jam ${schoolSettings.checkInOpenTime || '06:00'}.`);
-      return;
+    // Otomatis Deteksi Shift Berdasarkan Jam Sekarang
+    // Shift Pagi: Masuk 06.00 - 08.00 (setelah 08.00 Terlambat) | Pulang: 11.45 - 12.00 WIT
+    // Shift Siang: Masuk 12.00 - 12.30 (setelah 12.30 Terlambat) | Pulang: 16.00 - 16.45 WIT
+    let detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '11.45' ? 'pagi' : 'siang');
+    let isLate = false;
+
+    if (detectedShift === 'pagi') {
+      if (nowTimeStr < (schoolSettings.pagiCheckInOpen || '06:00')) {
+        alert(`Presensi Shift Pagi belum dibuka. Presensi dibuka mulai jam ${schoolSettings.pagiCheckInOpen || '06:00'} WIT.`);
+        return;
+      }
+      isLate = nowTimeStr > (schoolSettings.pagiWorkStart || '08:00');
+    } else {
+      if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
+        alert(`Presensi Shift Siang belum dibuka. Presensi dibuka mulai jam ${schoolSettings.siangCheckInOpen || '12:00'} WIT.`);
+        return;
+      }
+      isLate = nowTimeStr > (schoolSettings.siangWorkStart || '12:30');
     }
 
-    const isLate = nowTimeStr > schoolSettings.workStartTime;
     const status = isLate ? 'terlambat' : 'hadir';
 
     // Simpan data absen sementara, tunggu selfie dikonfirmasi
@@ -167,7 +180,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       checkInLng: userCoords?.lng,
       distanceMeters: distance || 0,
       status: status,
-      notes: notes || (isLate ? 'Presensi Masuk (Terlambat)' : 'Presensi Masuk Tepat Waktu')
+      shift: detectedShift,
+      notes: notes || (isLate ? `Presensi Masuk Shift ${detectedShift.toUpperCase()} (Terlambat)` : `Presensi Masuk Shift ${detectedShift.toUpperCase()} (Tepat Waktu)`)
     });
 
     // Buka modal kamera selfie
@@ -192,9 +206,11 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const handleCheckOutSubmit = () => {
     if (!userTodayRecord) return;
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const userShift = userTodayRecord.shift || 'pagi';
+    const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
     
-    if (nowTimeStr < (schoolSettings.workEndTime || '16:00')) {
-      if (!confirm(`Belum memasuki jam pulang resmi (${schoolSettings.workEndTime || '16:00'}). Yakin ingin absen pulang sekarang?`)) {
+    if (nowTimeStr < targetCheckOutStart) {
+      if (!confirm(`Belum memasuki jam pulang resmi Shift ${userShift.toUpperCase()} (${targetCheckOutStart} WIT). Yakin ingin absen pulang sekarang?`)) {
         return;
       }
     }
@@ -223,8 +239,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {formatDateIndo(currentTime.toISOString())}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.2rem', background: 'rgba(99,102,241,0.12)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
-              Masuk: {schoolSettings.checkInOpenTime || '06:00'} - {schoolSettings.workStartTime} WIT • Pulang: {schoolSettings.workEndTime} - {schoolSettings.checkOutEndTime || '17:00'} WIT
+            <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.25rem', background: 'rgba(99,102,241,0.12)', padding: '0.3rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
+              🌅 Pagi: Masuk 06.00-08.00 • Pulang 11.45-12.00 | ☀️ Siang: Masuk 12.00-12.30 • Pulang 16.00-16.45 WIT
             </div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 export type UserRole = 'guru' | 'admin';
 
+export type ShiftType = 'pagi' | 'siang';
+
 export interface UserProfile {
   id: string;
   nip: string;
@@ -10,6 +12,7 @@ export interface UserProfile {
   avatarUrl?: string;
   phone?: string;
   password?: string;
+  shift?: ShiftType; // 'pagi' | 'siang'
 }
 
 export type AttendanceStatus = 'hadir' | 'terlambat' | 'izin' | 'alfa';
@@ -28,6 +31,7 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   notes?: string;
   selfieUrl?: string;
+  shift?: ShiftType;
 }
 
 export interface SchoolSettings {
@@ -38,10 +42,18 @@ export interface SchoolSettings {
   longitude: number;
   radiusMeters: number;
   polygonCoords?: Array<[number, number]>; // Geofence polygon KML [lat, lng]
-  checkInOpenTime: string; // e.g. "06:00"
-  workStartTime: string;    // e.g. "07:15"
-  workEndTime: string;      // e.g. "16:00"
-  checkOutEndTime: string;  // e.g. "17:00"
+  
+  // Shift Pagi
+  pagiCheckInOpen: string;  // "06:00"
+  pagiWorkStart: string;    // "08:00"
+  pagiCheckOutStart: string; // "11:45"
+  pagiCheckOutEnd: string;   // "12:00"
+
+  // Shift Siang
+  siangCheckInOpen: string;  // "12:00"
+  siangWorkStart: string;    // "12:30"
+  siangCheckOutStart: string; // "16:00"
+  siangCheckOutEnd: string;   // "16:45"
 }
 
 export type LeaveType = 'sakit' | 'izin' | 'cuti';
