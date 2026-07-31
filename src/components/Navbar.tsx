@@ -11,6 +11,8 @@ interface NavbarProps {
   onOpenSupabaseConfig: () => void;
   isSupabaseActive: boolean;
   schoolName: string;
+  activeViewMode?: 'admin' | 'guru';
+  onToggleViewMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,7 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onInstallPwa,
   onOpenSupabaseConfig,
   isSupabaseActive,
-  schoolName
+  schoolName,
+  activeViewMode = 'admin',
+  onToggleViewMode
 }) => {
   return (
     <header className="glass-panel" style={{ borderRadius: '0 0 var(--radius-md) var(--radius-md)', borderTop: 'none', padding: '0.9rem 1.5rem', marginBottom: '1.5rem' }}>
@@ -68,6 +72,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Database size={14} color={isSupabaseActive ? '#34d399' : '#f59e0b'} />
             <span>{isSupabaseActive ? 'Supabase Connected' : 'Demo Mode'}</span>
           </button>
+
+          {/* Admin Feature: Toggle View Mode (Absen Guru vs Panel Admin) */}
+          {currentUser.role === 'admin' && onToggleViewMode && (
+            <button
+              onClick={onToggleViewMode}
+              className="btn btn-primary"
+              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', background: activeViewMode === 'guru' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : undefined }}
+              title="Beralih antara Mode Presensi Saya dan Panel Kepala Sekolah"
+            >
+              {activeViewMode === 'guru' ? (
+                <>
+                  <ShieldCheck size={14} />
+                  <span>Buka Panel Admin</span>
+                </>
+              ) : (
+                <>
+                  <User size={14} />
+                  <span>Mode Absen Saya</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Admin Feature: Manage Teacher Accounts Button */}
           {currentUser.role === 'admin' && onOpenTeacherManagement && (

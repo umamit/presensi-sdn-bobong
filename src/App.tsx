@@ -36,6 +36,9 @@ export const App: React.FC = () => {
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Admin View Mode: 'admin' (default) or 'guru' (to take attendance)
+  const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
+
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
     const saved = localStorage.getItem('presensi_school_settings');
     if (saved) {
@@ -271,11 +274,13 @@ export const App: React.FC = () => {
         onOpenSupabaseConfig={() => setIsSupabaseModalOpen(true)}
         isSupabaseActive={isSupabaseConfigured}
         schoolName={schoolSettings.schoolName}
+        activeViewMode={adminViewMode}
+        onToggleViewMode={() => setAdminViewMode(prev => prev === 'admin' ? 'guru' : 'admin')}
       />
 
-      {/* Main Content View based on User Role */}
+      {/* Main Content View based on User Role & View Mode */}
       <main className="app-container">
-        {currentUser.role === 'guru' ? (
+        {(currentUser.role === 'guru' || (currentUser.role === 'admin' && adminViewMode === 'guru')) ? (
           <GuruDashboard
             user={currentUser}
             schoolSettings={schoolSettings}
