@@ -63,6 +63,14 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        // Cek akurasi sinyal GPS (Fake GPS seringkali menghasilkan accuracy = 0 atau sangat presisi buatan)
+        const accuracy = position.coords.accuracy;
+        
+        // Peringatan jika akurasi mencurigakan / terlalu rendah (> 100m)
+        if (accuracy > 100) {
+          setGpsError(`Sinyal GPS kurang akurat (Tingkat ketelitian: ${Math.round(accuracy)}m). Mohon buka tempat terbuka atau aktifkan GPS Akurasi Tinggi.`);
+        }
+
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setUserCoords({ lat, lng });
