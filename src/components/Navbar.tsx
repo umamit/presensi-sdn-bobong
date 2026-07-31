@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="btn btn-secondary"
               style={{
                 padding: '0.4rem',
-                borderRadius: '8px',
+                borderRadius: '9999px',
                 minHeight: '36px',
                 minWidth: '36px',
                 display: 'flex',
