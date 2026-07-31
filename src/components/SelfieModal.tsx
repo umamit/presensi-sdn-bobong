@@ -60,16 +60,26 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
     canvas.height = video.videoHeight;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (ctx) {
+      // Mirroring agar sesuai tampilan kamera depan
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    // Mirror the image (selfie effect)
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0);
+      // CETAK WATERMARK MANDIRI (Timestamp Waktu WIT & Lokasi SDN Bobong)
+      const nowStr = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jayapura' }) + ' WIT';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(10, canvas.height - 45, canvas.width - 20, 35);
 
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    setCapturedImage(imageDataUrl);
-    stopCamera();
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.fillStyle = '#34d399';
+      ctx.fillText(`📍 SDN Bobong • ${nowStr}`, 20, canvas.height - 22);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      setCapturedImage(dataUrl);
+      stopCamera();
+    }
   }, [stopCamera]);
 
   const retakePhoto = useCallback(() => {
