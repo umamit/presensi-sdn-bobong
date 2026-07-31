@@ -37,12 +37,6 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
-  // Update clock every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Filter attendance records for current user
   const todayStr = new Date().toISOString().split('T')[0];
   const userTodayRecord = attendanceRecords.find(
@@ -51,6 +45,31 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const userHistory = attendanceRecords
     .filter(r => r.userId === user.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Request Push Notification Permission & Trigger Reminder
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Update clock every second & check for notification reminder
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now);
+
+      // Cek jam 07:00 WIT & belum absen
+      const hoursStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+      if (hoursStr === '07:00' && !userTodayRecord && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification('Pengingat Presensi SD Negeri Bobong', {
+          body: 'Jangan lupa melakukan presensi masuk hari ini sebelum jam 07:15 WIT!',
+          icon: '/icon-192.png'
+        });
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [userTodayRecord]);
 
   // Function to get GPS location
   const fetchGpsLocation = () => {
