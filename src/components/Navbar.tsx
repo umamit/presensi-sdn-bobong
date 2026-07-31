@@ -1,11 +1,11 @@
 import React from 'react';
-import { UserProfile, UserRole } from '../types';
-import { MapPin, User, ShieldCheck, Download, Database, School } from 'lucide-react';
+import { UserProfile } from '../types';
+import { MapPin, User, ShieldCheck, Download, Database, School, LogOut, Users } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: UserProfile;
-  allUsers: UserProfile[];
-  onSwitchUser: (user: UserProfile) => void;
+  onLogout: () => void;
+  onOpenTeacherManagement?: () => void;
   isPwaInstallable: boolean;
   onInstallPwa: () => void;
   onOpenSupabaseConfig: () => void;
@@ -15,8 +15,8 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
-  allUsers,
-  onSwitchUser,
+  onLogout,
+  onOpenTeacherManagement,
   isPwaInstallable,
   onInstallPwa,
   onOpenSupabaseConfig,
@@ -69,6 +69,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{isSupabaseActive ? 'Supabase Connected' : 'Demo Mode'}</span>
           </button>
 
+          {/* Admin Feature: Manage Teacher Accounts Button */}
+          {currentUser.role === 'admin' && onOpenTeacherManagement && (
+            <button
+              onClick={onOpenTeacherManagement}
+              className="btn btn-secondary"
+              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', border: '1px solid var(--primary)' }}
+            >
+              <Users size={14} color="var(--primary)" />
+              <span>Kelola Akun Guru</span>
+            </button>
+          )}
+
           {/* PWA Install Button if available */}
           {isPwaInstallable && (
             <button
@@ -81,36 +93,33 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* User Switcher Dropdown (Demo Purpose) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(15, 23, 42, 0.7)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+          {/* Active Logged-In User Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(15, 23, 42, 0.8)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
             {currentUser.role === 'admin' ? (
               <ShieldCheck size={16} color="var(--warning)" />
             ) : (
               <User size={16} color="var(--primary)" />
             )}
-            <select
-              value={currentUser.id}
-              onChange={(e) => {
-                const selected = allUsers.find(u => u.id === e.target.value);
-                if (selected) onSwitchUser(selected);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-main)',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              {allUsers.map((u) => (
-                <option key={u.id} value={u.id} style={{ background: '#0f172a', color: '#fff' }}>
-                  {u.fullName} ({u.role.toUpperCase()})
-                </option>
-              ))}
-            </select>
+            <div>
+              <strong style={{ fontSize: '0.85rem', color: '#fff', display: 'block', lineHeight: 1.2 }}>
+                {currentUser.fullName}
+              </strong>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                {currentUser.role.toUpperCase()} • NIP: {currentUser.nip}
+              </span>
+            </div>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={onLogout}
+            className="btn btn-danger"
+            style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', gap: '0.35rem' }}
+            title="Keluar dari Akun"
+          >
+            <LogOut size={14} />
+            <span>Keluar</span>
+          </button>
 
         </div>
 

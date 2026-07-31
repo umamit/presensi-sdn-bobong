@@ -14,26 +14,26 @@ import {
   updateLeaveStatusLive
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
+import { LoginPage } from './components/LoginPage';
 import { GuruDashboard } from './components/GuruDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { LeaveRequestModal } from './components/LeaveRequestModal';
 import { SchoolSettingsModal } from './components/SchoolSettingsModal';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
+import { TeacherManagementModal } from './components/TeacherManagementModal';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
 
 export const App: React.FC = () => {
-  // Application Data States
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('presensi_current_user');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.email && !parsed.email.includes('sdnegeribobong')) {
-        localStorage.setItem('presensi_current_user', JSON.stringify(MOCK_USERS[0]));
-        return MOCK_USERS[0];
-      }
-      return parsed;
-    }
-    return MOCK_USERS[0];
+  // All registered users list (Admin can add new teachers)
+  const [allUsers, setAllUsers] = useState<UserProfile[]>(() => {
+    const saved = localStorage.getItem('presensi_all_users');
+    return saved ? JSON.parse(saved) : MOCK_USERS;
+  });
+
+  // Active Authenticated Session
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('presensi_active_user');
+    return saved ? JSON.parse(saved) : null;
   });
 
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
@@ -63,6 +63,7 @@ export const App: React.FC = () => {
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+  const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
 
   // PWA Install Event Handler
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -101,9 +102,17 @@ export const App: React.FC = () => {
     }
   };
 
-  // Sync to localStorage as fallback
+  // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('presensi_current_user', JSON.stringify(currentUser));
+    localStorage.setItem('presensi_all_users', JSON.stringify(allUsers));
+  }, [allUsers]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('presensi_active_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('presensi_active_user');
+    }
   }, [currentUser]);
 
   useEffect(() => {
@@ -117,6 +126,19 @@ export const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('presensi_leaves', JSON.stringify(leaveRequests));
   }, [leaveRequests]);
+
+  // Handlers for Authentication
+  const handleLoginSuccess = (user: UserProfile) => {
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
+
+  const handleAddTeacher = (newTeacher: UserProfile) => {
+    setAllUsers(prev => [newTeacher, ...prev]);
+  };
 
   // Handlers for Presensi
   const handleCheckIn = async (newRecord: Partial<AttendanceRecord>) => {
@@ -226,13 +248,24 @@ export const App: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // If user is not logged in, render LoginPage
+  if (!currentUser) {
+    return (
+      <LoginPage
+        onLoginSuccess={handleLoginSuccess}
+        allUsers={allUsers}
+        schoolName={schoolSettings.schoolName}
+      />
+    );
+  }
+
   return (
     <div>
       {/* Top Navbar */}
       <Navbar
         currentUser={currentUser}
-        allUsers={MOCK_USERS}
-        onSwitchUser={setCurrentUser}
+        onLogout={handleLogout}
+        onOpenTeacherManagement={() => setIsTeacherModalOpen(true)}
         isPwaInstallable={isPwaInstallable}
         onInstallPwa={handleInstallPwa}
         onOpenSupabaseConfig={() => setIsSupabaseModalOpen(true)}
@@ -253,7 +286,7 @@ export const App: React.FC = () => {
           />
         ) : (
           <AdminDashboard
-            allUsers={MOCK_USERS}
+            allUsers={allUsers}
             attendanceRecords={attendanceRecords}
             schoolSettings={schoolSettings}
             leaveRequests={leaveRequests}
@@ -286,6 +319,14 @@ export const App: React.FC = () => {
         <SupabaseConfigModal
           onClose={() => setIsSupabaseModalOpen(false)}
           isConfigured={isSupabaseConfigured}
+        />
+      )}
+
+      {isTeacherModalOpen && (
+        <TeacherManagementModal
+          allUsers={allUsers}
+          onClose={() => setIsTeacherModalOpen(false)}
+          onAddTeacher={handleAddTeacher}
         />
       )}
 

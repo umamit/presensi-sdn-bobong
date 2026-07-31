@@ -9,6 +9,7 @@ export interface UserProfile {
   subject?: string;
   avatarUrl?: string;
   phone?: string;
+  password?: string;
 }
 
 export type AttendanceStatus = 'hadir' | 'terlambat' | 'izin' | 'alfa';
