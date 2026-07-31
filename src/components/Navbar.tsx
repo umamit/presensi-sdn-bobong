@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserProfile } from '../types';
-import { MapPin, User, ShieldCheck, Download, Database, School, LogOut, Users } from 'lucide-react';
+import { User, ShieldCheck, Download, Database, LogOut, Users, ChevronRight } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: UserProfile;
@@ -28,149 +28,137 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleViewMode
 }) => {
   return (
-    <header className="glass-panel" style={{ borderRadius: '0 0 var(--radius-md) var(--radius-md)', borderTop: 'none', padding: '0.9rem 1.5rem', marginBottom: '1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-        
-        {/* Brand & School Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <div style={{
-            width: '42px',
-            height: '42px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            border: '2px solid rgba(99, 102, 241, 0.4)',
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
-          }}>
-            <img 
-              src="/logo-sdn-bobong.jpg" 
-              alt="Logo SD Negeri Bobong" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
+    <header style={{
+      background: 'rgba(28,28,30,0.92)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(255,255,255,0.08)',
+      padding: '0.75rem 1.25rem',
+      marginBottom: '1.5rem',
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+    }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+
+        {/* Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img
+            src="/logo-sdn-bobong.jpg"
+            alt="Logo SD Negeri Bobong"
+            style={{ width: '36px', height: '36px', borderRadius: '9px', objectFit: 'cover', flexShrink: 0 }}
+          />
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-                Presensi<span style={{ color: 'var(--secondary)' }}>Guru</span>
-              </h1>
+            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
+              Presensi Guru
             </div>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <MapPin size={12} color="var(--secondary)" /> {schoolName}
-            </p>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1 }}>
+              {schoolName}
+            </div>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          
-          {/* Server Connection Status Badge (Apple Style) */}
+        {/* Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+
+          {/* Server status */}
           {currentUser.role === 'admin' ? (
             <button
               onClick={onOpenSupabaseConfig}
-              className="btn btn-secondary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: '20px' }}
-              title="Pengaturan Koneksi Server Supabase"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.35rem',
+                border: 'none', cursor: 'pointer',
+                padding: '0.35rem 0.65rem',
+                borderRadius: '20px',
+                fontSize: '0.78rem',
+                color: isSupabaseActive ? 'var(--success)' : 'var(--warning)',
+                background: isSupabaseActive ? 'var(--success-bg)' : 'var(--warning-bg)',
+              } as React.CSSProperties}
             >
-              <Database size={14} color={isSupabaseActive ? '#30d158' : '#ff9f0a'} />
-              <span>{isSupabaseActive ? 'Server Connected' : 'Demo Mode'}</span>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', flexShrink: 0 }} />
+              {isSupabaseActive ? 'Server Connected' : 'Demo Mode'}
             </button>
           ) : (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.45rem 0.85rem',
-                fontSize: '0.8rem',
-                background: 'rgba(28, 28, 30, 0.6)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '20px',
-                color: '#ffffff'
-              }}
-            >
-              <Database size={14} color={isSupabaseActive ? '#30d158' : '#ff9f0a'} />
-              <span>{isSupabaseActive ? 'Server Connected' : 'Demo Mode'}</span>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.35rem',
+              padding: '0.35rem 0.65rem', borderRadius: '20px',
+              fontSize: '0.78rem',
+              color: isSupabaseActive ? 'var(--success)' : 'var(--warning)',
+              background: isSupabaseActive ? 'var(--success-bg)' : 'var(--warning-bg)',
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', flexShrink: 0 }} />
+              {isSupabaseActive ? 'Server Connected' : 'Demo Mode'}
             </div>
           )}
 
-          {/* Admin Feature: Toggle View Mode (Absen Guru vs Panel Admin) */}
+          {/* Admin toggle view */}
           {currentUser.role === 'admin' && onToggleViewMode && (
             <button
               onClick={onToggleViewMode}
-              className="btn btn-primary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', background: activeViewMode === 'guru' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : undefined }}
-              title="Beralih antara Mode Presensi Saya dan Panel Kepala Sekolah"
+              className="btn btn-secondary"
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
             >
               {activeViewMode === 'guru' ? (
-                <>
-                  <ShieldCheck size={14} />
-                  <span>Buka Panel Admin</span>
-                </>
+                <><ShieldCheck size={13} /> Panel Admin</>
               ) : (
-                <>
-                  <User size={14} />
-                  <span>Mode Absen Saya</span>
-                </>
+                <><User size={13} /> Absen Saya</>
               )}
             </button>
           )}
 
-          {/* Admin Feature: Manage Teacher Accounts Button */}
+          {/* Kelola Guru */}
           {currentUser.role === 'admin' && onOpenTeacherManagement && (
             <button
               onClick={onOpenTeacherManagement}
               className="btn btn-secondary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', border: '1px solid var(--primary)' }}
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
             >
-              <Users size={14} color="var(--primary)" />
-              <span>Kelola Akun Guru</span>
+              <Users size={13} /> Kelola Guru
             </button>
           )}
 
-          {/* PWA Install Button if available */}
+          {/* Install PWA */}
           {isPwaInstallable && (
             <button
               onClick={onInstallPwa}
               className="btn btn-primary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem' }}
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
             >
-              <Download size={14} />
-              <span>Install PWA App</span>
+              <Download size={13} /> Install App
             </button>
           )}
 
-          {/* Active Logged-In User Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(15, 23, 42, 0.8)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-            {currentUser.role === 'admin' ? (
-              <ShieldCheck size={16} color="var(--warning)" />
-            ) : (
-              <User size={16} color="var(--primary)" />
-            )}
-            <div>
-              <strong style={{ fontSize: '0.85rem', color: '#fff', display: 'block', lineHeight: 1.2 }}>
-                {currentUser.fullName}
-              </strong>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {currentUser.role.toUpperCase()} • NIP: {currentUser.nip}
-              </span>
+          {/* User pill */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            background: 'var(--bg-card-2)', borderRadius: '20px',
+            padding: '0.3rem 0.75rem 0.3rem 0.4rem',
+            border: '1px solid var(--border-color)',
+          }}>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '50%',
+              background: currentUser.role === 'admin' ? 'var(--warning-bg)' : 'var(--primary-light)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {currentUser.role === 'admin'
+                ? <ShieldCheck size={13} color="var(--warning)" />
+                : <User size={13} color="var(--primary)" />}
             </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fff' }}>
+              {currentUser.fullName.split(' ')[0]}
+            </span>
           </div>
 
-          {/* Logout Button */}
+          {/* Logout */}
           <button
             onClick={onLogout}
-            className="btn btn-danger"
-            style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', gap: '0.35rem' }}
-            title="Keluar dari Akun"
+            className="btn btn-secondary"
+            style={{ padding: '0.4rem 0.65rem', fontSize: '0.8rem', color: 'var(--danger)' }}
+            title="Keluar"
           >
-            <LogOut size={14} />
-            <span>Keluar</span>
+            <LogOut size={14} color="var(--danger)" />
           </button>
-
         </div>
-
       </div>
     </header>
   );

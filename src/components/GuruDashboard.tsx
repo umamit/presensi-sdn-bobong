@@ -236,218 +236,194 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   return (
     <>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
-      
-      {/* LEFT COLUMN: Main Presensi GPS Card */}
-      <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '1.75rem' }}>
-        
-        {/* User Greeting & Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Selamat Datang,</span>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>{user.fullName}</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--secondary)' }}>NIP: {user.nip} • {user.subject || 'Guru'}</p>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)', fontFamily: 'Outfit, sans-serif' }}>
-              {currentTime.toLocaleTimeString('id-ID')} <span style={{ fontSize: '1.1rem' }}>WIT</span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {formatDateIndo(currentTime.toISOString())}
-            </div>
-            <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.25rem', background: 'rgba(99,102,241,0.12)', padding: '0.3rem 0.6rem', borderRadius: '6px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
-              Shift Pagi: Masuk 06.00-08.00 • Pulang 11.45-12.00 | Shift Siang: Masuk 12.00-12.30 • Pulang 16.00-16.45 WIT
-            </div>
-          </div>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-        {/* GPS Location & Radius Status Box */}
-        <div className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: 'rgba(15, 23, 42, 0.9)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div className={`gps-pulse ${!isInRadius ? 'gps-pulse-out' : ''}`}></div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#fff' }}>Status Deteksi Lokasi GPS</h3>
-            </div>
+      {/* HEADER: Greeting + Clock */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0.25rem 0', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div>
+          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.15rem' }}>Selamat datang,</div>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', lineHeight: 1.1 }}>{user.fullName.split(' ').slice(0,2).join(' ')}</h2>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{user.subject || 'Guru'} • NIP {user.nip}</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+            {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>WIT • {formatDateIndo(currentTime.toISOString())}</div>
+        </div>
+      </div>
+
+      {/* SHIFT INFO */}
+      <div style={{ background: 'var(--primary-light)', border: '1px solid rgba(10,132,255,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.78rem', color: 'var(--primary)' }}>
+        Shift Pagi 06:00–08:00 / Pulang 11:45–12:00 &nbsp;|&nbsp; Shift Siang 12:00–12:30 / Pulang 16:00–16:45 WIT
+      </div>
+
+      {/* GPS CARD */}
+      <div className="ios-group">
+        <div className="ios-row" style={{ justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div className={`gps-pulse ${!isInRadius ? 'gps-pulse-out' : ''}`} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff' }}>Lokasi GPS</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: isInRadius ? 'var(--success)' : 'var(--danger)' }}>
+              {distance !== null ? `${distance}m — ${isInRadius ? 'Dalam Radius' : 'Di Luar'}` : 'Mendeteksi...'}
+            </span>
             <button
               onClick={fetchGpsLocation}
               disabled={gpsLoading}
               className="btn btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', gap: '0.3rem' }}
+              style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
             >
               <RefreshCw size={12} className={gpsLoading ? 'spin' : ''} />
-              <span>{gpsLoading ? 'Mendapatkan GPS...' : 'Refresh Lokasi'}</span>
+              {gpsLoading ? 'GPS...' : 'Refresh'}
             </button>
           </div>
-
-          {/* Distance Indicator Bar */}
-          {distance !== null ? (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.4rem' }}>
-                <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Navigation size={14} color="var(--secondary)" /> Jarak dari Sekolah:
-                </span>
-                <strong style={{ color: isInRadius ? '#34d399' : '#f87171' }}>
-                  {distance} Meter {isInRadius ? '(Dalam Radius)' : '(Di Luar Radius)'}
-                </strong>
-              </div>
-
-              {/* Visual Progress Bar */}
-              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.8rem' }}>
-                <div style={{
-                  width: `${Math.min(100, (distance / (schoolSettings.radiusMeters * 2)) * 100)}%`,
-                  height: '100%',
-                  background: isInRadius
-                    ? 'linear-gradient(90deg, #10b981, #34d399)'
-                    : 'linear-gradient(90deg, #f59e0b, #ef4444)',
-                  transition: 'width 0.5s ease'
-                }} />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-                <span>Batas Radius Sekolah: <strong>{schoolSettings.radiusMeters} Meter</strong></span>
-                <span>Koordinat: {userCoords?.lat.toFixed(5)}, {userCoords?.lng.toFixed(5)}</span>
-              </div>
-            </div>
-          ) : (
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mendeteksi posisi perangkat...</p>
-          )}
-
-          {gpsError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-bg)', border: '1px solid var(--warning)', padding: '0.5rem 0.8rem', borderRadius: 'var(--radius-sm)', marginTop: '0.75rem', fontSize: '0.8rem', color: '#fbbf24' }}>
-              <AlertTriangle size={16} />
-              <span>{gpsError}</span>
-            </div>
-          )}
-
-
-
-          {/* Visual Geofence Polygon Map Component */}
-          <GeofenceMap
-            userCoords={userCoords}
-            centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }}
-            polygonCoords={schoolSettings.polygonCoords}
-            radiusMeters={schoolSettings.radiusMeters}
-            isInRadius={isInRadius}
-            distanceMeters={distance}
-          />
-
         </div>
 
-        {/* PRESENSI ACTIONS (Check-In / Check-Out) */}
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: '0.85rem' }}>
-            Presensi Hari Ini ({formatDateIndo(todayStr)})
-          </h3>
+        {gpsError && (
+          <div className="ios-row" style={{ background: 'var(--danger-bg)' }}>
+            <AlertTriangle size={14} color="var(--danger)" />
+            <span style={{ fontSize: '0.8rem', color: 'var(--danger)', lineHeight: 1.4 }}>{gpsError}</span>
+          </div>
+        )}
 
-          {!userTodayRecord ? (
-            /* Form Absen Masuk */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <input
-                type="text"
-                placeholder="Catatan presensi (opsional, misal: Piket / Daring)..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="glass-input"
-              />
-              <button
-                onClick={handleCheckInSubmit}
-                disabled={!isInRadius}
-                className="btn btn-success"
-                style={{
-                  padding: '1rem',
-                  fontSize: '1.05rem',
-                  width: '100%',
-                  opacity: isInRadius ? 1 : 0.5,
-                  cursor: isInRadius ? 'pointer' : 'not-allowed'
-                }}
-              >
-                <CheckCircle2 size={22} />
-                <span>Absen Masuk Sekarang ({isInRadius ? 'Siap' : 'Di Luar Radius'})</span>
-              </button>
+        {/* Progress bar */}
+        {distance !== null && (
+          <div style={{ padding: '0 1rem 0.85rem' }}>
+            <div style={{ height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{
+                width: `${Math.min(100, (distance / (schoolSettings.radiusMeters * 2)) * 100)}%`,
+                height: '100%',
+                background: isInRadius ? 'var(--success)' : 'var(--danger)',
+                borderRadius: '2px',
+                transition: 'width 0.5s ease'
+              }} />
             </div>
-          ) : (
-            /* Status Terabsen & Option Absen Pulang */
-            <div className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <CheckCircle2 size={24} color="#34d399" />
-                  <div>
-                    <strong style={{ color: '#34d399', fontSize: '1rem', display: 'block' }}>
-                      Anda Sudah Absen Masuk
-                    </strong>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      Jam Masuk: {formatTime(userTodayRecord.checkInTime)} • Status: <span className={`badge badge-${userTodayRecord.status}`}>{userTodayRecord.status.toUpperCase()}</span>
-                    </span>
-                  </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.35rem' }}>
+              <span>Batas: {schoolSettings.radiusMeters}m</span>
+              <span>{userCoords?.lat.toFixed(5)}, {userCoords?.lng.toFixed(5)}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Geofence Map */}
+      <GeofenceMap
+        userCoords={userCoords}
+        centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }}
+        polygonCoords={schoolSettings.polygonCoords}
+        radiusMeters={schoolSettings.radiusMeters}
+        isInRadius={isInRadius}
+        distanceMeters={distance}
+      />
+
+      {/* PRESENSI ACTION */}
+      <div>
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 500 }}>
+          Presensi Hari Ini — {formatDateIndo(todayStr)}
+        </div>
+
+        {!userTodayRecord ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <input
+              type="text"
+              placeholder="Catatan (opsional — misal: Piket, Daring...)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="glass-input"
+            />
+            <button
+              onClick={handleCheckInSubmit}
+              disabled={!isInRadius}
+              className="btn btn-success"
+              style={{
+                padding: '1rem',
+                fontSize: '1rem',
+                fontWeight: 700,
+                width: '100%',
+                opacity: isInRadius ? 1 : 0.4,
+                cursor: isInRadius ? 'pointer' : 'not-allowed',
+                borderRadius: 'var(--radius-md)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              <CheckCircle2 size={20} />
+              {isInRadius ? 'Absen Masuk Sekarang' : 'Di Luar Radius Sekolah'}
+            </button>
+          </div>
+        ) : (
+          <div className="ios-group">
+            <div className="ios-row">
+              <div style={{ background: 'var(--success-bg)', padding: '0.4rem', borderRadius: '8px' }}>
+                <CheckCircle2 size={16} color="var(--success)" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--success)' }}>Sudah Absen Masuk</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  Jam masuk: {formatTime(userTodayRecord.checkInTime)} &nbsp;•&nbsp;
+                  <span className={`badge badge-${userTodayRecord.status}`}>{userTodayRecord.status.toUpperCase()}</span>
                 </div>
               </div>
-
-              {!userTodayRecord.checkOutTime ? (
+            </div>
+            {!userTodayRecord.checkOutTime ? (
+              <div style={{ padding: '0.75rem 1rem' }}>
                 <button
                   onClick={handleCheckOutSubmit}
                   className="btn btn-primary"
-                  style={{ width: '100%', padding: '0.85rem' }}
+                  style={{ width: '100%', padding: '0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', fontWeight: 700 }}
                 >
                   <Clock size={18} />
-                  <span>Absen Pulang Sekarang ({formatTime(new Date().toISOString())})</span>
+                  Absen Pulang — {formatTime(new Date().toISOString())} WIT
                 </button>
-              ) : (
-                <div style={{ background: 'rgba(99, 102, 241, 0.15)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', fontSize: '0.85rem', color: '#a5b4fc', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
-                  <CheckCircle2 size={16} color="#34d399" /> Presensi Lengkap Hari Ini! (Jam Pulang: {formatTime(userTodayRecord.checkOutTime)})
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Quick Action: Permohonan Izin / Sakit & Panduan */}
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <div>
-            <strong style={{ fontSize: '0.9rem', color: '#fff', display: 'block' }}>Butuh Bantuan Atau Ajukan Izin?</strong>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Baca petunjuk cara absen atau ajukan surat izin ke sekolah</span>
+              </div>
+            ) : (
+              <div className="ios-row" style={{ justifyContent: 'center' }}>
+                <CheckCircle2 size={15} color="var(--success)" />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Presensi lengkap hari ini &nbsp;·&nbsp; Pulang: {formatTime(userTodayRecord.checkOutTime)}
+                </span>
+              </div>
+            )}
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={() => setIsChangePassOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
-              <Key size={16} color="var(--primary)" />
-              <span>Ubah Sandi</span>
-            </button>
-            <button onClick={() => setIsGuideOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
-              <HelpCircle size={16} color="var(--secondary)" />
-              <span>Panduan Absen</span>
-            </button>
-            <button onClick={onOpenLeaveModal} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
-              <FileText size={16} />
-              <span>Ajukan Izin</span>
-            </button>
-          </div>
-        </div>
-
+        )}
       </div>
 
-      {/* RIGHT COLUMN: Personal Attendance History Table */}
-      <div className="glass-panel" style={{ gridColumn: 'span 12', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
-          <Calendar size={20} color="var(--primary)" />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>Riwayat Kehadiran Anda</h3>
+      {/* QUICK ACTIONS */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <button onClick={() => setIsChangePassOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.82rem', flex: 1 }}>
+          <Key size={14} /> Ubah Sandi
+        </button>
+        <button onClick={() => setIsGuideOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.82rem', flex: 1 }}>
+          <HelpCircle size={14} /> Panduan
+        </button>
+        <button onClick={onOpenLeaveModal} className="btn btn-secondary" style={{ fontSize: '0.82rem', flex: 1 }}>
+          <FileText size={14} /> Ajukan Izin
+        </button>
+      </div>
+
+      {/* HISTORY */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+          <Calendar size={15} color="var(--text-muted)" />
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>Riwayat Kehadiran</span>
         </div>
 
         {userHistory.length === 0 ? (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
-            Belum ada catatan riwayat presensi.
-          </p>
+          <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+            Belum ada riwayat presensi.
+          </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '420px', overflowY: 'auto' }}>
-            {userHistory.map((rec) => (
-              <div key={rec.id} style={{ background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <strong style={{ fontSize: '0.9rem', color: '#fff' }}>{formatDateIndo(rec.date)}</strong>
-                  <span className={`badge badge-${rec.status}`}>{rec.status.toUpperCase()}</span>
+          <div className="ios-group" style={{ maxHeight: '340px', overflowY: 'auto' }}>
+            {userHistory.map((rec, idx) => (
+              <div key={rec.id} className="ios-row" style={{ borderBottom: idx < userHistory.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.87rem', fontWeight: 600, color: '#fff' }}>{formatDateIndo(rec.date)}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                    Masuk {formatTime(rec.checkInTime)} &nbsp;·&nbsp; Pulang {formatTime(rec.checkOutTime)} &nbsp;·&nbsp; {rec.distanceMeters ?? '-'}m
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                  <span>Masuk: {formatTime(rec.checkInTime)}</span>
-                  <span>Pulang: {formatTime(rec.checkOutTime)}</span>
-                  <span>Jarak: {rec.distanceMeters ?? '-'}m</span>
-                </div>
+                <span className={`badge badge-${rec.status}`}>{rec.status.toUpperCase()}</span>
               </div>
             ))}
           </div>
@@ -455,7 +431,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       </div>
 
     </div>
-
+        
     {/* Selfie Modal - Muncul saat Absen Masuk ditekan */}
     {isSelfieOpen && (
       <SelfieModal
