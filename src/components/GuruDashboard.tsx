@@ -147,21 +147,33 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     
-    // Otomatis Deteksi Shift Berdasarkan Jam Sekarang
-    // Shift Pagi: Masuk 06.00 - 08.00 (setelah 08.00 Terlambat) | Pulang: 11.45 - 12.00 WIT
-    // Shift Siang: Masuk 12.00 - 12.30 (setelah 12.30 Terlambat) | Pulang: 16.00 - 16.45 WIT
-    let detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '11.45' ? 'pagi' : 'siang');
+    // OTOMATIS VERIFIKASI BATAS KETAT JADWAL 2 SHIFT
+    // Shift Pagi:
+    // - Masuk: 06:00 - 11:45 WIT (06:00-08:00 Tepat Waktu, >08:00 Terlambat)
+    // - Pulang: 11:45 - 12:00 WIT (Di atas 12:00 WIT Jendela Pagi Ditutup!)
+    // Shift Siang:
+    // - Masuk: 12:00 - 16:00 WIT (12:00-12:30 Tepat Waktu, >12:30 Terlambat)
+    // - Pulang: 16:00 - 16:45 WIT (Di atas 16:45 WIT Jendela Siang Ditutup!)
+    let detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
     let isLate = false;
 
     if (detectedShift === 'pagi') {
       if (nowTimeStr < (schoolSettings.pagiCheckInOpen || '06:00')) {
-        alert(`Presensi Shift Pagi belum dibuka. Presensi dibuka mulai jam ${schoolSettings.pagiCheckInOpen || '06:00'} WIT.`);
+        alert(`Presensi Shift Pagi belum dibuka. Jendela presensi pagi dimulai jam ${schoolSettings.pagiCheckInOpen || '06:00'} WIT.`);
+        return;
+      }
+      if (nowTimeStr >= (schoolSettings.pagiCheckOutStart || '11:45')) {
+        alert(`Jendela presensi masuk Shift Pagi telah ditutup (Maksimal jam ${schoolSettings.pagiCheckOutStart || '11:45'} WIT).`);
         return;
       }
       isLate = nowTimeStr > (schoolSettings.pagiWorkStart || '08:00');
     } else {
       if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
-        alert(`Presensi Shift Siang belum dibuka. Presensi dibuka mulai jam ${schoolSettings.siangCheckInOpen || '12:00'} WIT.`);
+        alert(`Presensi Shift Siang belum dibuka. Jendela presensi siang dimulai jam ${schoolSettings.siangCheckInOpen || '12:00'} WIT.`);
+        return;
+      }
+      if (nowTimeStr >= (schoolSettings.siangCheckOutStart || '16:00')) {
+        alert(`Jendela presensi masuk Shift Siang telah ditutup (Maksimal jam ${schoolSettings.siangCheckOutStart || '16:00'} WIT).`);
         return;
       }
       isLate = nowTimeStr > (schoolSettings.siangWorkStart || '12:30');
@@ -208,11 +220,16 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     const userShift = userTodayRecord.shift || 'pagi';
     const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
-    
+    const targetCheckOutEnd = userShift === 'pagi' ? (schoolSettings.pagiCheckOutEnd || '12:00') : (schoolSettings.siangCheckOutEnd || '16:45');
+
     if (nowTimeStr < targetCheckOutStart) {
-      if (!confirm(`Belum memasuki jam pulang resmi Shift ${userShift.toUpperCase()} (${targetCheckOutStart} WIT). Yakin ingin absen pulang sekarang?`)) {
-        return;
-      }
+      alert(`Absen pulang Shift ${userShift.toUpperCase()} belum dibuka. Jam pulang resmi dimulai pukul ${targetCheckOutStart} WIT.`);
+      return;
+    }
+
+    if (nowTimeStr > targetCheckOutEnd) {
+      alert(`Batas waktu absen pulang Shift ${userShift.toUpperCase()} telah berakhir (Batas maksimal ${targetCheckOutEnd} WIT). Silakan hubungi admin sekolah.`);
+      return;
     }
     
     onCheckOut(userTodayRecord.id, new Date().toISOString());
