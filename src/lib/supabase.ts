@@ -42,7 +42,7 @@ export const MOCK_USERS: UserProfile[] = [
     email: 'husnita.usman@sdnegeribobong.sch.id',
     role: 'admin',
     subject: 'Plt. Kepala Sekolah / Bahasa Inggris',
-    password: 'sdnbobong123',
+    password: '230900',
   },
   {
     id: 'usr-3',
