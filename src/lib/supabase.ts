@@ -21,7 +21,7 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   address: 'Area Presensi SD Negeri Bobong, Taliabu Barat, Maluku Utara',
   latitude: -1.955544,   // Koordinat titik tengah area presensi dari KML
   longitude: 124.384388, // Koordinat titik tengah area presensi dari KML
-  radiusMeters: 20,      // Toleransi radius absensi (Strict 20 Meter)
+  radiusMeters: 10,      // Toleransi radius absensi (Super Strict 10 Meter)
   polygonCoords: [       // Polygon Geofence presisi dari Google Earth KML
     [-1.955389, 124.384231],
     [-1.955707, 124.384250],
