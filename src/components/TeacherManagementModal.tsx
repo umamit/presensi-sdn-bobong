@@ -89,31 +89,30 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
 
         {/* TAB 1: Daftar Guru */}
         {activeTab === 'list' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '380px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.25rem' }}>
             {allUsers.map((u) => (
               <div key={u.id} style={{
                 background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.85rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '0.75rem'
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '12px',
+                padding: '1rem 1.1rem',
+                minHeight: '75px',
+                display: 'block',
+                boxSizing: 'border-box',
               }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                    <strong style={{ color: '#ffffff', fontSize: '0.92rem', fontWeight: 600 }}>{u.fullName}</strong>
-                    <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
-                      {u.role.toUpperCase()}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    NIP: <strong style={{ color: '#fff' }}>{u.nip}</strong> &nbsp;·&nbsp; {u.subject || 'Guru'}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                    Email: {u.email} &nbsp;·&nbsp; Pass: <code style={{ color: 'var(--primary)', background: 'rgba(10,132,255,0.1)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>{u.password || 'sdnbobong123'}</code>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                  <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, lineHeight: '1.3' }}>
+                    {u.fullName}
+                  </span>
+                  <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
+                    {u.role.toUpperCase()}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#8e8e93', lineHeight: '1.4' }}>
+                  NIP: <strong style={{ color: '#ffffff' }}>{u.nip}</strong> &nbsp;·&nbsp; {u.subject || 'Guru'}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#8e8e93', lineHeight: '1.4', marginTop: '0.25rem' }}>
+                  Email: {u.email} &nbsp;·&nbsp; Pass: <code style={{ color: '#0a84ff', background: 'rgba(10,132,255,0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontFamily: 'monospace' }}>{u.password || 'sdnbobong123'}</code>
                 </div>
               </div>
             ))}
