@@ -50,12 +50,12 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     .filter(r => r.userId === user.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  // Request Push Notification Permission & Trigger Reminder
-  useEffect(() => {
+  // Function to safely request push notification permissions on user interaction
+  const requestNotificationAccess = () => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-  }, []);
+  };
 
   // Update clock every second & check for notification reminder
   useEffect(() => {
@@ -139,6 +139,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   // Handle Absen Masuk Click — Buka kamera selfie terlebih dahulu
   const handleCheckInSubmit = () => {
+    requestNotificationAccess();
     if (!isInRadius) {
       alert(`Gagal Absen: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
       return;
