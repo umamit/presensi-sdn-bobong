@@ -44,16 +44,6 @@ export const MOCK_USERS: UserProfile[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80'
   },
   {
-    id: 'usr-2',
-    nip: '101501',
-    fullName: 'Syawal',
-    email: 'syawal@sdnegeribobong.sch.id',
-    role: 'admin',
-    subject: 'Ketua Komite / Perwakilan Masyarakat',
-    password: 'sdnbobong123',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80'
-  },
-  {
     id: 'usr-3',
     nip: '198004042009042005',
     fullName: 'Wa Sutini Idris',
