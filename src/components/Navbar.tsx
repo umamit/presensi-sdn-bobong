@@ -66,16 +66,35 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           
-          {/* Supabase Status Button */}
-          <button
-            onClick={onOpenSupabaseConfig}
-            className="btn btn-secondary"
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem' }}
-            title="Pengaturan Supabase Client"
-          >
-            <Database size={14} color={isSupabaseActive ? '#34d399' : '#f59e0b'} />
-            <span>{isSupabaseActive ? 'Supabase Connected' : 'Demo Mode'}</span>
-          </button>
+          {/* Server Connection Status Badge (Apple Style) */}
+          {currentUser.role === 'admin' ? (
+            <button
+              onClick={onOpenSupabaseConfig}
+              className="btn btn-secondary"
+              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', gap: '0.4rem', borderRadius: '20px' }}
+              title="Pengaturan Koneksi Server Supabase"
+            >
+              <Database size={14} color={isSupabaseActive ? '#30d158' : '#ff9f0a'} />
+              <span>{isSupabaseActive ? 'Server Connected' : 'Demo Mode'}</span>
+            </button>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.8rem',
+                background: 'rgba(28, 28, 30, 0.6)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '20px',
+                color: '#ffffff'
+              }}
+            >
+              <Database size={14} color={isSupabaseActive ? '#30d158' : '#ff9f0a'} />
+              <span>{isSupabaseActive ? 'Server Connected' : 'Demo Mode'}</span>
+            </div>
+          )}
 
           {/* Admin Feature: Toggle View Mode (Absen Guru vs Panel Admin) */}
           {currentUser.role === 'admin' && onToggleViewMode && (
