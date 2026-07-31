@@ -92,16 +92,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <CheckCircle size={16} color="#30d158" />
-          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Hadir:</span>
+          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Sudah Absen Hadir:</span>
           <strong style={{ fontSize: '0.95rem', color: '#30d158' }}>{totalHadir}</strong>
-        </div>
-
-        <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <Clock size={16} color="#ff9f0a" />
-          <span style={{ fontSize: '0.88rem', color: '#8e8e93' }}>Terlambat:</span>
-          <strong style={{ fontSize: '0.95rem', color: '#ff9f0a' }}>{totalTerlambat}</strong>
         </div>
 
         <div style={{ height: '16px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>

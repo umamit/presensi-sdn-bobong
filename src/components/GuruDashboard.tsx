@@ -162,24 +162,22 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         alert(`Presensi Shift Pagi belum dibuka. Jendela presensi pagi dimulai jam ${schoolSettings.pagiCheckInOpen || '06:00'} WIT.`);
         return;
       }
-      if (nowTimeStr >= (schoolSettings.pagiCheckOutStart || '11:45')) {
-        alert(`Jendela presensi masuk Shift Pagi telah ditutup (Maksimal jam ${schoolSettings.pagiCheckOutStart || '11:45'} WIT).`);
+      if (nowTimeStr > (schoolSettings.pagiWorkStart || '08:00')) {
+        alert(`Batas waktu presensi masuk Shift Pagi telah berakhir (Maksimal jam ${schoolSettings.pagiWorkStart || '08:00'} WIT). Silakan hubungi Kepala Sekolah.`);
         return;
       }
-      isLate = nowTimeStr > (schoolSettings.pagiWorkStart || '08:00');
     } else {
       if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
         alert(`Presensi Shift Siang belum dibuka. Jendela presensi siang dimulai jam ${schoolSettings.siangCheckInOpen || '12:00'} WIT.`);
         return;
       }
-      if (nowTimeStr >= (schoolSettings.siangCheckOutStart || '16:00')) {
-        alert(`Jendela presensi masuk Shift Siang telah ditutup (Maksimal jam ${schoolSettings.siangCheckOutStart || '16:00'} WIT).`);
+      if (nowTimeStr > (schoolSettings.siangWorkStart || '12:30')) {
+        alert(`Batas waktu presensi masuk Shift Siang telah berakhir (Maksimal jam ${schoolSettings.siangWorkStart || '12:30'} WIT). Silakan hubungi Kepala Sekolah.`);
         return;
       }
-      isLate = nowTimeStr > (schoolSettings.siangWorkStart || '12:30');
     }
 
-    const status = isLate ? 'terlambat' : 'hadir';
+    const status = 'hadir';
 
     // Simpan data absen sementara, tunggu selfie dikonfirmasi
     setPendingCheckIn({
