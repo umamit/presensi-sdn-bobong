@@ -18,8 +18,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showDemoCredentials, setShowDemoCredentials] = useState(false);
-
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -52,12 +50,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       setLoading(false);
       onLoginSuccess(matchedUser);
     }, 400);
-  };
-
-  const handleFillDemo = (user: UserProfile) => {
-    setIdentifier(user.nip);
-    setPassword(user.password || 'sdnbobong123');
-    setErrorMsg(null);
   };
 
   return (
@@ -176,35 +168,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </button>
         </form>
 
-        {/* Demo Credentials Helper Toggle */}
+        {/* Bantuan Lupa Password */}
         <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
-          <button
-            onClick={() => setShowDemoCredentials(!showDemoCredentials)}
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
-          >
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
             <HelpCircle size={14} color="var(--secondary)" />
-            <span>{showDemoCredentials ? 'Sembunyikan Bantuan Login' : 'Bantuan / Contoh Akun Terdaftar'}</span>
-          </button>
-
-          {showDemoCredentials && (
-            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Klik nama di bawah untuk mengisi form secara otomatis:</span>
-              {allUsers.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => handleFillDemo(u)}
-                  className="btn btn-secondary"
-                  style={{ justifyContent: 'space-between', padding: '0.5rem 0.75rem', fontSize: '0.78rem' }}
-                >
-                  <span><strong>{u.fullName}</strong> ({u.role.toUpperCase()})</span>
-                  <span style={{ color: 'var(--secondary)' }}>NIP: {u.nip}</span>
-                </button>
-              ))}
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.2rem' }}>
-                Password Default Sekolah: <code>sdnbobong123</code>
-              </div>
-            </div>
-          )}
+            Lupa password? Hubungi Kepala Sekolah / Admin.
+          </p>
         </div>
 
       </div>
