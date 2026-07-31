@@ -92,29 +92,32 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
 
         {/* TAB 1: Daftar Guru */}
         {activeTab === 'list' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', maxHeight: '380px', overflowY: 'auto', paddingRight: '0.2rem' }}>
             {allUsers.map((u) => (
               <div key={u.id} style={{
                 background: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '12px',
-                padding: '1rem 1.1rem',
-                minHeight: '75px',
-                display: 'block',
+                padding: '0.9rem 1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.35rem',
+                height: 'auto',
                 boxSizing: 'border-box',
+                flexShrink: 0
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                  <span style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, lineHeight: '1.3' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <span style={{ color: '#ffffff', fontSize: '0.92rem', fontWeight: 700 }}>
                     {u.fullName}
                   </span>
                   <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
                     {u.role.toUpperCase()}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#8e8e93', lineHeight: '1.4' }}>
+                <div style={{ fontSize: '0.78rem', color: '#8e8e93' }}>
                   NIP: <strong style={{ color: '#ffffff' }}>{u.nip}</strong> &nbsp;·&nbsp; {u.subject || 'Guru'}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#8e8e93', lineHeight: '1.4', marginTop: '0.2rem' }}>
+                <div style={{ fontSize: '0.75rem', color: '#8e8e93' }}>
                   Pass: <code style={{ color: '#0a84ff', background: 'rgba(10,132,255,0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontFamily: 'monospace' }}>{u.password || 'sdnbobong123'}</code>
                 </div>
               </div>
