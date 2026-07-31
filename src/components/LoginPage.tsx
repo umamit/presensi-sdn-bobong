@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { School, Lock, User, Eye, EyeOff, LogIn, Key, HelpCircle } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, LogIn, HelpCircle } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface LoginPageProps {
@@ -79,18 +79,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         {/* Header Logo & School Branding */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
-            width: '60px',
-            height: '60px',
-            borderRadius: 'var(--radius-md)',
+            width: '90px',
+            height: '90px',
+            borderRadius: '50%',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
             marginBottom: '1rem',
-            boxShadow: '0 8px 20px rgba(99, 102, 241, 0.35)'
+            overflow: 'hidden',
+            boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)',
+            border: '2px solid rgba(99, 102, 241, 0.3)'
           }}>
-            <School size={32} />
+            <img
+              src="/logo-sdn-bobong.jpg"
+              alt="Logo SD Negeri Bobong"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </div>
 
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
