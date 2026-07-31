@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
 import { calculateDistanceMeters, formatTime, formatDateIndo, isPointInPolygon } from '../utils/haversine';
-import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck, Camera } from 'lucide-react';
+import { MapPin, Navigation, Clock, CheckCircle2, AlertTriangle, Calendar, FileText, Send, RefreshCw, Compass, ShieldCheck, Camera, HelpCircle } from 'lucide-react';
 import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
+import { GuideModal } from './GuideModal';
 
 interface GuruDashboardProps {
   user: UserProfile;
@@ -33,6 +34,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [isSimulated, setIsSimulated] = useState(false);
   const [notes, setNotes] = useState('');
   const [isSelfieOpen, setIsSelfieOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
   // Update clock every second
@@ -379,16 +381,22 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
           )}
         </div>
 
-        {/* Quick Action: Permohonan Izin / Sakit */}
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Quick Action: Permohonan Izin / Sakit & Panduan */}
+        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
-            <strong style={{ fontSize: '0.9rem', color: '#fff', display: 'block' }}>Halangan / Sakit / Cuti?</strong>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Kirimkan surat permohonan izin langsung ke sekolah</span>
+            <strong style={{ fontSize: '0.9rem', color: '#fff', display: 'block' }}>Butuh Bantuan Atau Ajukan Izin?</strong>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Baca petunjuk cara absen atau ajukan surat izin ke sekolah</span>
           </div>
-          <button onClick={onOpenLeaveModal} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
-            <FileText size={16} />
-            <span>Ajukan Izin</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button onClick={() => setIsGuideOpen(true)} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
+              <HelpCircle size={16} color="var(--secondary)" />
+              <span>Panduan Absen</span>
+            </button>
+            <button onClick={onOpenLeaveModal} className="btn btn-secondary" style={{ fontSize: '0.85rem' }}>
+              <FileText size={16} />
+              <span>Ajukan Izin</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -432,6 +440,11 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         onCapture={handleSelfieCapture}
         onClose={handleSelfieClose}
       />
+    )}
+
+    {/* Guide Modal - Muncul saat tombol Panduan ditekan */}
+    {isGuideOpen && (
+      <GuideModal onClose={() => setIsGuideOpen(false)} />
     )}
   </>
   );

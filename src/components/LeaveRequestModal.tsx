@@ -105,13 +105,20 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
           </div>
 
           <div>
-            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Link Lampiran Dokumen / Surat Dokter (Opsional)</label>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>Upload Foto Surat Dokter / Bukti Pendukung (Opsional)</label>
             <input
-              type="url"
-              placeholder="https://..."
-              value={documentUrl}
-              onChange={(e) => setDocumentUrl(e.target.value)}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => setDocumentUrl(reader.result as string);
+                  reader.readAsDataURL(file);
+                }
+              }}
               className="glass-input"
+              style={{ padding: '0.4rem' }}
             />
           </div>
 

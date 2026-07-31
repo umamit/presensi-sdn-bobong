@@ -159,6 +159,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '0.75rem 1rem' }}>NIP & Nama Guru</th>
+                <th style={{ padding: '0.75rem 1rem' }}>Foto Selfie</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Jam Masuk</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Jam Pulang</th>
                 <th style={{ padding: '0.75rem 1rem' }}>Jarak GPS</th>
@@ -169,7 +170,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                     Tidak ada catatan presensi untuk tanggal ini.
                   </td>
                 </tr>
@@ -179,6 +180,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <td style={{ padding: '0.85rem 1rem' }}>
                       <strong style={{ color: '#fff', display: 'block' }}>{rec.userName}</strong>
                       <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rec.userNip}</span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      {rec.selfieUrl ? (
+                        <a href={rec.selfieUrl} target="_blank" rel="noreferrer">
+                          <img
+                            src={rec.selfieUrl}
+                            alt="Bukti Selfie"
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1.5 solid var(--secondary)' }}
+                          />
+                        </a>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Tanpa Foto</span>
+                      )}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', color: '#fff' }}>{formatTime(rec.checkInTime)}</td>
                     <td style={{ padding: '0.85rem 1rem', color: '#fff' }}>{formatTime(rec.checkOutTime)}</td>
@@ -218,9 +232,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                   Tanggal: {formatDateIndo(req.startDate)} - {formatDateIndo(req.endDate)}
                 </p>
-                <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1rem', fontStyle: 'italic' }}>
+                <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '0.75rem', fontStyle: 'italic' }}>
                   "{req.description}"
                 </p>
+                {req.documentUrl && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <a href={req.documentUrl} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.6rem', display: 'inline-flex', gap: '0.3rem' }}>
+                      Lihat Foto Surat Dokter / Lampiran
+                    </a>
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     onClick={() => onUpdateLeaveStatus(req.id, 'approved')}
