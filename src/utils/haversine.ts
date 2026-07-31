@@ -46,13 +46,13 @@ export function isPointInPolygon(
  * Format jam menit dari ISO String atau HH:mm:ss
  */
 export function formatTime(isoString?: string): string {
-  if (!isoString) return '--:--';
+  if (!isoString) return '--:-- WIT';
   const date = new Date(isoString);
   return date.toLocaleTimeString('id-ID', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
-  });
+  }) + ' WIT';
 }
 
 /**

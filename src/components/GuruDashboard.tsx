@@ -200,13 +200,13 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--primary)', fontFamily: 'Outfit, sans-serif' }}>
-              {currentTime.toLocaleTimeString('id-ID')}
+              {currentTime.toLocaleTimeString('id-ID')} <span style={{ fontSize: '1.1rem' }}>WIT</span>
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {formatDateIndo(currentTime.toISOString())}
             </div>
             <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.2rem', background: 'rgba(99,102,241,0.12)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
-              Masuk: {schoolSettings.checkInOpenTime || '06:00'} - {schoolSettings.workStartTime} • Pulang: {schoolSettings.workEndTime} - {schoolSettings.checkOutEndTime || '17:00'}
+              Masuk: {schoolSettings.checkInOpenTime || '06:00'} - {schoolSettings.workStartTime} WIT • Pulang: {schoolSettings.workEndTime} - {schoolSettings.checkOutEndTime || '17:00'} WIT
             </div>
           </div>
         </div>
