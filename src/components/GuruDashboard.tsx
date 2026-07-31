@@ -63,11 +63,13 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // Cek akurasi sinyal GPS (Fake GPS seringkali menghasilkan accuracy = 0 atau sangat presisi buatan)
+        // Cek akurasi sinyal GPS (Fake GPS di HP Root/Jailbreak sering menghasilkan accuracy = 0 atau angka bulat sempurna tanpa desimal)
         const accuracy = position.coords.accuracy;
         
-        // Peringatan jika akurasi mencurigakan / terlalu rendah (> 100m)
-        if (accuracy > 100) {
+        // Peringatan jika akurasi mencurigakan / terlalu rendah (> 100m) atau 0 (indikator Mock Provider)
+        if (accuracy === 0) {
+          setGpsError('Terdeteksi lokasi tidak valid (Mock GPS). Mohon matikan aplikasi pengubah lokasi atau gunakan perangkat standar.');
+        } else if (accuracy > 100) {
           setGpsError(`Sinyal GPS kurang akurat (Tingkat ketelitian: ${Math.round(accuracy)}m). Mohon buka tempat terbuka atau aktifkan GPS Akurasi Tinggi.`);
         }
 
