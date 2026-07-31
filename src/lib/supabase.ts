@@ -34,7 +34,17 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   checkOutEndTime: '17:00'
 };
 
-export const MOCK_USERS: UserProfile[] = [];
+export const MOCK_USERS: UserProfile[] = [
+  {
+    id: 'usr-1',
+    nip: '199610272019032006',
+    fullName: 'Husnita Usman, M.Pd.',
+    email: 'husnita.usman@sdnegeribobong.sch.id',
+    role: 'admin',
+    subject: 'Plt. Kepala Sekolah / Bahasa Inggris',
+    password: '230900'
+  }
+];
 
 export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [];
 
