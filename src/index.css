@@ -256,10 +256,33 @@ h1, h2, h3, h4, .font-heading {
   margin: 0 auto;
   padding: 1.5rem;
   min-height: calc(100vh - 80px);
+  padding-bottom: env(safe-area-inset-bottom, 1.5rem);
 }
 
+/* TOUCH TARGET & RESPONSIVE MOBILE MEDIA QUERIES */
 @media (max-width: 640px) {
   .app-container {
-    padding: 1rem 0.75rem;
+    padding: 0.85rem 0.65rem;
+  }
+
+  .btn {
+    min-height: 44px; /* Standar Ukuran Sentuh Jari Apple & Android */
+    padding: 0.65rem 1rem;
+  }
+
+  .glass-panel {
+    border-radius: var(--radius-sm);
+  }
+
+  .modal-backdrop {
+    padding: 0.5rem;
+    align-items: flex-end; /* Sheet Modal khas iOS di layar HP kecil */
+  }
+
+  .modal-backdrop > .glass-panel {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    max-height: 90vh;
+    overflow-y: auto;
   }
 }
