@@ -38,8 +38,10 @@ export interface SchoolSettings {
   longitude: number;
   radiusMeters: number;
   polygonCoords?: Array<[number, number]>; // Geofence polygon KML [lat, lng]
-  workStartTime: string; // e.g. "07:15"
-  workEndTime: string;   // e.g. "13:00"
+  checkInOpenTime: string; // e.g. "06:00"
+  workStartTime: string;    // e.g. "07:15"
+  workEndTime: string;      // e.g. "16:00"
+  checkOutEndTime: string;  // e.g. "17:00"
 }
 
 export type LeaveType = 'sakit' | 'izin' | 'cuti';

@@ -128,6 +128,13 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+    // Cek apakah presensi dibuka (mulai jam 06:00)
+    if (nowTimeStr < (schoolSettings.checkInOpenTime || '06:00')) {
+      alert(`Presensi masuk belum dibuka. Presensi dibuka mulai jam ${schoolSettings.checkInOpenTime || '06:00'}.`);
+      return;
+    }
+
     const isLate = nowTimeStr > schoolSettings.workStartTime;
     const status = isLate ? 'terlambat' : 'hadir';
 
@@ -166,6 +173,14 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   // Handle Absen Pulang Click
   const handleCheckOutSubmit = () => {
     if (!userTodayRecord) return;
+    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+    if (nowTimeStr < (schoolSettings.workEndTime || '16:00')) {
+      if (!confirm(`Belum memasuki jam pulang resmi (${schoolSettings.workEndTime || '16:00'}). Yakin ingin absen pulang sekarang?`)) {
+        return;
+      }
+    }
+    
     onCheckOut(userTodayRecord.id, new Date().toISOString());
   };
 
@@ -189,6 +204,9 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               {formatDateIndo(currentTime.toISOString())}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#a5b4fc', marginTop: '0.2rem', background: 'rgba(99,102,241,0.12)', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(99,102,241,0.25)', display: 'inline-block' }}>
+              Masuk: {schoolSettings.checkInOpenTime || '06:00'} - {schoolSettings.workStartTime} • Pulang: {schoolSettings.workEndTime} - {schoolSettings.checkOutEndTime || '17:00'}
             </div>
           </div>
         </div>
