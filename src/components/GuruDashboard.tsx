@@ -228,7 +228,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
 
     if (nowTimeStr > targetCheckOutEnd) {
-      alert(`Batas waktu absen pulang Shift ${userShift.toUpperCase()} telah berakhir (Batas maksimal ${targetCheckOutEnd} WIT). Silakan hubungi admin sekolah.`);
+      alert(`Batas waktu presensi telah berakhir (Batas maksimal ${targetCheckOutEnd} WIT). Silakan hubungi Kepala Sekolah.`);
       return;
     }
     
