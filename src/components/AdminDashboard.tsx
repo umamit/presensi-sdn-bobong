@@ -113,23 +113,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* PENGATURAN GPS DISPLAY CARD */}
-      <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', background: 'rgba(15,23,42,0.8)' }}>
+      {/* PENGATURAN GPS DISPLAY ROW (Apple iOS System Row Style) */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'rgba(28, 28, 30, 0.6)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        padding: '1rem 1.25rem',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <div style={{ background: 'var(--primary-light)', padding: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
-            <MapPin size={22} color="var(--primary)" />
+          <div style={{ background: 'rgba(10, 132, 255, 0.15)', width: '38px', height: '38px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <MapPin size={20} color="#0a84ff" />
           </div>
           <div>
-            <strong style={{ fontSize: '0.95rem', color: '#fff', display: 'block' }}>
-              Lokasi GPS Terdaftar: {schoolSettings.schoolName}
+            <strong style={{ fontSize: '0.92rem', color: '#ffffff', display: 'block' }}>
+              Area GPS Presensi: {schoolSettings.schoolName}
             </strong>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Lat: {schoolSettings.latitude}, Lng: {schoolSettings.longitude} • Radius Max: <strong>{schoolSettings.radiusMeters} Meter</strong> • Jam Kerja: {schoolSettings.workStartTime} - {schoolSettings.workEndTime}
+            <span style={{ fontSize: '0.78rem', color: '#8e8e93' }}>
+              Koordinat ({schoolSettings.latitude}, {schoolSettings.longitude}) • Max Radius: <strong>{schoolSettings.radiusMeters}m</strong> • Jam Operasional: {schoolSettings.workStartTime} - {schoolSettings.workEndTime} WIT
             </span>
           </div>
         </div>
-        <button onClick={onOpenSettingsModal} className="btn btn-secondary" style={{ fontSize: '0.8rem' }}>
-          Ubah Titik GPS Sekolah
+        <button onClick={onOpenSettingsModal} className="btn btn-secondary" style={{ fontSize: '0.8rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
+          Ubah Titik GPS
         </button>
       </div>
 
