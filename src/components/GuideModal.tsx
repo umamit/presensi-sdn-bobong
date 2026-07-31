@@ -50,6 +50,20 @@ export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
             </ul>
           </div>
 
+          <div style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.2)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
+            <h4 style={{ color: '#ff453a', fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <ShieldCheck size={16} /> Solusi Izin GPS / Kamera Terlanjur Ditolak
+            </h4>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.4rem' }}>
+              Jika Anda tidak sengaja menekan <strong>"Tolak/Block"</strong>, ikuti 3 langkah mudah ini untuk mereset:
+            </p>
+            <ol style={{ fontSize: '0.8rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <li>Tekan ikon <strong>Gembok / Titik 3</strong> di sebelah kiri baris alamat website (URL) di atas browser HP Anda.</li>
+              <li>Pilih <strong>Izin Situs (Site Settings)</strong> $\rightarrow$ Ubah <strong>Lokasi & Kamera</strong> menjadi <strong>"Izinkan / Allow"</strong>.</li>
+              <li>Tutup halaman ini dan tekan tombol <strong>Refresh Lokasi</strong> di aplikasi.</li>
+            </ol>
+          </div>
+
         </div>
 
         <button onClick={onClose} className="btn btn-primary" style={{ width: '100%', padding: '0.8rem', marginTop: '1.5rem' }}>

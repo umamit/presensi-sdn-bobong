@@ -114,7 +114,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       },
       (error) => {
         console.warn('GPS Error:', error.message);
-        setGpsError('Perangkat ini belum mengizinkan akses lokasi. Klik tombol di bawah untuk mengizinkan akses GPS perangkat Anda.');
+        setGpsError('Akses lokasi/GPS terlanjur ditolak di HP Anda. Silakan tekan tombol "Panduan Absen" di bawah untuk melihat 3 langkah mudah mengizinkan kembali GPS.');
         setUserCoords(null);
         setDistance(null);
         setGpsLoading(false);
