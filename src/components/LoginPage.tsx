@@ -183,12 +183,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       {/* Developer Footer Credit */}
       <div style={{ position: 'absolute', bottom: '1.25rem', width: '100%', textAlign: 'center', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <p style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.45)', letterSpacing: '0.04em', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span>Developed by <strong style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Ibra Digital Engineering</strong></span>
-          <img
-            src="/logo-ide.png"
-            alt="Logo Ibra Digital Engineering"
-            style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', verticalAlign: 'middle', border: '1px solid rgba(255,255,255,0.2)' }}
-          />
+          <span>Developed by</span>
+          <a
+            href="https://digital.ibraglobalenglish.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: 'rgba(255, 255, 255, 0.85)',
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.75')}
+            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            <span>Ibra Digital Engineering</span>
+            <img
+              src="/logo-ide.png"
+              alt="Logo Ibra Digital Engineering"
+              style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', verticalAlign: 'middle', border: '1px solid rgba(255,255,255,0.2)' }}
+            />
+          </a>
         </p>
       </div>
     </div>
