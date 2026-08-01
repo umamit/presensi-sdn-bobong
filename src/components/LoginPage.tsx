@@ -181,9 +181,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       </div>
 
       {/* Developer Footer Credit */}
-      <div style={{ position: 'absolute', bottom: '1.5rem', width: '100%', textAlign: 'center', zIndex: 10 }}>
-        <p style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.45)', letterSpacing: '0.04em', fontWeight: 500 }}>
-          Developed by <strong style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Ibra Digital Engineering</strong>
+      <div style={{ position: 'absolute', bottom: '1.25rem', width: '100%', textAlign: 'center', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <p style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.45)', letterSpacing: '0.04em', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span>Developed by <strong style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Ibra Digital Engineering</strong></span>
+          <img
+            src="/logo-ide.png"
+            alt="Logo Ibra Digital Engineering"
+            style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', verticalAlign: 'middle', border: '1px solid rgba(255,255,255,0.2)' }}
+          />
         </p>
       </div>
     </div>
