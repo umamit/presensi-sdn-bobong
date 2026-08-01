@@ -179,6 +179,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
       </div>
+
+      {/* Developer Footer Credit */}
+      <div style={{ position: 'absolute', bottom: '1.5rem', width: '100%', textAlign: 'center', zIndex: 10 }}>
+        <p style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.45)', letterSpacing: '0.04em', fontWeight: 500 }}>
+          Developed by <strong style={{ color: 'rgba(255, 255, 255, 0.75)' }}>Ibra Digital Engineering</strong>
+        </p>
+      </div>
     </div>
   );
 };
