@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings, LeaveRequest } from './types';
 import {
   MOCK_USERS,
-  MOCK_ATTENDANCE_INITIAL,
-  MOCK_LEAVES_INITIAL,
   INITIAL_SCHOOL_SETTINGS,
   isSupabaseConfigured,
   fetchAttendanceLive,
@@ -13,7 +11,10 @@ import {
   saveLeaveLive,
   updateLeaveStatusLive,
   fetchUsersLive,
-  updateUserPasswordLive
+  addUserLive,
+  updateUserPasswordLive,
+  fetchSchoolSettingsLive,
+  saveSchoolSettingsLive
 } from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { LoginPage } from './components/LoginPage';
@@ -29,48 +30,12 @@ import { usePwaInstall } from './hooks/usePwaInstall';
 import { exportAttendanceCsv } from './utils/exportCsv';
 
 export const App: React.FC = () => {
-  const [allUsers, setAllUsers] = useState<UserProfile[]>(() => {
-    const saved = localStorage.getItem('presensi_all_users');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.warn('Failed to parse saved users, resetting to defaults');
-      }
-    }
-    return MOCK_USERS;
-  });
-
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('presensi_active_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
+  const [allUsers, setAllUsers] = useState<UserProfile[]>(MOCK_USERS);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
-
-  const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
-    const saved = localStorage.getItem('presensi_school_settings');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.schoolName && parsed.schoolName.includes('SMA Negeri 1')) {
-        localStorage.setItem('presensi_school_settings', JSON.stringify(INITIAL_SCHOOL_SETTINGS));
-        return INITIAL_SCHOOL_SETTINGS;
-      }
-      return parsed;
-    }
-    return INITIAL_SCHOOL_SETTINGS;
-  });
-
-  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(() => {
-    const saved = localStorage.getItem('presensi_attendance');
-    return saved ? JSON.parse(saved) : MOCK_ATTENDANCE_INITIAL;
-  });
-
-  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>(() => {
-    const saved = localStorage.getItem('presensi_leaves');
-    return saved ? JSON.parse(saved) : MOCK_LEAVES_INITIAL;
-  });
+  const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(INITIAL_SCHOOL_SETTINGS);
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
 
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -79,47 +44,42 @@ export const App: React.FC = () => {
 
   const { isPwaInstallable, handleInstallPwa } = usePwaInstall();
 
+  // Load ALL data dynamically directly from Supabase DB on startup
   useEffect(() => {
     fetchUsersLive().then((liveUsers: UserProfile[] | null) => {
       if (liveUsers && liveUsers.length > 0) setAllUsers(liveUsers);
     });
+
+    fetchSchoolSettingsLive().then((liveSettings: SchoolSettings | null) => {
+      if (liveSettings) setSchoolSettings(liveSettings);
+    });
+
     if (isSupabaseConfigured) {
       fetchAttendanceLive().then((liveAtt: AttendanceRecord[] | null) => {
-        if (liveAtt && liveAtt.length > 0) setAttendanceRecords(liveAtt);
+        if (liveAtt) setAttendanceRecords(liveAtt);
       });
       fetchLeavesLive().then((liveLeaves: LeaveRequest[] | null) => {
-        if (liveLeaves && liveLeaves.length > 0) setLeaveRequests(liveLeaves);
+        if (liveLeaves) setLeaveRequests(liveLeaves);
       });
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('presensi_all_users', JSON.stringify(allUsers));
-  }, [allUsers]);
-
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('presensi_active_user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('presensi_active_user');
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    localStorage.setItem('presensi_school_settings', JSON.stringify(schoolSettings));
-  }, [schoolSettings]);
-
-  useEffect(() => {
-    localStorage.setItem('presensi_attendance', JSON.stringify(attendanceRecords));
-  }, [attendanceRecords]);
-
-  useEffect(() => {
-    localStorage.setItem('presensi_leaves', JSON.stringify(leaveRequests));
-  }, [leaveRequests]);
-
   const handleLoginSuccess = (user: UserProfile) => setCurrentUser(user);
   const handleLogout = () => setCurrentUser(null);
-  const handleAddTeacher = (newTeacher: UserProfile) => setAllUsers(prev => [newTeacher, ...prev]);
+
+  const handleAddTeacher = async (newTeacher: UserProfile) => {
+    setAllUsers(prev => [newTeacher, ...prev]);
+    if (isSupabaseConfigured) {
+      await addUserLive(newTeacher);
+    }
+  };
+
+  const handleUpdateSettings = async (newSettings: SchoolSettings) => {
+    setSchoolSettings(newSettings);
+    if (isSupabaseConfigured) {
+      await saveSchoolSettingsLive(newSettings);
+    }
+  };
 
   const handleCheckIn = async (newRecord: Partial<AttendanceRecord>) => {
     const fullRecord: AttendanceRecord = {
@@ -189,9 +149,7 @@ export const App: React.FC = () => {
   const handleUpdateUserPassword = async (userId: string, newPass: string) => {
     setAllUsers(prev => prev.map(u => (u.id === userId ? { ...u, password: newPass } : u)));
     if (currentUser && currentUser.id === userId) {
-      const updated = { ...currentUser, password: newPass };
-      setCurrentUser(updated);
-      localStorage.setItem('presensi_active_user', JSON.stringify(updated));
+      setCurrentUser(prev => prev ? { ...prev, password: newPass } : null);
     }
     if (isSupabaseConfigured) await updateUserPasswordLive(userId, newPass);
   };
@@ -232,7 +190,7 @@ export const App: React.FC = () => {
             attendanceRecords={attendanceRecords}
             schoolSettings={schoolSettings}
             leaveRequests={leaveRequests}
-            onUpdateSettings={setSchoolSettings}
+            onUpdateSettings={handleUpdateSettings}
             onUpdateLeaveStatus={handleUpdateLeaveStatus}
             onExportReport={() => exportAttendanceCsv(attendanceRecords)}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
@@ -241,7 +199,7 @@ export const App: React.FC = () => {
       </main>
 
       {isLeaveModalOpen && <LeaveRequestModal currentUser={currentUser} onClose={() => setIsLeaveModalOpen(false)} onSubmit={handleLeaveSubmit} />}
-      {isSettingsModalOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsSettingsModalOpen(false)} onSave={setSchoolSettings} />}
+      {isSettingsModalOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsSettingsModalOpen(false)} onSave={handleUpdateSettings} />}
       {isSupabaseModalOpen && <SupabaseConfigModal onClose={() => setIsSupabaseModalOpen(false)} isConfigured={isSupabaseConfigured} />}
       {isTeacherModalOpen && <TeacherManagementModal allUsers={allUsers} onClose={() => setIsTeacherModalOpen(false)} onAddTeacher={handleAddTeacher} />}
       {isPwaInstallable && <PwaInstallBanner onInstall={handleInstallPwa} />}
