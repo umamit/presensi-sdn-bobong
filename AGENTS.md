@@ -1,9 +1,9 @@
 # Aturan Penghematan Token Google Antigravity (AGY) - SD Negeri Bobong Project
 
 ## 1. Modularitas & Batas Ukuran File
-- **Maksimal 300 baris per file**: Jangan pernah membuat satu file komponen/modul lebih dari 300-400 baris.
-- **Setiap fungsi/fitur di file terpisah**: Ekstrak fungsi pembantu, modal, dan hook ke dalam file khusus (Single Responsibility Principle).
-- **Manfaat Token**: Pembacaan dan pengeditan file kecil memakan token yang jauh lebih sedikit dibanding memuat file raksasa.
+- **Aturan Mutlak 1 Fungsi / 1 Komponen = 1 File**: Setiap fungsi pembantu (utility), modul service, custom hook, dan sub-komponen UI WAJIB dipisah dalam file khusus tersendiri (Single Responsibility Principle). Jangan pernah menumpuk banyak fungsi/komponen di dalam satu file.
+- **Maksimal 300 baris per file**: Batas keras ukuran file adalah 300-400 baris. Jika file mendekati batas ini, WAKTUnya di-refaktor dan dipecah ke file-file terpisah.
+- **Manfaat Token & Pemeliharaan**: Pembacaan dan pengeditan file kecil berfokus tunggal memakan token yang jauh lebih sedikit dan mencegah bug regresi.
 
 ## 2. Strategi Pengeditan & Pembacaan Kode
 - **Gunakan line-range spesifik**: Saat me-view file (`view_file`), selalu tentukan `StartLine` dan `EndLine` yang dibutuhkan saja.
