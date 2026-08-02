@@ -1,13 +1,14 @@
 import React from 'react';
-import { UserProfile } from '../../types';
+import { UserProfile, SchoolSettings } from '../../types';
 import { formatDateIndo } from '../../utils/haversine';
 
 interface GuruHeaderProps {
   user: UserProfile;
   currentTime: Date;
+  schoolSettings: SchoolSettings;
 }
 
-export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime }) => {
+export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime, schoolSettings }) => {
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0.25rem 0', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -25,7 +26,7 @@ export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime }) => 
       </div>
 
       <div style={{ background: 'var(--primary-light)', border: '1px solid rgba(10,132,255,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.78rem', color: 'var(--primary)' }}>
-        Shift Pagi 06:00–08:00 / Pulang 11:45–12:00 &nbsp;|&nbsp; Shift Siang 12:00–12:30 / Pulang 16:00–16:45 WIT
+        Shift Pagi {schoolSettings.pagiCheckInOpen || '06:00'}–{schoolSettings.pagiWorkStart || '08:00'} / Pulang {schoolSettings.pagiCheckOutStart || '11:45'}–{schoolSettings.pagiCheckOutEnd || '12:00'} &nbsp;|&nbsp; Shift Siang {schoolSettings.siangCheckInOpen || '12:00'}–{schoolSettings.siangWorkStart || '12:30'} / Pulang {schoolSettings.siangCheckOutStart || '16:00'}–{schoolSettings.siangCheckOutEnd || '16:45'} WIT
       </div>
     </>
   );

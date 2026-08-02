@@ -195,7 +195,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <GuruHeader user={user} currentTime={currentTime} />
+        <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
         <GpsStatusCard
           isInRadius={isInRadius}
           distance={distance}
