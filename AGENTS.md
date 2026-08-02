@@ -19,7 +19,8 @@
 - **Batasi output log terminal**: Gunakan filter seperti `head -n 20` atau `tail -n 20` saat menjalankan perintah terminal untuk mencegah output besar memenuhi konteks token.
 - **Jalankan build hanya jika diperlukan**: Jangan jalankan tes/build berulang-ulang tanpa perubahan kode yang signifikan.
 
-## 5. Menjaga Kode Tetap Clean Slate
+## 5. Menjaga Kode Tetap Clean Slate & Full Supabase Integrasi
+- **Dilarang Gunakan LocalStorage**: Seluruh operasi data (baca, simpan, edit, hapus) WAJIB 100% terhubung langsung ke Supabase DB & Supabase Cloud Storage. Jangan pernah menyimpan state aplikasi atau data presensi/user ke `localStorage`.
 - **Tidak ada Mock Data Palsu**: Jangan menambahkan data dummy/placeholder tambahan yang tidak perlu.
 - **Gunakan HANYA 19 Guru Resmi SD Negeri Bobong**: Jaga file data agar tidak membengkak dengan data tidak relevan.
 
