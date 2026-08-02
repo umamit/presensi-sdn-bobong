@@ -12,6 +12,7 @@ import {
   updateLeaveStatusLive,
   fetchUsersLive,
   addUserLive,
+  deleteUserLive,
   updateUserPasswordLive,
   fetchSchoolSettingsLive,
   saveSchoolSettingsLive
@@ -71,6 +72,14 @@ export const App: React.FC = () => {
     setAllUsers(prev => [newTeacher, ...prev]);
     if (isSupabaseConfigured) {
       await addUserLive(newTeacher);
+    }
+  };
+
+  const handleDeleteTeacher = async (userId: string, fullName: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${fullName}?`)) return;
+    setAllUsers(prev => prev.filter(u => u.id !== userId));
+    if (isSupabaseConfigured) {
+      await deleteUserLive(userId);
     }
   };
 
@@ -201,7 +210,7 @@ export const App: React.FC = () => {
       {isLeaveModalOpen && <LeaveRequestModal currentUser={currentUser} onClose={() => setIsLeaveModalOpen(false)} onSubmit={handleLeaveSubmit} />}
       {isSettingsModalOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsSettingsModalOpen(false)} onSave={handleUpdateSettings} />}
       {isSupabaseModalOpen && <SupabaseConfigModal onClose={() => setIsSupabaseModalOpen(false)} isConfigured={isSupabaseConfigured} />}
-      {isTeacherModalOpen && <TeacherManagementModal allUsers={allUsers} onClose={() => setIsTeacherModalOpen(false)} onAddTeacher={handleAddTeacher} />}
+      {isTeacherModalOpen && <TeacherManagementModal allUsers={allUsers} onClose={() => setIsTeacherModalOpen(false)} onAddTeacher={handleAddTeacher} onDeleteTeacher={handleDeleteTeacher} />}
       {isPwaInstallable && <PwaInstallBanner onInstall={handleInstallPwa} />}
     </div>
   );

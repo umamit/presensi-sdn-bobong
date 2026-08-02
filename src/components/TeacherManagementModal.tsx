@@ -6,12 +6,14 @@ interface TeacherManagementModalProps {
   allUsers: UserProfile[];
   onClose: () => void;
   onAddTeacher: (newTeacher: UserProfile) => void;
+  onDeleteTeacher: (userId: string, fullName: string) => void;
 }
 
 export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
   allUsers,
   onClose,
-  onAddTeacher
+  onAddTeacher,
+  onDeleteTeacher
 }) => {
   const [activeTab, setActiveTab] = useState<'list' | 'add'>('list');
 
@@ -110,9 +112,20 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
                   <span style={{ color: '#ffffff', fontSize: '0.92rem', fontWeight: 700 }}>
                     {u.fullName}
                   </span>
-                  <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
-                    {u.role.toUpperCase()}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className={`badge ${u.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>
+                      {u.role.toUpperCase()}
+                    </span>
+                    {u.role !== 'admin' && (
+                      <button
+                        onClick={() => onDeleteTeacher(u.id, u.fullName)}
+                        style={{ background: 'rgba(255,69,58,0.15)', border: '1px solid rgba(255,69,58,0.3)', color: '#ff453a', borderRadius: '6px', padding: '0.2rem 0.4rem', cursor: 'pointer' }}
+                        title="Hapus Akun Guru"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#8e8e93' }}>
                   NIP: <strong style={{ color: '#ffffff' }}>{u.nip}</strong> &nbsp;·&nbsp; {u.subject || 'Guru'}
