@@ -39,9 +39,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         return;
       }
 
-      // Verifikasi password (default password awal sekolah: sdnbobong123)
-      const userPassword = matchedUser.password || 'sdnbobong123';
-      if (cleanPassword !== userPassword && cleanPassword !== 'sdnbobong123') {
+      // Verifikasi password (password dari Supabase DB, atau default '230900' / 'sdnbobong123')
+      const userPassword = matchedUser.password || '230900';
+      if (cleanPassword !== userPassword && cleanPassword !== '230900' && cleanPassword !== 'sdnbobong123') {
         setErrorMsg('Password yang Anda masukkan salah. Hubungi Admin/Kepala Sekolah jika lupa password.');
         setLoading(false);
         return;
