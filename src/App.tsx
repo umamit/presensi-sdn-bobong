@@ -14,6 +14,8 @@ import {
   addUserLive,
   deleteUserLive,
   updateUserPasswordLive,
+  uploadSelfie,
+  uploadLeaveDocument,
   fetchSchoolSettingsLive,
   saveSchoolSettingsLive
 } from './lib/supabase';
@@ -91,6 +93,12 @@ export const App: React.FC = () => {
   };
 
   const handleCheckIn = async (newRecord: Partial<AttendanceRecord>) => {
+    let cloudSelfieUrl = newRecord.selfieUrl;
+    if (newRecord.selfieUrl && newRecord.selfieUrl.startsWith('data:image')) {
+      const uploaded = await uploadSelfie(newRecord.selfieUrl, newRecord.userId!);
+      if (uploaded) cloudSelfieUrl = uploaded;
+    }
+
     const fullRecord: AttendanceRecord = {
       id: `att-${Date.now()}`,
       userId: newRecord.userId!,
@@ -102,7 +110,8 @@ export const App: React.FC = () => {
       checkInLng: newRecord.checkInLng,
       distanceMeters: newRecord.distanceMeters,
       status: newRecord.status || 'hadir',
-      notes: newRecord.notes
+      notes: newRecord.notes,
+      selfieUrl: cloudSelfieUrl
     };
 
     setAttendanceRecords(prev => [fullRecord, ...prev]);
@@ -115,6 +124,12 @@ export const App: React.FC = () => {
   };
 
   const handleLeaveSubmit = async (req: Partial<LeaveRequest>) => {
+    let cloudDocUrl = req.documentUrl;
+    if (req.documentUrl && req.documentUrl.startsWith('data:image')) {
+      const uploaded = await uploadLeaveDocument(req.documentUrl, req.userId!);
+      if (uploaded) cloudDocUrl = uploaded;
+    }
+
     const fullReq: LeaveRequest = {
       id: `lv-${Date.now()}`,
       userId: req.userId!,
@@ -124,7 +139,7 @@ export const App: React.FC = () => {
       endDate: req.endDate!,
       leaveType: req.leaveType!,
       description: req.description!,
-      documentUrl: req.documentUrl,
+      documentUrl: cloudDocUrl,
       status: 'pending',
       createdAt: new Date().toISOString()
     };
