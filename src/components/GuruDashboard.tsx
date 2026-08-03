@@ -114,7 +114,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
         <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
-        <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} polygonCoords={schoolSettings.polygonCoords} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
+        <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
         <PresensiActionCard
           todayStr={todayStr}
           userTodayRecord={userTodayRecord}

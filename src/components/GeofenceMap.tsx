@@ -1,10 +1,19 @@
-import React from 'react';
-import { ShieldCheck, MapPin, Navigation, Compass, AlertCircle } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { ShieldCheck } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix default icon Leaflet yang rusak saat di-bundle Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 interface GeofenceMapProps {
   userCoords: { lat: number; lng: number } | null;
   centerCoords: { lat: number; lng: number };
-  polygonCoords?: Array<[number, number]>;
   radiusMeters: number;
   isInRadius: boolean;
   distanceMeters: number | null;
@@ -13,133 +22,110 @@ interface GeofenceMapProps {
 export const GeofenceMap: React.FC<GeofenceMapProps> = ({
   userCoords,
   centerCoords,
-  polygonCoords,
   radiusMeters,
   isInRadius,
-  distanceMeters
+  distanceMeters,
 }) => {
-  // Koordinat polygon KML atau fallback polygon box
-  const poly = polygonCoords || [
-    [centerCoords.lat - 0.0003, centerCoords.lng - 0.0003],
-    [centerCoords.lat - 0.0003, centerCoords.lng + 0.0003],
-    [centerCoords.lat + 0.0003, centerCoords.lng + 0.0003],
-    [centerCoords.lat + 0.0003, centerCoords.lng - 0.0003]
-  ];
+  const mapRef = useRef<L.Map | null>(null);
+  const mapDivRef = useRef<HTMLDivElement | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const radiusCircleRef = useRef<L.Circle | null>(null);
+  const schoolMarkerRef = useRef<L.Marker | null>(null);
 
-  // Hitung bounding box untuk konversi koordinat GPS [lat, lng] ke SVG viewBox (200 x 200)
-  const lats = poly.map(p => p[0]);
-  const lngs = poly.map(p => p[1]);
+  // Inisialisasi peta sekali saja
+  useEffect(() => {
+    if (!mapDivRef.current || mapRef.current) return;
 
-  if (userCoords) {
-    lats.push(userCoords.lat);
-    lngs.push(userCoords.lng);
-  }
+    const map = L.map(mapDivRef.current, {
+      center: [centerCoords.lat, centerCoords.lng],
+      zoom: 17,
+      zoomControl: true,
+      attributionControl: false,
+    });
 
-  const minLat = Math.min(...lats) - 0.0001;
-  const maxLat = Math.max(...lats) + 0.0001;
-  const minLng = Math.min(...lngs) - 0.0001;
-  const maxLng = Math.max(...lngs) + 0.0001;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+    }).addTo(map);
 
-  const latRange = maxLat - minLat || 0.0008;
-  const lngRange = maxLng - minLng || 0.0008;
+    // Marker sekolah (biru)
+    const schoolIcon = L.divIcon({
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:#6366f1;border:2px solid #fff;box-shadow:0 0 6px #6366f1;"></div>`,
+      className: '',
+      iconAnchor: [7, 7],
+    });
+    schoolMarkerRef.current = L.marker([centerCoords.lat, centerCoords.lng], { icon: schoolIcon })
+      .addTo(map)
+      .bindPopup('📍 Titik Pusat Sekolah');
 
-  // Function konversi GPS ke koordinat SVG Canvas (300 x 220)
-  const mapToSvg = (lat: number, lng: number) => {
-    const x = ((lng - minLng) / lngRange) * 260 + 20;
-    // Latitude makin besar di GPS = posisi makin di atas (y makin kecil di SVG)
-    const y = 200 - (((lat - minLat) / latRange) * 160 + 20);
-    return { x, y };
-  };
+    mapRef.current = map;
 
-  // Titik SVG Polygon
-  const svgPolygonPoints = poly
-    .map(p => {
-      const pt = mapToSvg(p[0], p[1]);
-      return `${pt.x},${pt.y}`;
-    })
-    .join(' ');
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
 
-  const centerPt = mapToSvg(centerCoords.lat, centerCoords.lng);
-  const userPt = userCoords ? mapToSvg(userCoords.lat, userCoords.lng) : null;
+  // Update user marker & radius circle setiap kali coords berubah
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const color = isInRadius ? '#10b981' : '#ef4444';
+
+    // Hapus marker & circle lama
+    if (userMarkerRef.current) { userMarkerRef.current.remove(); userMarkerRef.current = null; }
+    if (radiusCircleRef.current) { radiusCircleRef.current.remove(); radiusCircleRef.current = null; }
+
+    // Lingkaran radius sekolah
+    radiusCircleRef.current = L.circle([centerCoords.lat, centerCoords.lng], {
+      radius: radiusMeters,
+      color,
+      fillColor: color,
+      fillOpacity: 0.18,
+      weight: 2,
+    }).addTo(map);
+
+    // Marker posisi guru
+    if (userCoords) {
+      const userIcon = L.divIcon({
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 0 8px ${color};"></div>`,
+        className: '',
+        iconAnchor: [8, 8],
+      });
+      userMarkerRef.current = L.marker([userCoords.lat, userCoords.lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup(`📡 Posisi Anda (${distanceMeters ?? 0}m dari sekolah)`);
+
+      // Fit map agar tampilkan kedua titik
+      const bounds = L.latLngBounds(
+        [centerCoords.lat, centerCoords.lng],
+        [userCoords.lat, userCoords.lng]
+      );
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 18 });
+    }
+  }, [userCoords, isInRadius, radiusMeters, distanceMeters]);
 
   return (
     <div className="glass-panel" style={{ padding: '1.25rem', marginTop: '1.25rem', background: 'rgba(11, 15, 25, 0.95)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ShieldCheck size={18} color="var(--primary)" />
-          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>Peta Visual Geofencing (KML Area Presensi)</h4>
+          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>Peta Geofencing Presensi</h4>
         </div>
-
         <span className={`badge ${isInRadius ? 'badge-hadir' : 'badge-alfa'}`} style={{ fontSize: '0.78rem' }}>
           {isInRadius ? 'Dalam Zone Presensi' : 'Di Luar Zone Presensi'}
         </span>
       </div>
 
-      {/* SVG Canvas Map Render */}
-      <div style={{ position: 'relative', width: '100%', height: '220px', background: '#090d16', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        
-        {/* Grid Background Pattern */}
-        <svg width="100%" height="100%" style={{ position: 'absolute', inset: 0 }}>
-          <defs>
-            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-
-          {/* Draw Polygon Geofence Zone from KML */}
-          <polygon
-            points={svgPolygonPoints}
-            fill={isInRadius ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.12)'}
-            stroke={isInRadius ? '#10b981' : '#ef4444'}
-            strokeWidth="2"
-            strokeDasharray="4 2"
-          />
-
-          {/* Center Point Icon */}
-          <circle cx={centerPt.x} cy={centerPt.y} r="6" fill="#6366f1" opacity="0.8" />
-          <circle cx={centerPt.x} cy={centerPt.y} r="12" fill="none" stroke="#6366f1" strokeWidth="1.5" opacity="0.5" />
-
-          {/* Draw Line from Center to User */}
-          {userPt && (
-            <line
-              x1={centerPt.x}
-              y1={centerPt.y}
-              x2={userPt.x}
-              y2={userPt.y}
-              stroke={isInRadius ? '#34d399' : '#f87171'}
-              strokeWidth="1.5"
-              strokeDasharray="3 3"
-            />
-          )}
-
-          {/* User Marker */}
-          {userPt && (
-            <g transform={`translate(${userPt.x}, ${userPt.y})`}>
-              <circle r="9" fill={isInRadius ? '#10b981' : '#ef4444'} opacity="0.3" />
-              <circle r="5" fill={isInRadius ? '#34d399' : '#f87171'} stroke="#ffffff" strokeWidth="1.5" />
-            </g>
-          )}
-        </svg>
-
-        {/* Legend Overlay */}
-        <div style={{ position: 'absolute', bottom: '8px', left: '10px', background: 'rgba(15,23,42,0.85)', padding: '0.4rem 0.7rem', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.72rem', display: 'flex', gap: '0.8rem', color: 'var(--text-muted)' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366f1' }}></span> Titik Pusat Sekolah
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isInRadius ? '#34d399' : '#f87171' }}></span> Posisi Anda ({distanceMeters ?? 0}m)
-          </span>
-        </div>
-
-        <div style={{ position: 'absolute', top: '8px', right: '10px', background: 'rgba(15,23,42,0.85)', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', color: 'var(--secondary)' }}>
-          Geofence KML (4-Point Boundary)
-        </div>
-      </div>
+      {/* Leaflet Map Container */}
+      <div
+        ref={mapDivRef}
+        style={{ width: '100%', height: '220px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border-color)', zIndex: 0 }}
+      />
 
       <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <span>Koordinat Anda: <strong>{userCoords ? `${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}` : 'Mendeteksi...'}</strong></span>
-        <span>Koordinat Sekolah: <strong>{centerCoords.lat.toFixed(6)}, {centerCoords.lng.toFixed(6)}</strong></span>
+        <span>Posisi Anda: <strong>{userCoords ? `${userCoords.lat.toFixed(6)}, ${userCoords.lng.toFixed(6)}` : 'Mendeteksi...'}</strong></span>
+        <span>Sekolah: <strong>{centerCoords.lat.toFixed(6)}, {centerCoords.lng.toFixed(6)}</strong></span>
       </div>
     </div>
   );
