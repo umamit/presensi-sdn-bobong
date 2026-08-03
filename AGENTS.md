@@ -63,6 +63,7 @@ src/
     ├── Navbar.tsx                  # Header + hamburger toggle
     ├── LoginPage.tsx               # Halaman login (<50 baris)
     ├── SelfieModal.tsx             # Modal selfie kamera
+    ├── SelfiePreviewModal.tsx      # Modal pop-up pratinjau foto presensi HD
     ├── LeaveRequestModal.tsx       # Modal pengajuan izin
     ├── SchoolSettingsModal.tsx     # Modal pengaturan GPS & shift
     ├── TeacherManagementModal.tsx  # Modal kelola guru
