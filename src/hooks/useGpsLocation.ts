@@ -60,31 +60,11 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
       setDistance(dist);
       setGpsLoading(false);
     } catch (error: any) {
-      console.warn('Capacitor Geolocation Error, fallback to navigator:', error?.message);
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            setUserCoords({ lat, lng });
-            const dist = calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude);
-            setDistance(dist);
-            setGpsLoading(false);
-          },
-          (err) => {
-            setGpsError('Akses lokasi ditolak. Tekan Panduan untuk bantuan.');
-            setUserCoords(null);
-            setDistance(null);
-            setGpsLoading(false);
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
-      } else {
-        setGpsError('Akses lokasi ditolak. Tekan Panduan untuk bantuan.');
-        setUserCoords(null);
-        setDistance(null);
-        setGpsLoading(false);
-      }
+      console.warn('Capacitor Geolocation Error:', error?.message);
+      setGpsError('Akses lokasi ditolak atau GPS tidak aktif. Silakan izinkan akses lokasi.');
+      setUserCoords(null);
+      setDistance(null);
+      setGpsLoading(false);
     }
   };
 

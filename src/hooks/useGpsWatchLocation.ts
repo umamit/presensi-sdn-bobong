@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SchoolSettings } from '../types';
 import { calculateDistanceMeters, isPointInPolygon } from '../utils/haversine';
+import { Geolocation } from '@capacitor/geolocation';
 
 interface UseGpsWatchLocationResult {
   userCoords: { lat: number; lng: number } | null;
@@ -19,46 +20,58 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
   const [gpsError, setGpsError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setGpsError('Browser Anda tidak mendukung fitur Geolocation GPS.');
-      setGpsLoading(false);
-      return;
-    }
+    let watchId: string | null = null;
 
-    setGpsLoading(true);
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const acc = position.coords.accuracy;
-        setAccuracy(acc);
-
-        if (acc === 0) {
-          setGpsError('Terdeteksi lokasi tidak valid (Mock GPS).');
-        } else if (acc > 100) {
-          setGpsError(`Sinyal GPS kurang akurat (${Math.round(acc)}m).`);
-        } else {
-          setGpsError(null);
+    const startWatch = async () => {
+      setGpsLoading(true);
+      try {
+        const permResult = await Geolocation.checkPermissions();
+        if (permResult.location !== 'granted') {
+          await Geolocation.requestPermissions();
         }
 
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setUserCoords({ lat, lng });
+        watchId = await Geolocation.watchPosition(
+          { enableHighAccuracy: true, timeout: 20000, maximumAge: 3000 },
+          (position, err) => {
+            if (err || !position) {
+              setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
+              setGpsLoading(false);
+              return;
+            }
 
-        const dist = calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude);
-        setDistance(dist);
+            const acc = position.coords.accuracy;
+            setAccuracy(acc);
+
+            if (acc === 0) {
+              setGpsError('Terdeteksi lokasi tidak valid (Mock GPS).');
+            } else if (acc > 100) {
+              setGpsError(`Sinyal GPS kurang akurat (${Math.round(acc)}m).`);
+            } else {
+              setGpsError(null);
+            }
+
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            setUserCoords({ lat, lng });
+
+            const dist = calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude);
+            setDistance(dist);
+            setGpsLoading(false);
+          }
+        );
+      } catch (error: any) {
+        console.warn('Capacitor Watch Position Error:', error?.message);
+        setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
         setGpsLoading(false);
-      },
-      (error) => {
-        console.warn('GPS Watch Error:', error.message);
-        setGpsError('Akses lokasi ditolak. Tekan Panduan untuk bantuan.');
-        setUserCoords(null);
-        setDistance(null);
-        setGpsLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 3000 }
-    );
+      }
+    };
+
+    startWatch();
 
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      if (watchId) {
+        Geolocation.clearWatch({ id: watchId });
+      }
     };
   }, [schoolSettings.latitude, schoolSettings.longitude]);
 
