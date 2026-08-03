@@ -12,7 +12,20 @@ export default defineConfig({
       workbox: {
         skipWaiting: true,       // Langsung aktifkan service worker baru
         clientsClaim: true,      // Ambil kendali semua tab sekaligus
-        cleanupOutdatedCaches: true // Hapus cache lama otomatis
+        cleanupOutdatedCaches: true, // Hapus cache lama otomatis
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*\/.*$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'sdn-bobong-live-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 // 1 hari
+              }
+            }
+          }
+        ]
       },
       manifest: {
         name: 'Presensi Guru - SD Negeri Bobong',
