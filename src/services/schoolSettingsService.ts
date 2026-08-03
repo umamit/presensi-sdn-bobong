@@ -23,9 +23,9 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
     radiusMeters: data.radius_meters || 10,
     polygonCoords: data.polygon_coords,
     pagiCheckInOpen: data.pagi_check_in_open || '06:00',
-    pagiWorkStart: data.pagi_work_start || data.work_start_time || '07:15',
+    pagiWorkStart: data.pagi_work_start || '07:15',
     pagiCheckOutStart: data.pagi_check_out_start || '11:45',
-    pagiCheckOutEnd: data.pagi_check_out_end || data.work_end_time || '12:00',
+    pagiCheckOutEnd: data.pagi_check_out_end || '12:00',
     siangCheckInOpen: data.siang_check_in_open || '12:10',
     siangWorkStart: data.siang_work_start || '12:45',
     siangCheckOutStart: data.siang_check_out_start || '16:00',
@@ -42,9 +42,7 @@ export async function saveSchoolSettingsLive(s: SchoolSettings): Promise<boolean
     address: s.address,
     latitude: s.latitude,
     longitude: s.longitude,
-    radius_meters: s.radiusMeters,
-    work_start_time: s.pagiWorkStart || '08:00',
-    work_end_time: s.pagiCheckOutEnd || '12:00'
+    radius_meters: s.radiusMeters
   };
 
   if (s.polygonCoords) payload.polygon_coords = s.polygonCoords;
