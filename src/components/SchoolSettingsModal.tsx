@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { SchoolSettings } from '../types';
 import { X, Save, MapPin, Navigation } from 'lucide-react';
 import { ShiftSettingsForm } from './settings/ShiftSettingsForm';
+import { Geolocation } from '@capacitor/geolocation';
 
 interface SchoolSettingsModalProps {
   settings: SchoolSettings;
@@ -12,15 +13,18 @@ interface SchoolSettingsModalProps {
 export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settings, onClose, onSave }) => {
   const [formData, setFormData] = useState<SchoolSettings>({ ...settings });
 
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        setFormData(prev => ({
-          ...prev,
-          latitude: parseFloat(pos.coords.latitude.toFixed(6)),
-          longitude: parseFloat(pos.coords.longitude.toFixed(6))
-        }));
-      });
+  const handleGetCurrentLocation = async () => {
+    try {
+      const permResult = await Geolocation.checkPermissions();
+      if (permResult.location !== 'granted') await Geolocation.requestPermissions();
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      setFormData(prev => ({
+        ...prev,
+        latitude: parseFloat(pos.coords.latitude.toFixed(6)),
+        longitude: parseFloat(pos.coords.longitude.toFixed(6))
+      }));
+    } catch (e) {
+      console.warn('GPS error:', e);
     }
   };
 
@@ -30,8 +34,8 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
     onClose();
   };
 
-  const DEFAULT_SCHOOL_LAT = -1.955549;
-  const DEFAULT_SCHOOL_LNG = 124.384365;
+  const DEFAULT_SCHOOL_LAT = -1.955536;
+  const DEFAULT_SCHOOL_LNG = 124.384367;
 
   const isAtDefaultSchoolCoords = 
     Math.abs(formData.latitude - DEFAULT_SCHOOL_LAT) < 0.000001 &&

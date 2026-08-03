@@ -4,9 +4,9 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   id: 1,
   schoolName: 'SD Negeri Bobong',
   address: 'Area Presensi SD Negeri Bobong, Taliabu Barat, Maluku Utara',
-  latitude: -1.955549,
-  longitude: 124.384365,
-  radiusMeters: 3,
+  latitude: -1.955536,
+  longitude: 124.384367,
+  radiusMeters: 10,
   polygonCoords: [
     [-1.955656974304001, 124.3842430227951],
     [-1.955653769665803, 124.3844916213357],
