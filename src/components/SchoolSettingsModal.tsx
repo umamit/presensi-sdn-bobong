@@ -100,9 +100,9 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
               Radius Toleransi Maksimal Absensi: <strong style={{ color: 'var(--secondary)' }}>{formData.radiusMeters} Meter</strong>
             </label>
-            <input type="range" min="10" max="500" step="5" value={formData.radiusMeters} onChange={(e) => setFormData({ ...formData, radiusMeters: parseInt(e.target.value) })} style={{ width: '100%', accentColor: 'var(--primary)' }} />
+            <input type="range" min="3" max="500" step="1" value={formData.radiusMeters} onChange={(e) => setFormData({ ...formData, radiusMeters: parseInt(e.target.value) || 3 })} style={{ width: '100%', accentColor: 'var(--primary)' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              <span>10m (Super Strict)</span><span>100m (Standard)</span><span>500m (Long Range)</span>
+              <span>3m (Super Strict)</span><span>100m (Standard)</span><span>500m (Long Range)</span>
             </div>
           </div>
 
