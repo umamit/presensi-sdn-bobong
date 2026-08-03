@@ -26,6 +26,7 @@ export async function fetchUsersLive(): Promise<UserProfile[] | null> {
 export async function addUserLive(user: UserProfile): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase.from('users').insert([{
+    id: user.id || `usr-${Date.now()}`,
     nip: user.nip,
     full_name: user.fullName,
     email: user.email,
