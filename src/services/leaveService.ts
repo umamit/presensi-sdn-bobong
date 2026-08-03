@@ -30,8 +30,10 @@ export async function fetchLeavesLive(): Promise<LeaveRequest[] | null> {
 
 export async function saveLeaveLive(req: LeaveRequest): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase.from('leave_requests').insert([{
-    user_id: req.userId,
+
+  const isUuid = req.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.userId);
+
+  const payload: any = {
     user_name: req.userName,
     user_nip: req.userNip,
     start_date: req.startDate,
@@ -40,7 +42,11 @@ export async function saveLeaveLive(req: LeaveRequest): Promise<boolean> {
     description: req.description,
     document_url: req.documentUrl,
     status: req.status
-  }]);
+  };
+
+  if (isUuid) payload.user_id = req.userId;
+
+  const { error } = await supabase.from('leave_requests').insert([payload]);
 
   if (error) {
     console.error('Error saving leave request to Supabase:', error.message);
