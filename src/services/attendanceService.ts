@@ -13,21 +13,29 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
     return null;
   }
 
-  return data.map(item => ({
-    id: item.id,
-    userId: item.user_id,
-    userName: item.user_name,
-    userNip: item.user_nip,
-    date: item.date,
-    checkInTime: item.check_in_time,
-    checkOutTime: item.check_out_time,
-    checkInLat: item.check_in_lat,
-    checkInLng: item.check_in_lng,
-    distanceMeters: item.distance_meters,
-    status: item.status,
-    notes: item.notes,
-    selfieUrl: item.selfie_url
-  }));
+  return data.map(item => {
+    let extractedSelfie = item.selfie_url;
+    if (!extractedSelfie && item.notes && item.notes.includes('https://')) {
+      const match = item.notes.match(/https:\/\/[^\s]+\.(jpg|jpeg|png)/i);
+      if (match) extractedSelfie = match[0];
+    }
+
+    return {
+      id: item.id,
+      userId: item.user_id,
+      userName: item.user_name,
+      userNip: item.user_nip,
+      date: item.date,
+      checkInTime: item.check_in_time,
+      checkOutTime: item.check_out_time,
+      checkInLat: item.check_in_lat,
+      checkInLng: item.check_in_lng,
+      distanceMeters: item.distance_meters,
+      status: item.status,
+      notes: item.notes,
+      selfieUrl: extractedSelfie
+    };
+  });
 }
 
 export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean> {
