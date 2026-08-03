@@ -17,8 +17,8 @@ export function subscribeAttendanceRealtime(
       { event: 'INSERT', schema: 'public', table: 'attendance' },
       (payload) => {
         const item = payload.new;
-        let extractedSelfie = item.selfie_url;
-        if (!extractedSelfie && item.notes && item.notes.includes('https://')) {
+        let extractedSelfie: string | undefined = undefined;
+        if (item.notes && item.notes.includes('https://')) {
           const match = item.notes.match(/https:\/\/[^\s]+\.(jpg|jpeg|png)/i);
           if (match) extractedSelfie = match[0];
         }
