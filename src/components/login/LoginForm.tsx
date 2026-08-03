@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Lock, User, Eye, EyeOff, LogIn, Fingerprint } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
 import { UserProfile } from '../../types';
-import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 
 interface LoginFormProps {
   allUsers: UserProfile[];
@@ -14,27 +13,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ allUsers, onLoginSuccess }
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { registerBiometricLogin, verifyBiometricLogin } = useBiometricAuth();
-
-  const handleBiometricClick = async () => {
-    if (!identifier.trim()) {
-      setErrorMsg('Masukkan NIP terlebih dahulu untuk Login Biometric.');
-      return;
-    }
-    const cleanId = identifier.trim().toLowerCase();
-    const matchedUser = allUsers.find(u => u.nip.toLowerCase() === cleanId || u.email.toLowerCase() === cleanId);
-    if (!matchedUser) {
-      setErrorMsg('NIP tidak terdaftar dalam sistem.');
-      return;
-    }
-    const verified = await verifyBiometricLogin(matchedUser.nip);
-    if (verified) {
-      registerBiometricLogin(matchedUser.nip);
-      onLoginSuccess(matchedUser);
-    } else {
-      setErrorMsg('Autentikasi Sidik Jari / Biometric gagal.');
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +41,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ allUsers, onLoginSuccess }
         return;
       }
 
-      registerBiometricLogin(matchedUser.nip);
       setLoading(false);
       onLoginSuccess(matchedUser);
     }, 400);
@@ -96,15 +73,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ allUsers, onLoginSuccess }
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.6rem' }}>
-          <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 1, padding: '0.9rem', fontSize: '0.95rem' }}>
-            <LogIn size={18} />
-            <span>{loading ? 'Memproses Login...' : 'Masuk ke Sistem'}</span>
-          </button>
-          <button type="button" onClick={handleBiometricClick} className="btn btn-secondary" title="Login Cepat Sidik Jari / Biometric" style={{ padding: '0.9rem', background: 'rgba(255,255,255,0.08)' }}>
-            <Fingerprint size={20} color="var(--primary)" />
-          </button>
-        </div>
+        <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', fontSize: '1rem', marginTop: '0.5rem' }}>
+          <LogIn size={18} />
+          <span>{loading ? 'Memproses Login...' : 'Masuk ke Sistem Presensi'}</span>
+        </button>
       </form>
     </>
   );

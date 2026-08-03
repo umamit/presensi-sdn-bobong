@@ -56,7 +56,6 @@ src/
 │   ├── useCamera.ts               # Akses kamera
 │   ├── useLivenessDetection.ts    # Deteksi wajah liveness
 │   ├── useNetworkStatus.ts        # Capacitor Network status & offline sync (Poin 4)
-│   ├── useBiometricAuth.ts        # Otentikasi Sidik Jari / Face ID (Poin 5)
 │   └── usePwaInstall.ts           # PWA install prompt
 ├── utils/
 │   ├── haversine.ts               # GPS distance, polygon, format date/time
