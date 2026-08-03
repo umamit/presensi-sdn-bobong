@@ -21,6 +21,7 @@
 - **Jalankan build hanya jika diperlukan**: Jangan jalankan tes/build berulang-ulang tanpa perubahan kode yang signifikan.
 
 ## 5. Menjaga Kode Tetap Clean Slate & Full Supabase Integrasi
+- **Pembersihan Total Logika Lama (Clean Slate Purge)**: Setiap kali ada fitur baru yang menggantikan logika/metode/modul lama, logika atau rujukan lama WAJIB DIBERSIHKAN TOTAL dari seluruh file proyek agar kode tetap rapi, ringan, dan mencegah bug regresi di kemudian hari.
 - **Dilarang Gunakan LocalStorage**: Seluruh operasi data (baca, simpan, edit, hapus) WAJIB 100% terhubung langsung ke Supabase DB & Supabase Cloud Storage. Jangan pernah menyimpan state aplikasi atau data presensi/user ke `localStorage`.
 - **Tidak ada Mock Data Palsu**: Jangan menambahkan data dummy/placeholder tambahan yang tidak perlu.
 - **Gunakan HANYA 19 Guru Resmi SD Negeri Bobong**: Jaga file data agar tidak membengkak dengan data tidak relevan.
