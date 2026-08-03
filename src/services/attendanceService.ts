@@ -53,7 +53,8 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: rec.notes || (rec.selfieUrl ? `Foto Verified: ${rec.selfieUrl}` : undefined),
+    notes: rec.notes || 'Presensi Verified',
+    selfie_url: rec.selfieUrl || undefined
   };
 
   if (isUuid) {
