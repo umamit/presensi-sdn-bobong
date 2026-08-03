@@ -1,5 +1,5 @@
 import React from 'react';
-import { AttendanceRecord } from '../../types';
+import { AttendanceRecord, SchoolSettings } from '../../types';
 import { CheckCircle2, Clock } from 'lucide-react';
 import { formatDateIndo, formatTime } from '../../utils/haversine';
 
@@ -11,6 +11,9 @@ interface PresensiActionCardProps {
   isInRadius: boolean;
   handleCheckInSubmit: () => void;
   handleCheckOutSubmit: () => void;
+  currentTime?: Date;
+  schoolSettings?: SchoolSettings;
+  userShift?: 'pagi' | 'siang';
 }
 
 export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
@@ -20,8 +23,30 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   setNotes,
   isInRadius,
   handleCheckInSubmit,
-  handleCheckOutSubmit
+  handleCheckOutSubmit,
+  currentTime = new Date(),
+  schoolSettings,
+  userShift = 'pagi'
 }) => {
+  const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const openTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckInOpen || '06:00') : (schoolSettings?.siangCheckInOpen || '12:00');
+  const closeTime = userShift === 'pagi' ? (schoolSettings?.pagiWorkStart || '08:00') : (schoolSettings?.siangWorkStart || '12:30');
+
+  const isTooEarly = nowTimeStr < openTime;
+  const isTooLate = nowTimeStr > closeTime;
+  const isTimeValid = !isTooEarly && !isTooLate;
+
+  const isButtonEnabled = isInRadius && isTimeValid;
+
+  let buttonText = 'Absen Masuk Sekarang';
+  if (!isInRadius) {
+    buttonText = 'Di Luar Radius Sekolah';
+  } else if (isTooEarly) {
+    buttonText = `Belum Buka (Mulai ${openTime} WIT)`;
+  } else if (isTooLate) {
+    buttonText = `Absen Tutup (Batas ${closeTime} WIT)`;
+  }
+
   return (
     <div>
       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 500 }}>
@@ -39,21 +64,21 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
           />
           <button
             onClick={handleCheckInSubmit}
-            disabled={!isInRadius}
+            disabled={!isButtonEnabled}
             className="btn btn-success"
             style={{
               padding: '1rem',
               fontSize: '1rem',
               fontWeight: 700,
               width: '100%',
-              opacity: isInRadius ? 1 : 0.4,
-              cursor: isInRadius ? 'pointer' : 'not-allowed',
+              opacity: isButtonEnabled ? 1 : 0.45,
+              cursor: isButtonEnabled ? 'pointer' : 'not-allowed',
               borderRadius: 'var(--radius-md)',
               letterSpacing: '-0.01em',
             }}
           >
             <CheckCircle2 size={20} />
-            {isInRadius ? 'Absen Masuk Sekarang' : 'Di Luar Radius Sekolah'}
+            {buttonText}
           </button>
         </div>
       ) : (

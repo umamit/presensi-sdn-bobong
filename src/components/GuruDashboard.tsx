@@ -113,7 +113,18 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
         <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
         <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} polygonCoords={schoolSettings.polygonCoords} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
-        <PresensiActionCard todayStr={todayStr} userTodayRecord={userTodayRecord} notes={notes} setNotes={setNotes} isInRadius={isInRadius} handleCheckInSubmit={handleCheckInSubmit} handleCheckOutSubmit={handleCheckOutSubmit} />
+        <PresensiActionCard
+          todayStr={todayStr}
+          userTodayRecord={userTodayRecord}
+          notes={notes}
+          setNotes={setNotes}
+          isInRadius={isInRadius}
+          handleCheckInSubmit={handleCheckInSubmit}
+          handleCheckOutSubmit={handleCheckOutSubmit}
+          currentTime={currentTime}
+          schoolSettings={schoolSettings}
+          userShift={user.shift || 'pagi'}
+        />
         <QuickActionButtons setIsChangePassOpen={setIsChangePassOpen} setIsGuideOpen={setIsGuideOpen} onOpenLeaveModal={onOpenLeaveModal} />
         <PersonalHistoryList userHistory={userHistory} />
       </div>
