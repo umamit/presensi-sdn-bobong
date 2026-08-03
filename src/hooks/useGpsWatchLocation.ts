@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { SchoolSettings } from '../types';
-import { calculateDistanceMeters, isPointInPolygon } from '../utils/haversine';
+import { calculateDistanceMeters } from '../utils/haversine';
 import { Geolocation } from '@capacitor/geolocation';
 
 interface UseGpsWatchLocationResult {
@@ -75,11 +75,7 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
     };
   }, [schoolSettings.latitude, schoolSettings.longitude]);
 
-  const inPolygon = (userCoords && schoolSettings.polygonCoords)
-    ? isPointInPolygon([userCoords.lat, userCoords.lng], schoolSettings.polygonCoords)
-    : false;
-
-  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || inPolygon;
+  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters);
 
   return { userCoords, distance, gpsLoading, gpsError, isInRadius, accuracy };
 }
