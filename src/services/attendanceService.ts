@@ -14,11 +14,7 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
   }
 
   return data.map(item => {
-    let extractedSelfie: string | undefined = undefined;
-    if (item.notes && item.notes.includes('https://')) {
-      const match = item.notes.match(/https:\/\/[^\s]+\.(jpg|jpeg|png)/i);
-      if (match) extractedSelfie = match[0];
-    }
+    const extractedSelfie = item.selfie_url || undefined;
 
     return {
       id: item.id,
@@ -53,9 +49,8 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: rec.selfieUrl
-      ? `Presensi Verified: ${rec.selfieUrl}`
-      : (rec.notes || 'Presensi Verified')
+    notes: rec.notes || 'Presensi Verified',
+    selfie_url: rec.selfieUrl || null
   };
 
   if (isUuid) {
