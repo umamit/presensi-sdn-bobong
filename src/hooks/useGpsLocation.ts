@@ -72,7 +72,7 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
     fetchGpsLocation();
   }, [schoolSettings]);
 
-  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || isWifiMatched;
+  const isInRadius = distance !== null && distance <= schoolSettings.radiusMeters;
 
   return { userCoords, distance, gpsLoading, gpsError, isInRadius, isWifiMatched, networkInfo, fetchGpsLocation };
 }
