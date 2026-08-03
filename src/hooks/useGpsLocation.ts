@@ -54,9 +54,12 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
     });
 
     try {
-      const permResult = await Geolocation.checkPermissions();
-      if (permResult.location !== 'granted') {
-        await Geolocation.requestPermissions({ permissions: ['location'] });
+      const isNative = (window as any).Capacitor?.isNativePlatform();
+      if (isNative) {
+        const permResult = await Geolocation.checkPermissions();
+        if (permResult.location !== 'granted') {
+          await Geolocation.requestPermissions({ permissions: ['location'] });
+        }
       }
 
       // 1. Pengecekan GPS palsu native Android

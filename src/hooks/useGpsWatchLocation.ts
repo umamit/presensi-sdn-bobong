@@ -46,9 +46,12 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
     const startWatch = async () => {
       setGpsLoading(true);
       try {
-        const permResult = await Geolocation.checkPermissions();
-        if (permResult.location !== 'granted') {
-          await Geolocation.requestPermissions({ permissions: ['location'] });
+        const isNative = (window as any).Capacitor?.isNativePlatform();
+        if (isNative) {
+          const permResult = await Geolocation.checkPermissions();
+          if (permResult.location !== 'granted') {
+            await Geolocation.requestPermissions({ permissions: ['location'] });
+          }
         }
 
         // 1. Pengecekan GPS palsu native Android
