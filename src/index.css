@@ -220,6 +220,10 @@ h1, h2, h3, h4 {
 .spin { animation: spin 1s linear infinite; }
 
 /* === MODAL === */
+body:has(.modal-backdrop) {
+  overflow: hidden;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -231,6 +235,7 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow-y: auto;
   animation: fadeIn 0.18s ease-out;
 }
 
