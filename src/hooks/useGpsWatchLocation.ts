@@ -27,7 +27,7 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
       try {
         const permResult = await Geolocation.checkPermissions();
         if (permResult.location !== 'granted') {
-          await Geolocation.requestPermissions();
+          await Geolocation.requestPermissions({ permissions: ['location'] });
         }
 
         watchId = await Geolocation.watchPosition(

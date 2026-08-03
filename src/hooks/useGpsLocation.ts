@@ -33,10 +33,9 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
     });
 
     try {
-      // Minta izin lokasi secara native jika belum diizinkan
       const permResult = await Geolocation.checkPermissions();
       if (permResult.location !== 'granted') {
-        await Geolocation.requestPermissions();
+        await Geolocation.requestPermissions({ permissions: ['location'] });
       }
 
       const position = await Geolocation.getCurrentPosition({
