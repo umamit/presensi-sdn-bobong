@@ -30,6 +30,21 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
     onClose();
   };
 
+  const DEFAULT_SCHOOL_LAT = -1.955549;
+  const DEFAULT_SCHOOL_LNG = 124.384365;
+
+  const isAtDefaultSchoolCoords = 
+    Math.abs(formData.latitude - DEFAULT_SCHOOL_LAT) < 0.000001 &&
+    Math.abs(formData.longitude - DEFAULT_SCHOOL_LNG) < 0.000001;
+
+  const handleResetSchoolCoords = () => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: DEFAULT_SCHOOL_LAT,
+      longitude: DEFAULT_SCHOOL_LNG
+    }));
+  };
+
   return (
     <div className="modal-backdrop">
       <div className="glass-panel" style={{ width: '100%', maxWidth: '540px', padding: '1.5rem', background: '#0f172a' }}>
@@ -57,10 +72,29 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
             </div>
           </div>
 
-          <button type="button" onClick={handleGetCurrentLocation} className="btn btn-secondary" style={{ padding: '0.45rem', fontSize: '0.8rem', gap: '0.4rem' }}>
-            <Navigation size={14} color="var(--secondary)" />
-            <span>Gunakan Koordinat Posisi Saya Saat Ini</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" onClick={handleGetCurrentLocation} className="btn btn-secondary" style={{ padding: '0.45rem 0.6rem', fontSize: '0.78rem', gap: '0.4rem', flex: 1 }}>
+              <Navigation size={14} color="var(--secondary)" />
+              <span>Gunakan Posisi Saya</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetSchoolCoords}
+              disabled={isAtDefaultSchoolCoords}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.45rem 0.6rem',
+                fontSize: '0.78rem',
+                gap: '0.4rem',
+                flex: 1,
+                opacity: isAtDefaultSchoolCoords ? 0.45 : 1,
+                cursor: isAtDefaultSchoolCoords ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <MapPin size={14} color={isAtDefaultSchoolCoords ? 'var(--text-dim)' : 'var(--warning)'} />
+              <span>Kembali ke Koordinat Sekolah</span>
+            </button>
+          </div>
 
           <div>
             <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
