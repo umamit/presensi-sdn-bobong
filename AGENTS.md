@@ -45,7 +45,7 @@ src/
 │   ├── storageService.ts          # Upload selfie & dokumen
 │   ├── schoolSettingsService.ts   # CRUD school_settings
 │   ├── networkValidationService.ts # Validasi Jaringan IP & WiFi Sekolah (Poin 4)
-│   └── initialMockData.ts         # Data initial offline fallback
+│   └── initialData.ts         # Data initial offline fallback
 ├── hooks/
 │   ├── useAppData.ts              # State global App + semua handler
 │   ├── useGpsLocation.ts          # Logika GPS & radius check

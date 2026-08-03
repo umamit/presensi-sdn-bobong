@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings, LeaveRequest } from '../types';
 import {
-  MOCK_USERS, INITIAL_SCHOOL_SETTINGS, isSupabaseConfigured,
+  INITIAL_OFFLINE_USERS, INITIAL_SCHOOL_SETTINGS, isSupabaseConfigured,
   fetchAttendanceLive, saveAttendanceLive, updateCheckOutLive,
   fetchLeavesLive, saveLeaveLive, updateLeaveStatusLive,
   fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive,
@@ -13,7 +13,7 @@ import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
 
 export function useAppData() {
-  const [allUsers, setAllUsers] = useState<UserProfile[]>(MOCK_USERS);
+  const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSessionUser());
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(INITIAL_SCHOOL_SETTINGS);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);

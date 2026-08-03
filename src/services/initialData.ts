@@ -23,7 +23,7 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   siangCheckOutEnd: '16:45'
 };
 
-export const MOCK_USERS: UserProfile[] = [
+export const INITIAL_OFFLINE_USERS: UserProfile[] = [
   {
     id: 'usr-1',
     nip: '199610272019032006',
@@ -35,5 +35,5 @@ export const MOCK_USERS: UserProfile[] = [
   }
 ];
 
-export const MOCK_ATTENDANCE_INITIAL: AttendanceRecord[] = [];
-export const MOCK_LEAVES_INITIAL: LeaveRequest[] = [];
+export const INITIAL_ATTENDANCE: AttendanceRecord[] = [];
+export const INITIAL_LEAVES: LeaveRequest[] = [];
