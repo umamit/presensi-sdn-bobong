@@ -1,6 +1,6 @@
 import { AttendanceRecord } from '../types';
-import { recordAttendanceLive } from './attendanceService';
-import { uploadSelfiePhoto } from './storageService';
+import { saveAttendanceLive } from './attendanceService';
+import { uploadSelfie } from './storageService';
 
 const OFFLINE_ATTENDANCE_KEY = 'sdn_bobong_offline_attendance_queue';
 
@@ -44,7 +44,8 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
     try {
       let selfieUrl = '';
       if (item.selfieBase64) {
-        selfieUrl = await uploadSelfiePhoto(item.selfieBase64, item.userId);
+        const uploaded = await uploadSelfie(item.selfieBase64, item.userId);
+        selfieUrl = uploaded || '';
       }
 
       const rec: AttendanceRecord = {
@@ -61,7 +62,7 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
         notes: item.notes || `Presensi ${item.type === 'in' ? 'Masuk' : 'Pulang'} (Offline Sync)`
       };
 
-      const success = await recordAttendanceLive(rec);
+      const success = await saveAttendanceLive(rec);
       if (success) {
         syncedCount++;
       } else {
