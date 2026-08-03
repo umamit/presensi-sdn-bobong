@@ -9,6 +9,7 @@ interface UseLivenessOptions {
 export function useLivenessDetection({ videoRef, isCameraActive, capturedImage }: UseLivenessOptions) {
   const [faceDetected, setFaceDetected] = useState(false);
   const [hasBlinked, setHasBlinked] = useState(false);
+  const [hasSmiled, setHasSmiled] = useState(false);
   const [livenessStatusMsg, setLivenessStatusMsg] = useState('Posisikan wajah di dalam bingkai oval...');
   const [eyeState, setEyeState] = useState<'open' | 'closed'>('open');
   const animFrameRef = useRef<number | null>(null);
@@ -34,6 +35,7 @@ export function useLivenessDetection({ videoRef, isCameraActive, capturedImage }
 
           let totalBrightness = 0;
           let centerSkinPixels = 0;
+          let mouthMouthLuminance = 0;
 
           for (let i = 0; i < data.length; i += 16) {
             const r = data[i];
@@ -44,6 +46,20 @@ export function useLivenessDetection({ videoRef, isCameraActive, capturedImage }
 
             if (r > 60 && g > 40 && b > 20 && r > g && r > b) {
               centerSkinPixels++;
+            }
+          }
+
+          // Analisis area mulut (bagian bawah bingkai) untuk deteksi senyuman (gigi / kontras bibir melebar)
+          for (let y = 80; y < 110; y += 2) {
+            for (let x = 50; x < 110; x += 2) {
+              const idx = (y * 160 + x) * 4;
+              const r = data[idx];
+              const g = data[idx + 1];
+              const b = data[idx + 2];
+              // Deteksi kecerahan area senyum bibir/gigi
+              if (r > 120 && g > 110 && b > 100) {
+                mouthMouthLuminance++;
+              }
             }
           }
 
@@ -72,10 +88,16 @@ export function useLivenessDetection({ videoRef, isCameraActive, capturedImage }
               }
             }
 
+            if (mouthMouthLuminance > 80) {
+              setHasSmiled(true);
+            }
+
             if (!hasBlinked) {
               setLivenessStatusMsg('Wajah Terdeteksi! Silakan KEDIPKAN MATA 1 kali...');
+            } else if (!hasSmiled && mouthMouthLuminance <= 80) {
+              setLivenessStatusMsg('Bagus! Sekarang tersenyumlah 😊...');
             } else {
-              setLivenessStatusMsg('Verifikasi Kehidupan Berhasil! Silakan ambil foto.');
+              setLivenessStatusMsg('Verifikasi Kehidupan & Senyum Berhasil! Silakan ambil foto.');
             }
           }
         }
@@ -90,11 +112,12 @@ export function useLivenessDetection({ videoRef, isCameraActive, capturedImage }
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isCameraActive, capturedImage, hasBlinked, videoRef]);
+  }, [isCameraActive, capturedImage, hasBlinked, hasSmiled, videoRef]);
 
   return {
     faceDetected,
     hasBlinked,
+    hasSmiled,
     livenessStatusMsg,
     eyeState
   };

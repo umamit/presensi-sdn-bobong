@@ -17,7 +17,7 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
   const { videoRef, canvasRef, isCameraActive, cameraError, isLoading, startCamera, stopCamera } = useCamera();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const { faceDetected, hasBlinked, livenessStatusMsg } = useLivenessDetection({
+  const { faceDetected, hasBlinked, hasSmiled, livenessStatusMsg } = useLivenessDetection({
     videoRef,
     isCameraActive,
     capturedImage
@@ -108,9 +108,9 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
 
           {isCameraActive && !capturedImage && (
             <>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', width: '160px', height: '200px', border: `3px dashed ${!faceDetected ? '#ff453a' : hasBlinked ? '#30d158' : '#ff9f0a'}`, borderRadius: '50% 50% 45% 45%', pointerEvents: 'none', transition: 'all 0.3s ease' }} />
-              <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', padding: '0.4rem 0.85rem', borderRadius: '20px', color: !faceDetected ? '#ff453a' : hasBlinked ? '#30d158' : '#ff9f0a', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)' }}>
-                {!faceDetected ? <AlertCircle size={14} /> : hasBlinked ? <ShieldCheck size={14} /> : <Eye size={14} />}
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', width: '160px', height: '200px', border: `3px dashed ${!faceDetected ? '#ff453a' : (hasBlinked && hasSmiled) ? '#30d158' : '#ff9f0a'}`, borderRadius: '50% 50% 45% 45%', pointerEvents: 'none', transition: 'all 0.3s ease' }} />
+              <div style={{ position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', padding: '0.4rem 0.85rem', borderRadius: '20px', color: !faceDetected ? '#ff453a' : (hasBlinked && hasSmiled) ? '#30d158' : '#ff9f0a', fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)' }}>
+                {!faceDetected ? <AlertCircle size={14} /> : (hasBlinked && hasSmiled) ? <ShieldCheck size={14} /> : <Eye size={14} />}
                 <span>{livenessStatusMsg}</span>
               </div>
             </>
@@ -131,9 +131,9 @@ export const SelfieModal: React.FC<SelfieModalProps> = ({
               <button onClick={handleClose} className="btn btn-secondary" style={{ flex: 1 }}>
                 <X size={16} /> Batal
               </button>
-              <button onClick={capturePhoto} disabled={!isCameraActive || isLoading || !faceDetected} className="btn btn-primary" style={{ flex: 2, opacity: (!isCameraActive || isLoading || !faceDetected) ? 0.4 : 1, cursor: (!isCameraActive || isLoading || !faceDetected) ? 'not-allowed' : 'pointer' }}>
+              <button onClick={capturePhoto} disabled={!isCameraActive || isLoading || !faceDetected || !hasBlinked || !hasSmiled} className="btn btn-primary" style={{ flex: 2, opacity: (!isCameraActive || isLoading || !faceDetected || !hasBlinked || !hasSmiled) ? 0.4 : 1, cursor: (!isCameraActive || isLoading || !faceDetected || !hasBlinked || !hasSmiled) ? 'not-allowed' : 'pointer' }}>
                 <Camera size={16} />
-                <span>{!faceDetected ? 'Arahkan Wajah ke Oval' : 'Ambil Foto Selfie'}</span>
+                <span>{!faceDetected ? 'Arahkan Wajah ke Oval' : !hasBlinked ? 'Kedipkan Mata 1x' : !hasSmiled ? 'Tersenyumlah 😊' : 'Ambil Foto Selfie'}</span>
               </button>
             </>
           ) : (
