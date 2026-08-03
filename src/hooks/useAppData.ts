@@ -10,6 +10,7 @@ import {
 } from '../lib/supabase';
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
+import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(MOCK_USERS);
@@ -42,6 +43,16 @@ export function useAppData() {
       fetchLeavesLive().then((liveLeaves: LeaveRequest[] | null) => {
         if (liveLeaves) setLeaveRequests(liveLeaves);
       });
+
+      // Berlangganan Notifikasi Realtime Supabase
+      const unsubscribe = subscribeAttendanceRealtime((newRecord) => {
+        setAttendanceRecords(prev => {
+          if (prev.some(r => r.id === newRecord.id)) return prev;
+          return [newRecord, ...prev];
+        });
+      });
+
+      return () => unsubscribe();
     }
   }, []);
 
