@@ -8,33 +8,39 @@ export interface NetworkValidationResult {
  */
 export async function validateSchoolNetwork(): Promise<NetworkValidationResult> {
   try {
-    // 1. Cek Network Information API jika didukung browser
     const nav = navigator as any;
     const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
     
-    let networkType = 'Unknown';
+    let networkType = 'Seluler';
     if (connection) {
-      networkType = connection.effectiveType || connection.type || 'Cellular/WiFi';
+      const type = connection.type || '';
+      const effectiveType = connection.effectiveType || '';
+      if (type === 'wifi' || effectiveType.includes('wifi')) {
+        networkType = 'WiFi';
+      } else if (type === 'cellular') {
+        networkType = 'Seluler';
+      } else {
+        networkType = effectiveType.toUpperCase() || 'Seluler';
+      }
     }
 
-    // 2. Fetch IP Publik pengguna untuk dicocokkan dengan IP Jaringan Sekolah
+    // Pengecekan IP Publik
     const response = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) });
     if (!response.ok) {
-      return { isWifiMatched: false, networkInfo: `Jaringan: ${networkType} (Offline Check)` };
+      return { isWifiMatched: false, networkInfo: `Koneksi: ${networkType} (Offline)` };
     }
     
     const data = await response.json();
     const publicIp = data.ip || '';
 
-    // Misal range IP Sekolah atau deteksi koneksi WiFi lokal
     return {
-      isWifiMatched: true,
-      networkInfo: `IP Jaringan: ${publicIp} (${networkType})`
+      isWifiMatched: false, // Set false karena penentu radius utama murni adalah koordinat GPS
+      networkInfo: `Koneksi: ${networkType} (${publicIp})`
     };
   } catch {
     return {
       isWifiMatched: false,
-      networkInfo: 'Jaringan Seluler / Luar Sekolah'
+      networkInfo: 'Koneksi: Seluler / Luar Jaringan'
     };
   }
 }

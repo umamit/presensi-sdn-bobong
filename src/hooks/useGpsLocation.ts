@@ -96,7 +96,14 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
       setGpsLoading(false);
     } catch (error: any) {
       console.warn('Capacitor Geolocation Error:', error?.message);
-      setGpsError('Akses lokasi ditolak atau GPS tidak aktif. Silakan izinkan akses lokasi.');
+      const errMsg = error?.message?.toLowerCase() || '';
+      if (errMsg.includes('disabled') || errMsg.includes('provider')) {
+        setGpsError('Sensor GPS Anda MATI! Aktifkan Lokasi/GPS di menu atas HP Anda.');
+      } else if (errMsg.includes('denied') || errMsg.includes('permission')) {
+        setGpsError('Izin Lokasi ditolak! Izinkan akses GPS untuk aplikasi ini di Pengaturan HP.');
+      } else {
+        setGpsError('Gagal mendeteksi lokasi. Pastikan GPS aktif dan Anda di luar ruangan.');
+      }
       setUserCoords(null);
       setDistance(null);
       setGpsLoading(false);

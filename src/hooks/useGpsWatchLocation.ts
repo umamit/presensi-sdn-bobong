@@ -65,7 +65,14 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
           { enableHighAccuracy: true, timeout: 20000, maximumAge: 3000 },
           (position, err) => {
             if (err || !position) {
-              setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
+              const errMsg = err?.message?.toLowerCase() || '';
+              if (errMsg.includes('disabled') || errMsg.includes('provider')) {
+                setGpsError('Sensor GPS Anda MATI! Aktifkan Lokasi/GPS di menu atas HP Anda.');
+              } else if (errMsg.includes('denied') || errMsg.includes('permission')) {
+                setGpsError('Izin Lokasi ditolak! Izinkan akses GPS untuk aplikasi ini di Pengaturan HP.');
+              } else {
+                setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
+              }
               setGpsLoading(false);
               return;
             }
@@ -95,7 +102,14 @@ export function useGpsWatchLocation(schoolSettings: SchoolSettings): UseGpsWatch
         );
       } catch (error: any) {
         console.warn('Capacitor Watch Position Error:', error?.message);
-        setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
+        const errMsg = error?.message?.toLowerCase() || '';
+        if (errMsg.includes('disabled') || errMsg.includes('provider')) {
+          setGpsError('Sensor GPS Anda MATI! Aktifkan Lokasi/GPS di menu atas HP Anda.');
+        } else if (errMsg.includes('denied') || errMsg.includes('permission')) {
+          setGpsError('Izin Lokasi ditolak! Izinkan akses GPS untuk aplikasi ini di Pengaturan HP.');
+        } else {
+          setGpsError('Akses lokasi ditolak atau GPS tidak aktif.');
+        }
         setGpsLoading(false);
       }
     };
