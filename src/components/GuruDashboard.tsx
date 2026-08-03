@@ -60,6 +60,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+    // Perbaikan: Shift Pagi mencakup jam 00:00 - 12:00 WIT. Jam 08:00 - 12:00 WIT adalah waktu TERKUNCI (Telah lewat batas pagi)
     let detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
 
     if (detectedShift === 'pagi') {
@@ -67,14 +69,14 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         alert(`Presensi Shift Pagi belum dibuka (Mulai ${schoolSettings.pagiCheckInOpen || '06:00'} WIT).`); return;
       }
       if (nowTimeStr > (schoolSettings.pagiWorkStart || '08:00')) {
-        alert(`Batas waktu presensi Shift Pagi berakhir (${schoolSettings.pagiWorkStart || '08:00'} WIT).`); return;
+        alert(`Batas waktu presensi Shift Pagi telah berakhir (${schoolSettings.pagiWorkStart || '08:00'} WIT). Anda tidak dapat absen lagi.`); return;
       }
     } else {
       if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
         alert(`Presensi Shift Siang belum dibuka (Mulai ${schoolSettings.siangCheckInOpen || '12:00'} WIT).`); return;
       }
       if (nowTimeStr > (schoolSettings.siangWorkStart || '12:30')) {
-        alert(`Batas waktu presensi Shift Siang berakhir (${schoolSettings.siangWorkStart || '12:30'} WIT).`); return;
+        alert(`Batas waktu presensi Shift Siang telah berakhir (${schoolSettings.siangWorkStart || '12:30'} WIT). Anda tidak dapat absen lagi.`); return;
       }
     }
 
