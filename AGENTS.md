@@ -46,6 +46,7 @@ src/
 │   ├── storageService.ts          # Upload selfie & dokumen
 │   ├── schoolSettingsService.ts   # CRUD school_settings
 │   ├── networkValidationService.ts # Validasi Jaringan IP & WiFi Sekolah (Poin 4)
+│   ├── offlineSyncService.ts      # Antrean presensi offline & auto-sync (Poin 4)
 │   └── initialData.ts         # Data initial offline fallback
 ├── hooks/
 │   ├── useAppData.ts              # State global App + semua handler
@@ -54,6 +55,8 @@ src/
 │   ├── useAttendanceTimer.ts      # Timer clock + notifikasi pengingat
 │   ├── useCamera.ts               # Akses kamera
 │   ├── useLivenessDetection.ts    # Deteksi wajah liveness
+│   ├── useNetworkStatus.ts        # Capacitor Network status & offline sync (Poin 4)
+│   ├── useBiometricAuth.ts        # Otentikasi Sidik Jari / Face ID (Poin 5)
 │   └── usePwaInstall.ts           # PWA install prompt
 ├── utils/
 │   ├── haversine.ts               # GPS distance, polygon, format date/time
