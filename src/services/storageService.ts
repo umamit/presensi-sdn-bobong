@@ -13,8 +13,8 @@ export async function uploadSelfie(imageDataUrl: string, userId: string): Promis
       .upload(fileName, blob, { contentType: 'image/jpeg', upsert: false });
 
     if (error) {
-      console.warn('Error uploading selfie to Supabase Storage:', error.message);
-      return imageDataUrl;
+      console.warn('Supabase Storage Warning (presensi-selfies):', error.message);
+      return imageDataUrl; // Fallback gunakan base64 jika bucket belum dibuat
     }
 
     const { data: urlData } = supabase.storage

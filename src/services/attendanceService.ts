@@ -32,8 +32,11 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
 
 export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase.from('attendance').insert([{
-    user_id: rec.userId,
+
+  // Cek apakah rec.userId berbentuk UUID valid. Jika tidak, kosongkan user_id agar Supabase tidak menolak syntax UUID
+  const isUuid = rec.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rec.userId);
+
+  const payload: any = {
     user_name: rec.userName,
     user_nip: rec.userNip,
     date: rec.date,
@@ -42,12 +45,17 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: rec.notes,
-    selfie_url: rec.selfieUrl
-  }]);
+    notes: rec.notes || (rec.selfieUrl ? `Foto Verified: ${rec.selfieUrl}` : undefined),
+  };
+
+  if (isUuid) {
+    payload.user_id = rec.userId;
+  }
+
+  const { error } = await supabase.from('attendance').insert([payload]);
 
   if (error) {
-    console.error('Error saving attendance to Supabase:', error.message);
+    console.error('Error saving attendance to Supabase DB:', error.message);
     return false;
   }
   return true;
