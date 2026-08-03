@@ -96,16 +96,44 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
             </div>
           </div>
           {!userTodayRecord.checkOutTime ? (
-            <div style={{ padding: '0.75rem 1rem' }}>
-              <button
-                onClick={handleCheckOutSubmit}
-                className="btn btn-primary"
-                style={{ width: '100%', padding: '0.85rem', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', fontWeight: 700 }}
-              >
-                <Clock size={18} />
-                Absen Pulang — {formatTime(new Date().toISOString())} WIT
-              </button>
-            </div>
+            (() => {
+              const outStart = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutStart || '11:45') : (schoolSettings?.siangCheckOutStart || '16:00');
+              const outEnd = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutEnd || '12:00') : (schoolSettings?.siangCheckOutEnd || '16:45');
+              const isOutTooEarly = nowTimeStr < outStart;
+              const isOutTooLate = nowTimeStr > outEnd;
+              const isOutEnabled = isInRadius && !isOutTooEarly && !isOutTooLate;
+
+              let outButtonText = `Absen Pulang (${nowTimeStr} WIT)`;
+              if (!isInRadius) {
+                outButtonText = 'Di Luar Radius Sekolah';
+              } else if (isOutTooEarly) {
+                outButtonText = `Pulang Belum Buka (Mulai ${outStart} WIT)`;
+              } else if (isOutTooLate) {
+                outButtonText = `Absen Pulang Tutup (Batas ${outEnd} WIT)`;
+              }
+
+              return (
+                <div style={{ padding: '0.75rem 1rem' }}>
+                  <button
+                    onClick={handleCheckOutSubmit}
+                    disabled={!isOutEnabled}
+                    className="btn btn-primary"
+                    style={{
+                      width: '100%',
+                      padding: '0.85rem',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.95rem',
+                      fontWeight: 700,
+                      opacity: isOutEnabled ? 1 : 0.5,
+                      cursor: isOutEnabled ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    <Clock size={18} />
+                    {outButtonText}
+                  </button>
+                </div>
+              );
+            })()
           ) : (
             <div className="ios-row" style={{ justifyContent: 'center' }}>
               <CheckCircle2 size={15} color="var(--success)" />
