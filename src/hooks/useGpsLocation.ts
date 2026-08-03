@@ -15,6 +15,27 @@ interface UseGpsLocationResult {
   fetchGpsLocation: () => void;
 }
 
+// Fungsi pembantu mengecek Fake GPS menggunakan plugin native gpsmockchecker
+const detectMockLocation = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const win = window as any;
+    if (win.Capacitor?.isNativePlatform() && win.gpsmockchecker) {
+      win.gpsmockchecker.check(
+        [],
+        (result: any) => {
+          resolve(!!result.isMock);
+        },
+        (error: any) => {
+          console.warn('GPS Mock check error:', error);
+          resolve(false);
+        }
+      );
+    } else {
+      resolve(false);
+    }
+  });
+};
+
 export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationResult {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -38,15 +59,30 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
         await Geolocation.requestPermissions({ permissions: ['location'] });
       }
 
+      // 1. Pengecekan GPS palsu native Android
+      const isMockLocation = await detectMockLocation();
+      if (isMockLocation) {
+        setGpsError('Terdeteksi Fake GPS aktif! Silakan nonaktifkan lokasi palsu di HP Anda.');
+        setUserCoords(null);
+        setDistance(null);
+        setGpsLoading(false);
+        return;
+      }
+
       const position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 15000,
         maximumAge: 0
       });
 
+      // 2. Pengecekan GPS palsu fallback akurasi
       const accuracy = position.coords.accuracy;
       if (accuracy === 0) {
         setGpsError('Terdeteksi lokasi tidak valid (Mock GPS).');
+        setUserCoords(null);
+        setDistance(null);
+        setGpsLoading(false);
+        return;
       } else if (accuracy > 100) {
         setGpsError(`Sinyal GPS kurang akurat (${Math.round(accuracy)}m).`);
       }
