@@ -18,7 +18,7 @@
 
 ## 4. Eksekusi Terminal & Log
 - **Batasi output log terminal**: Gunakan filter seperti `head -n 20` atau `tail -n 20` saat menjalankan perintah terminal untuk mencegah output besar memenuhi konteks token.
-- **Jalankan build hanya jika diperlukan**: Jangan jalankan tes/build berulang-ulang tanpa perubahan kode yang signifikan.
+- **Dilarang Build APK Otomatis**: DILARANG keras menjalankan kompilasi/build APK Android (`npm run build:apk` / `./gradlew assembleDebug`) jika TIDAK ADA instruksi eksplisit dari pengguna. Jalankan kompilasi/build web atau APK HANYA saat pengguna memintanya.
 
 ## 5. Menjaga Kode Tetap Clean Slate & Full Supabase Integrasi
 - **Pembersihan Total Logika Lama (Clean Slate Purge)**: Setiap kali ada fitur baru yang menggantikan logika/metode/modul lama, logika atau rujukan lama WAJIB DIBERSIHKAN TOTAL dari seluruh file proyek agar kode tetap rapi, ringan, dan mencegah bug regresi di kemudian hari.
