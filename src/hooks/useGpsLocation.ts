@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { SchoolSettings } from '../types';
 import { calculateDistanceMeters, isPointInPolygon } from '../utils/haversine';
+import { validateSchoolNetwork } from '../services/networkValidationService';
 
 interface UseGpsLocationResult {
   userCoords: { lat: number; lng: number } | null;
@@ -8,6 +9,8 @@ interface UseGpsLocationResult {
   gpsLoading: boolean;
   gpsError: string | null;
   isInRadius: boolean;
+  isWifiMatched: boolean;
+  networkInfo: string;
   fetchGpsLocation: () => void;
 }
 
@@ -16,10 +19,17 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [gpsError, setGpsError] = useState<string | null>(null);
+  const [isWifiMatched, setIsWifiMatched] = useState(false);
+  const [networkInfo, setNetworkInfo] = useState('');
 
   const fetchGpsLocation = () => {
     setGpsLoading(true);
     setGpsError(null);
+
+    validateSchoolNetwork().then(res => {
+      setIsWifiMatched(res.isWifiMatched);
+      setNetworkInfo(res.networkInfo);
+    });
 
     if (!navigator.geolocation) {
       setGpsError('Browser Anda tidak mendukung fitur Geolocation GPS.');
@@ -63,7 +73,7 @@ export function useGpsLocation(schoolSettings: SchoolSettings): UseGpsLocationRe
     ? isPointInPolygon([userCoords.lat, userCoords.lng], schoolSettings.polygonCoords)
     : false;
 
-  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || inPolygon;
+  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || inPolygon || isWifiMatched;
 
-  return { userCoords, distance, gpsLoading, gpsError, isInRadius, fetchGpsLocation };
+  return { userCoords, distance, gpsLoading, gpsError, isInRadius, isWifiMatched, networkInfo, fetchGpsLocation };
 }
