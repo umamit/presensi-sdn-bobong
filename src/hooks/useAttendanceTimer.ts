@@ -27,52 +27,52 @@ async function setupLocalNotifications() {
       await LocalNotifications.cancel(pending);
     }
 
-    // Jadwalkan notifikasi harian berulang
+    // Jadwalkan notifikasi harian berulang sesuai 2 shift SDN Bobong
     await LocalNotifications.schedule({
       notifications: [
         {
-          id: 101,
+          id: 201,
           title: 'Presensi Masuk Pagi',
-          body: 'Ayo absen masuk pagi sekarang! Batas toleransi jam 07:15 WIT.',
+          body: 'Ayo lakukan absen masuk pagi! Batas jam masuk adalah 07:15 WIT.',
           schedule: {
-            on: { hour: 6, minute: 45 },
+            on: { hour: 6, minute: 45 }, // 15 menit sebelum batas masuk pagi
             repeats: true,
             allowWhileIdle: true
           }
         },
         {
-          id: 102,
-          title: 'Peringatan Batas Absen Pagi',
-          body: 'Segera lakukan absen masuk! 5 menit lagi batas jam 07:15 WIT.',
+          id: 202,
+          title: 'Presensi Pulang Pagi',
+          body: 'Jam pulang pagi sudah dibuka. Jangan lupa absen pulang pagi sebelum 12:00 WIT!',
           schedule: {
-            on: { hour: 7, minute: 10 },
+            on: { hour: 11, minute: 45 }, // Tepat saat checkout pagi dibuka
             repeats: true,
             allowWhileIdle: true
           }
         },
         {
-          id: 103,
+          id: 203,
           title: 'Presensi Masuk Siang',
-          body: 'Sudah jam 12:10 WIT, jangan lupa lakukan absen masuk shift siang!',
+          body: 'Ayo lakukan absen masuk siang! Batas jam masuk adalah 12:45 WIT.',
           schedule: {
-            on: { hour: 12, minute: 10 },
+            on: { hour: 12, minute: 20 }, // Sebelum batas masuk siang
             repeats: true,
             allowWhileIdle: true
           }
         },
         {
-          id: 104,
-          title: 'Peringatan Batas Absen Siang',
-          body: 'Segera absen masuk siang! 5 menit lagi batas jam 12:45 WIT.',
+          id: 204,
+          title: 'Presensi Pulang Siang',
+          body: 'Jam pulang siang sudah dibuka. Jangan lupa absen pulang siang sebelum 16:45 WIT!',
           schedule: {
-            on: { hour: 12, minute: 40 },
+            on: { hour: 16, minute: 0 }, // Tepat saat checkout siang dibuka
             repeats: true,
             allowWhileIdle: true
           }
         }
       ]
     });
-    console.log('✅ Capacitor Local Notifications successfully scheduled!');
+    console.log('✅ Capacitor Local Notifications successfully scheduled for 2 shifts!');
   } catch (err) {
     console.warn('Failed to schedule local notifications:', err);
   }
