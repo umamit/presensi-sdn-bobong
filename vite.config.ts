@@ -16,7 +16,7 @@ export default defineConfig({
       },
       manifest: {
         name: 'Presensi Guru - SD Negeri Bobong',
-        short_name: 'SDN Bobong',
+        short_name: 'Presensi SDN Bobong',
         description: 'Aplikasi Presensi Online Berbasis Geolocation GPS untuk Guru & Staff SD Negeri Bobong',
         start_url: '/',
         scope: '/',
