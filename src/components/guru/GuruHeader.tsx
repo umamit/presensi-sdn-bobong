@@ -25,8 +25,9 @@ export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime, schoo
         </div>
       </div>
 
-      <div style={{ background: 'var(--primary-light)', border: '1px solid rgba(10,132,255,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.78rem', color: 'var(--primary)' }}>
-        Shift Pagi {schoolSettings.pagiCheckInOpen || '06:00'}–{schoolSettings.pagiWorkStart || '08:00'} / Pulang {schoolSettings.pagiCheckOutStart || '11:45'}–{schoolSettings.pagiCheckOutEnd || '12:00'} &nbsp;|&nbsp; Shift Siang {schoolSettings.siangCheckInOpen || '12:00'}–{schoolSettings.siangWorkStart || '12:30'} / Pulang {schoolSettings.siangCheckOutStart || '16:00'}–{schoolSettings.siangCheckOutEnd || '16:45'} WIT
+      <div style={{ background: 'var(--primary-light)', border: '1px solid rgba(10,132,255,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.78rem', color: 'var(--primary)', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+        <span>Shift Pagi {schoolSettings.pagiCheckInOpen || '06:00'}–{schoolSettings.pagiWorkStart || '08:00'} / Pulang {schoolSettings.pagiCheckOutStart || '11:45'}–{schoolSettings.pagiCheckOutEnd || '12:00'} WIT</span>
+        <span>Shift Siang {schoolSettings.siangCheckInOpen || '12:00'}–{schoolSettings.siangWorkStart || '12:30'} / Pulang {schoolSettings.siangCheckOutStart || '16:00'}–{schoolSettings.siangCheckOutEnd || '16:45'} WIT</span>
       </div>
     </>
   );

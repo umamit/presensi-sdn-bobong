@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
-import { calculateDistanceMeters, isPointInPolygon } from '../utils/haversine';
 import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
 import { GuideModal } from './GuideModal';
@@ -11,6 +10,11 @@ import { GpsStatusCard } from './guru/GpsStatusCard';
 import { PresensiActionCard } from './guru/PresensiActionCard';
 import { QuickActionButtons } from './guru/QuickActionButtons';
 import { PersonalHistoryList } from './guru/PersonalHistoryList';
+
+import { useGpsLocation } from '../hooks/useGpsLocation';
+import { useAttendanceTimer } from '../hooks/useAttendanceTimer';
+import { getLocalDateString } from '../utils/haversine';
+import { useState } from 'react';
 
 interface GuruDashboardProps {
   user: UserProfile;
@@ -23,99 +27,29 @@ interface GuruDashboardProps {
 }
 
 export const GuruDashboard: React.FC<GuruDashboardProps> = ({
-  user,
-  schoolSettings,
-  attendanceRecords,
-  onCheckIn,
-  onCheckOut,
-  onOpenLeaveModal,
-  onUpdatePassword
+  user, schoolSettings, attendanceRecords,
+  onCheckIn, onCheckOut, onOpenLeaveModal, onUpdatePassword
 }) => {
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [gpsLoading, setGpsLoading] = useState<boolean>(false);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [distance, setDistance] = useState<number | null>(null);
-  const [gpsError, setGpsError] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [isSelfieOpen, setIsSelfieOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isChangePassOpen, setIsChangePassOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
   const userTodayRecord = attendanceRecords.find(r => r.userId === user.id && r.date === todayStr);
   const userHistory = attendanceRecords
     .filter(r => r.userId === user.id)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const currentTime = useAttendanceTimer(userTodayRecord);
+  const { userCoords, distance, gpsLoading, gpsError, isInRadius, fetchGpsLocation } = useGpsLocation(schoolSettings);
 
   const requestNotificationAccess = () => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now);
-      const hoursStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-      if (hoursStr === '07:00' && !userTodayRecord && 'Notification' in window && Notification.permission === 'granted') {
-        new Notification('Pengingat Presensi SD Negeri Bobong', {
-          body: 'Jangan lupa melakukan presensi masuk hari ini sebelum jam 07:15 WIT!',
-          icon: '/icon-192.png'
-        });
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [userTodayRecord]);
-
-  const fetchGpsLocation = () => {
-    setGpsLoading(true);
-    setGpsError(null);
-
-    if (!navigator.geolocation) {
-      setGpsError('Browser Anda tidak mendukung fitur Geolocation GPS.');
-      setGpsLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const accuracy = position.coords.accuracy;
-        if (accuracy === 0) {
-          setGpsError('Terdeteksi lokasi tidak valid (Mock GPS).');
-        } else if (accuracy > 100) {
-          setGpsError(`Sinyal GPS kurang akurat (${Math.round(accuracy)}m).`);
-        }
-
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setUserCoords({ lat, lng });
-
-        const dist = calculateDistanceMeters(lat, lng, schoolSettings.latitude, schoolSettings.longitude);
-        setDistance(dist);
-        setGpsLoading(false);
-      },
-      (error) => {
-        console.warn('GPS Error:', error.message);
-        setGpsError('Akses lokasi ditolak. Tekan Panduan untuk bantuan.');
-        setUserCoords(null);
-        setDistance(null);
-        setGpsLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  };
-
-  useEffect(() => {
-    fetchGpsLocation();
-  }, [schoolSettings]);
-
-  const inPolygon = (userCoords && schoolSettings.polygonCoords)
-    ? isPointInPolygon([userCoords.lat, userCoords.lng], schoolSettings.polygonCoords)
-    : false;
-
-  const isInRadius = (distance !== null && distance <= schoolSettings.radiusMeters) || inPolygon;
 
   const handleCheckInSubmit = () => {
     requestNotificationAccess();
@@ -130,38 +64,27 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     if (detectedShift === 'pagi') {
       if (nowTimeStr < (schoolSettings.pagiCheckInOpen || '06:00')) {
-        alert(`Presensi Shift Pagi belum dibuka (Mulai ${schoolSettings.pagiCheckInOpen || '06:00'} WIT).`);
-        return;
+        alert(`Presensi Shift Pagi belum dibuka (Mulai ${schoolSettings.pagiCheckInOpen || '06:00'} WIT).`); return;
       }
       if (nowTimeStr > (schoolSettings.pagiWorkStart || '08:00')) {
-        alert(`Batas waktu presensi Shift Pagi berakhir (${schoolSettings.pagiWorkStart || '08:00'} WIT).`);
-        return;
+        alert(`Batas waktu presensi Shift Pagi berakhir (${schoolSettings.pagiWorkStart || '08:00'} WIT).`); return;
       }
     } else {
       if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
-        alert(`Presensi Shift Siang belum dibuka (Mulai ${schoolSettings.siangCheckInOpen || '12:00'} WIT).`);
-        return;
+        alert(`Presensi Shift Siang belum dibuka (Mulai ${schoolSettings.siangCheckInOpen || '12:00'} WIT).`); return;
       }
       if (nowTimeStr > (schoolSettings.siangWorkStart || '12:30')) {
-        alert(`Batas waktu presensi Shift Siang berakhir (${schoolSettings.siangWorkStart || '12:30'} WIT).`);
-        return;
+        alert(`Batas waktu presensi Shift Siang berakhir (${schoolSettings.siangWorkStart || '12:30'} WIT).`); return;
       }
     }
 
     setPendingCheckIn({
-      userId: user.id,
-      userName: user.fullName,
-      userNip: user.nip,
-      date: todayStr,
-      checkInTime: nowISO,
-      checkInLat: userCoords?.lat,
-      checkInLng: userCoords?.lng,
-      distanceMeters: distance || 0,
-      status: 'hadir',
-      shift: detectedShift,
+      userId: user.id, userName: user.fullName, userNip: user.nip,
+      date: todayStr, checkInTime: nowISO,
+      checkInLat: userCoords?.lat, checkInLng: userCoords?.lng,
+      distanceMeters: distance || 0, status: 'hadir', shift: detectedShift,
       notes: notes || `Presensi Masuk Shift ${detectedShift.toUpperCase()}`
     });
-
     setIsSelfieOpen(true);
   };
 
@@ -179,16 +102,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
     const targetCheckOutEnd = userShift === 'pagi' ? (schoolSettings.pagiCheckOutEnd || '12:00') : (schoolSettings.siangCheckOutEnd || '16:45');
 
-    if (nowTimeStr < targetCheckOutStart) {
-      alert(`Absen pulang belum dibuka (Mulai ${targetCheckOutStart} WIT).`);
-      return;
-    }
-
-    if (nowTimeStr > targetCheckOutEnd) {
-      alert(`Batas waktu presensi telah berakhir (${targetCheckOutEnd} WIT).`);
-      return;
-    }
-
+    if (nowTimeStr < targetCheckOutStart) { alert(`Absen pulang belum dibuka (Mulai ${targetCheckOutStart} WIT).`); return; }
+    if (nowTimeStr > targetCheckOutEnd) { alert(`Batas waktu presensi telah berakhir (${targetCheckOutEnd} WIT).`); return; }
     onCheckOut(userTodayRecord.id, new Date().toISOString());
   };
 
@@ -196,37 +111,10 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
-        <GpsStatusCard
-          isInRadius={isInRadius}
-          distance={distance}
-          gpsLoading={gpsLoading}
-          gpsError={gpsError}
-          userCoords={userCoords}
-          schoolSettings={schoolSettings}
-          fetchGpsLocation={fetchGpsLocation}
-        />
-        <GeofenceMap
-          userCoords={userCoords}
-          centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }}
-          polygonCoords={schoolSettings.polygonCoords}
-          radiusMeters={schoolSettings.radiusMeters}
-          isInRadius={isInRadius}
-          distanceMeters={distance}
-        />
-        <PresensiActionCard
-          todayStr={todayStr}
-          userTodayRecord={userTodayRecord}
-          notes={notes}
-          setNotes={setNotes}
-          isInRadius={isInRadius}
-          handleCheckInSubmit={handleCheckInSubmit}
-          handleCheckOutSubmit={handleCheckOutSubmit}
-        />
-        <QuickActionButtons
-          setIsChangePassOpen={setIsChangePassOpen}
-          setIsGuideOpen={setIsGuideOpen}
-          onOpenLeaveModal={onOpenLeaveModal}
-        />
+        <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
+        <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} polygonCoords={schoolSettings.polygonCoords} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
+        <PresensiActionCard todayStr={todayStr} userTodayRecord={userTodayRecord} notes={notes} setNotes={setNotes} isInRadius={isInRadius} handleCheckInSubmit={handleCheckInSubmit} handleCheckOutSubmit={handleCheckOutSubmit} />
+        <QuickActionButtons setIsChangePassOpen={setIsChangePassOpen} setIsGuideOpen={setIsGuideOpen} onOpenLeaveModal={onOpenLeaveModal} />
         <PersonalHistoryList userHistory={userHistory} />
       </div>
 
