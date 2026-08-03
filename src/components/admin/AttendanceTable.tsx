@@ -102,7 +102,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   </div>
                 </div>
 
-                {rec.notes && !rec.notes.startsWith('Presensi Masuk Verified: https://') && !rec.notes.startsWith('Foto Verified: https://') && (
+                {rec.notes && !rec.notes.includes('https://') && !rec.notes.includes('http://') && (
                   <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>{rec.notes}</div>
                 )}
               </div>
