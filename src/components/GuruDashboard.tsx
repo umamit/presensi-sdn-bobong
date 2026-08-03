@@ -37,9 +37,9 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
 
   const todayStr = getLocalDateString();
-  const userTodayRecord = attendanceRecords.find(r => r.userId === user.id && r.date === todayStr);
+  const userTodayRecord = attendanceRecords.find(r => r.userNip === user.nip && r.date === todayStr);
   const userHistory = attendanceRecords
-    .filter(r => r.userId === user.id)
+    .filter(r => r.userNip === user.nip)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const currentTime = useAttendanceTimer(userTodayRecord);
