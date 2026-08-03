@@ -13,6 +13,8 @@ import { usePwaInstall } from './hooks/usePwaInstall';
 import { useAppData } from './hooks/useAppData';
 import { exportAttendanceCsv } from './utils/exportCsv';
 
+import { PwaGuidePage } from './components/login/PwaGuidePage';
+
 export const App: React.FC = () => {
   const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -29,6 +31,16 @@ export const App: React.FC = () => {
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword
   } = useAppData();
+
+  // Deteksi mode pembukaan aplikasi
+  const isStandalone = 
+    window.matchMedia('(display-mode: standalone)').matches || 
+    (navigator as any).standalone || 
+    (window as any).Capacitor?.isNativePlatform();
+
+  if (!isStandalone) {
+    return <PwaGuidePage schoolName={schoolSettings.schoolName} />;
+  }
 
   if (!currentUser) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} allUsers={allUsers} schoolName={schoolSettings.schoolName} />;
