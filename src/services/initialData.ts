@@ -14,11 +14,11 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
     [-1.955444588304861, 124.3842415717484]
   ],
   pagiCheckInOpen: '06:00',
-  pagiWorkStart: '08:00',
+  pagiWorkStart: '07:15',
   pagiCheckOutStart: '11:45',
   pagiCheckOutEnd: '12:00',
-  siangCheckInOpen: '12:00',
-  siangWorkStart: '12:30',
+  siangCheckInOpen: '12:10',
+  siangWorkStart: '12:45',
   siangCheckOutStart: '16:00',
   siangCheckOutEnd: '16:45'
 };
