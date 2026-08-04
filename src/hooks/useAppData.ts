@@ -4,7 +4,7 @@ import {
   INITIAL_OFFLINE_USERS, INITIAL_SCHOOL_SETTINGS, isSupabaseConfigured,
   fetchAttendanceLive, saveAttendanceLive, updateCheckOutLive,
   fetchLeavesLive, saveLeaveLive, updateLeaveStatusLive,
-  fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive,
+  fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive, updateUserLive,
   uploadSelfie, uploadLeaveDocument,
   fetchSchoolSettingsLive, saveSchoolSettingsLive
 } from '../lib/supabase';
@@ -74,6 +74,11 @@ export function useAppData() {
     if (!confirm(`Apakah Anda yakin ingin menghapus akun ${fullName}?`)) return;
     setAllUsers(prev => prev.filter(u => u.id !== userId));
     if (isSupabaseConfigured) await deleteUserLive(userId);
+  };
+
+  const handleUpdateTeacher = async (updatedUser: UserProfile) => {
+    setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    if (isSupabaseConfigured) await updateUserLive(updatedUser);
   };
 
   const handleUpdateSettings = async (newSettings: SchoolSettings) => {
@@ -155,7 +160,7 @@ export function useAppData() {
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
     handleLoginSuccess, handleLogout,
-    handleAddTeacher, handleDeleteTeacher, handleUpdateSettings,
+    handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword
   };
