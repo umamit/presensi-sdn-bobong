@@ -75,7 +75,6 @@ export const App: React.FC = () => {
         ) : (
           <AdminDashboard
             allUsers={allUsers}
-            attendanceRecords={attendanceRecords}
             schoolSettings={schoolSettings}
             leaveRequests={leaveRequests}
             onUpdateSettings={handleUpdateSettings}
