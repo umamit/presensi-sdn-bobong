@@ -33,24 +33,6 @@ export function useAttendanceFetcher(selectedDate: string, searchTerm: string) {
 
   useEffect(() => {
     loadData();
-
-    if (isSupabaseConfigured) {
-      // Dengarkan update realtime agar dashboard admin langsung sinkron saat guru absen
-      const unsubscribe = subscribeAttendanceRealtime((newRecord) => {
-        setRecords((prev) => {
-          // Update record jika sudah ada (misal checkout), atau tambahkan baru jika belum ada
-          const existsIdx = prev.findIndex((r) => r.id === newRecord.id);
-          if (existsIdx > -1) {
-            const updated = [...prev];
-            updated[existsIdx] = newRecord;
-            return updated;
-          }
-          return [newRecord, ...prev];
-        });
-      });
-
-      return () => unsubscribe();
-    }
   }, [loadData]);
 
   // Filter berdasarkan tanggal dan pencarian (nama / NIP)
