@@ -21,7 +21,7 @@ export const SmartInsightsSection: React.FC<SmartInsightsSectionProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
-  const apiKey = schoolSettings.groqApiKey || '';
+  const apiKey = schoolSettings.groqApiKey || (import.meta.env.VITE_GROQ_API_KEY as string) || '';
 
   const handleGenerateInsights = async () => {
     if (!apiKey) return;

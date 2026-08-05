@@ -9,7 +9,8 @@ export async function fetchAttendanceInsights(
   totalGuru: number,
   apiKey: string
 ): Promise<string | null> {
-  if (!apiKey) return null;
+  const activeKey = apiKey || (import.meta.env.VITE_GROQ_API_KEY as string) || '';
+  if (!activeKey) return null;
 
   // Siapkan data ringkasan kehadiran guru hari ini untuk dikirim secara aman dan anonim ke AI
   const summaryData = records.map((r, i) => ({
