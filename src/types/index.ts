@@ -54,6 +54,7 @@ export interface SchoolSettings {
   siangWorkStart: string;    // "12:30"
   siangCheckOutStart: string; // "16:00"
   siangCheckOutEnd: string;   // "16:45"
+  groqApiKey?: string;
 }
 
 export type LeaveType = 'sakit' | 'izin' | 'cuti';

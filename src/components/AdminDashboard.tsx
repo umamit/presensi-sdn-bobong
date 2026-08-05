@@ -9,6 +9,7 @@ import { getLocalDateString } from '../utils/haversine';
 import { useAttendanceFetcher } from '../hooks/useAttendanceFetcher';
 import { SkeletonTable } from './attendance/SkeletonTable';
 import { EmptyState } from './attendance/EmptyState';
+import { SmartInsightsSection } from './attendance/SmartInsightsSection';
 
 interface AdminDashboardProps {
   allUsers: UserProfile[];
@@ -85,6 +86,14 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
 
       {/* Tampilan Gps Row Sekolah */}
       <AdminGpsRow schoolSettings={schoolSettings} onOpenSettingsModal={onOpenSettingsModal} />
+
+      {/* Analisis Laporan Cerdas AI Groq */}
+      <SmartInsightsSection 
+        records={recordsToday} 
+        totalGuru={totalGuru} 
+        schoolSettings={schoolSettings} 
+        onOpenSettingsModal={onOpenSettingsModal} 
+      />
 
       {/* Loading & Empty State Handling */}
       {loading ? (

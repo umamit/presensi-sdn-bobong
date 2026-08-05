@@ -105,9 +105,25 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
               Radius Toleransi Maksimal Absensi: <strong style={{ color: 'var(--secondary)' }}>{formData.radiusMeters} Meter</strong>
             </label>
             <input type="range" min="3" max="500" step="1" value={formData.radiusMeters} onChange={(e) => setFormData({ ...formData, radiusMeters: parseInt(e.target.value) || 3 })} style={{ width: '100%', accentColor: 'var(--primary)' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>
               <span>3m (Super Strict)</span><span>100m (Standard)</span><span>500m (Long Range)</span>
             </div>
+          </div>
+
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '1rem', marginBottom: '0.5rem' }}>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
+              Groq Cloud API Key (Analisis Laporan AI)
+            </label>
+            <input 
+              type="password" 
+              placeholder="gsk_xxxxxxxxxxxxxxxxxxxx" 
+              value={formData.groqApiKey || ''} 
+              onChange={(e) => setFormData({ ...formData, groqApiKey: e.target.value })} 
+              className="glass-input" 
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem', display: 'block' }}>
+              Dapatkan API Key gratis untuk analisis rekap otomatis di <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>console.groq.com</a>
+            </span>
           </div>
 
           <ShiftSettingsForm formData={formData} setFormData={setFormData} />

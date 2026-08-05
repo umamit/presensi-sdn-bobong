@@ -14,10 +14,20 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
     return null;
   }
 
+  const rawAddress = data.address || 'Taliabu Barat';
+  let cleanAddress = rawAddress;
+  let groqApiKey = '';
+
+  if (rawAddress.includes('|| groq_key:')) {
+    const parts = rawAddress.split('|| groq_key:');
+    cleanAddress = parts[0].trim();
+    groqApiKey = parts[1].trim();
+  }
+
   return {
     id: data.id,
     schoolName: data.school_name || 'SD Negeri Bobong',
-    address: data.address || 'Taliabu Barat',
+    address: cleanAddress,
     latitude: data.latitude,
     longitude: data.longitude,
     radiusMeters: data.radius_meters || 10,
@@ -29,17 +39,23 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
     siangCheckInOpen: data.siang_check_in_open || '12:10',
     siangWorkStart: data.siang_work_start || '12:45',
     siangCheckOutStart: data.siang_check_out_start || '16:00',
-    siangCheckOutEnd: data.siang_check_out_end || '16:45'
+    siangCheckOutEnd: data.siang_check_out_end || '16:45',
+    groqApiKey: groqApiKey
   };
 }
 
 export async function saveSchoolSettingsLive(s: SchoolSettings): Promise<boolean> {
   if (!supabase) return false;
 
+  let dbAddress = s.address;
+  if (s.groqApiKey) {
+    dbAddress = `${s.address} || groq_key: ${s.groqApiKey}`;
+  }
+
   const payload: any = {
     id: 1,
     school_name: s.schoolName,
-    address: s.address,
+    address: dbAddress,
     latitude: s.latitude,
     longitude: s.longitude,
     radius_meters: s.radiusMeters
