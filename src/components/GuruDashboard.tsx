@@ -60,32 +60,50 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     const nowISO = new Date().toISOString();
     const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-    
-    // Perbaikan: Shift Pagi mencakup jam 00:00 - 12:00 WIT. Jam 08:00 - 12:00 WIT adalah waktu TERKUNCI (Telah lewat batas pagi)
-    let detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
+    const detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
 
-    if (detectedShift === 'pagi') {
-      if (nowTimeStr < (schoolSettings.pagiCheckInOpen || '06:00')) {
-        alert(`Presensi Shift Pagi belum dibuka (Mulai ${schoolSettings.pagiCheckInOpen || '06:00'} WIT).`); return;
-      }
-      if (nowTimeStr > (schoolSettings.pagiWorkStart || '08:00')) {
-        alert(`Batas waktu presensi Shift Pagi telah berakhir (${schoolSettings.pagiWorkStart || '08:00'} WIT). Anda tidak dapat absen lagi.`); return;
-      }
-    } else {
-      if (nowTimeStr < (schoolSettings.siangCheckInOpen || '12:00')) {
-        alert(`Presensi Shift Siang belum dibuka (Mulai ${schoolSettings.siangCheckInOpen || '12:00'} WIT).`); return;
-      }
-      if (nowTimeStr > (schoolSettings.siangWorkStart || '12:30')) {
-        alert(`Batas waktu presensi Shift Siang telah berakhir (${schoolSettings.siangWorkStart || '12:30'} WIT). Anda tidak dapat absen lagi.`); return;
-      }
+    const checkInOpen   = detectedShift === 'pagi' ? (schoolSettings.pagiCheckInOpen   || '06:00') : (schoolSettings.siangCheckInOpen   || '12:00');
+    const workStart     = detectedShift === 'pagi' ? (schoolSettings.pagiWorkStart      || '07:15') : (schoolSettings.siangWorkStart      || '12:45');
+    const checkOutStart = detectedShift === 'pagi' ? (schoolSettings.pagiCheckOutStart  || '11:45') : (schoolSettings.siangCheckOutStart  || '16:00');
+
+    if (nowTimeStr < checkInOpen) {
+      alert(`Presensi Shift ${detectedShift === 'pagi' ? 'Pagi' : 'Siang'} belum dibuka (Mulai ${checkInOpen} WIT).`); return;
+    }
+    if (nowTimeStr >= checkOutStart) {
+      alert(`Batas waktu absen masuk Shift ${detectedShift === 'pagi' ? 'Pagi' : 'Siang'} telah berakhir (${checkOutStart} WIT). Anda tidak dapat absen lagi.`); return;
+    }
+
+    // Hitung status & durasi keterlambatan
+    let attendanceStatus: 'hadir' | 'terlambat' = 'hadir';
+    let latenessNote = notes || `Presensi Masuk Shift ${detectedShift.toUpperCase()}`;
+
+    if (nowTimeStr > workStart) {
+      attendanceStatus = 'terlambat';
+      // Hitung selisih detik antara nowTimeStr dan workStart
+      const toSecs = (t: string) => {
+        const [h, m] = t.split(':').map(Number);
+        return h * 3600 + m * 60;
+      };
+      const nowSecs = currentTime.getHours() * 3600 + currentTime.getMinutes() * 60 + currentTime.getSeconds();
+      const workSecs = toSecs(workStart);
+      const diffSecs = nowSecs - workSecs;
+      const jm = Math.floor(diffSecs / 3600);
+      const mn = Math.floor((diffSecs % 3600) / 60);
+      const dt = diffSecs % 60;
+      const durasiText = [
+        jm > 0 ? `${jm} jam` : '',
+        mn > 0 ? `${mn} menit` : '',
+        `${dt} detik`
+      ].filter(Boolean).join(' ');
+      latenessNote = `Terlambat: ${durasiText}${notes ? ` — ${notes}` : ''}`;
     }
 
     setPendingCheckIn({
       userId: user.id, userName: user.fullName, userNip: user.nip,
       date: todayStr, checkInTime: nowISO,
       checkInLat: userCoords?.lat, checkInLng: userCoords?.lng,
-      distanceMeters: distance || 0, status: 'hadir', shift: detectedShift,
-      notes: notes || `Presensi Masuk Shift ${detectedShift.toUpperCase()}`
+      distanceMeters: distance || 0, status: attendanceStatus, shift: detectedShift,
+      notes: latenessNote
     });
     setIsSelfieOpen(true);
   };

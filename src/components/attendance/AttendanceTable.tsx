@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Download, Calendar, UserCheck, HelpCircle } from 'lucide-react';
+import { Search, Download, UserCheck, AlertTriangle } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
 import { exportAttendanceCsv } from '../../utils/exportCsv';
 import { formatTime, formatDateIndo } from '../../utils/haversine';
@@ -186,6 +186,21 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                     </span>
                   </div>
                 </div>
+
+                {/* Keterangan durasi keterlambatan */}
+                {rec.status === 'terlambat' && rec.notes && rec.notes.startsWith('Terlambat:') && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    background: 'rgba(251,146,60,0.08)',
+                    border: '1px solid rgba(251,146,60,0.2)',
+                    borderRadius: '7px',
+                    padding: '0.35rem 0.65rem',
+                    fontSize: '0.75rem', color: '#fb923c'
+                  }}>
+                    <AlertTriangle size={13} />
+                    <span>{rec.notes}</span>
+                  </div>
+                )}
               </div>
             );
           })}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AttendanceRecord, SchoolSettings } from '../../types';
-import { CheckCircle2, Clock } from 'lucide-react';
+import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { formatDateIndo, formatTime } from '../../utils/haversine';
 
 interface PresensiActionCardProps {
@@ -30,10 +30,12 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
 }) => {
   const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
   const openTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckInOpen || '06:00') : (schoolSettings?.siangCheckInOpen || '12:00');
-  const closeTime = userShift === 'pagi' ? (schoolSettings?.pagiWorkStart || '08:00') : (schoolSettings?.siangWorkStart || '12:30');
+  const workStart = userShift === 'pagi' ? (schoolSettings?.pagiWorkStart || '07:15') : (schoolSettings?.siangWorkStart || '12:45');
+  const closeTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutStart || '11:45') : (schoolSettings?.siangCheckOutStart || '16:00');
 
   const isTooEarly = nowTimeStr < openTime;
   const isTooLate = nowTimeStr > closeTime;
+  const isLateness = nowTimeStr > workStart && !isTooLate;
   const isTimeValid = !isTooEarly && !isTooLate;
 
   const isButtonEnabled = isInRadius && isTimeValid;
@@ -45,6 +47,8 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
     buttonText = `Belum Buka (Mulai ${openTime} WIT)`;
   } else if (isTooLate) {
     buttonText = `Absen Tutup (Batas ${closeTime} WIT)`;
+  } else if (isLateness) {
+    buttonText = 'Absen Masuk (Terlambat)';
   }
 
   return (
@@ -62,10 +66,23 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
             onChange={(e) => setNotes(e.target.value)}
             className="glass-input"
           />
+          {isLateness && isButtonEnabled && (
+            <div style={{
+              background: 'rgba(251, 146, 60, 0.12)',
+              border: '1px solid rgba(251, 146, 60, 0.35)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.5rem 0.75rem',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              fontSize: '0.78rem', color: '#fb923c'
+            }}>
+              <AlertTriangle size={14} />
+              <span>Anda melewati jam masuk <strong>{workStart} WIT</strong>. Presensi akan tercatat sebagai <strong>TERLAMBAT</strong>.</span>
+            </div>
+          )}
           <button
             onClick={handleCheckInSubmit}
             disabled={!isButtonEnabled}
-            className="btn btn-success"
+            className={isLateness ? 'btn' : 'btn btn-success'}
             style={{
               padding: '1rem',
               fontSize: '1rem',
@@ -75,9 +92,15 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
               cursor: isButtonEnabled ? 'pointer' : 'not-allowed',
               borderRadius: 'var(--radius-md)',
               letterSpacing: '-0.01em',
+              ...(isLateness ? {
+                background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                color: '#fff',
+                border: 'none',
+                boxShadow: '0 4px 14px rgba(249,115,22,0.4)'
+              } : {})
             }}
           >
-            <CheckCircle2 size={20} />
+            {isLateness ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
             {buttonText}
           </button>
         </div>
