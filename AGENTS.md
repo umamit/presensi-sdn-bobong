@@ -11,6 +11,7 @@
 - **Gunakan edit bertarget (`replace_file_content`)**: Jangan mengganti seluruh isi file jika hanya mengubah 5-10 baris kode.
 
 ## 3. Komunikasi Ringkas & Padat
+- **Gunakan Token AI Sehemat Mungkin**: Batasi pemanggilan pembacaan berkas secara berulang, batasi run command yang tidak perlu, dan selalu berikan respon sependek dan seefisien mungkin demi menghemat kuota token.
 - **Jawaban to-the-point**: Berikan tanggapan yang singkat, lugas, dan jelas tanpa penjelasan bertele-tele.
 - **Tanpa Pengulangan Ringkasan**: Jangan mengulang kembali seluruh kode yang sudah diubah jika tidak diminta.
 - **Gunakan Bahasa Indonesia yang Efisien**: Singkat dan jelas.
