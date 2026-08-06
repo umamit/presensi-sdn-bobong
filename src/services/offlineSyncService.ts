@@ -2,6 +2,7 @@ import { AttendanceRecord } from '../types';
 import { saveAttendanceLive } from './attendanceService';
 import { uploadSelfie } from './storageService';
 
+// Fix #12: Ganti sessionStorage → localStorage agar antrean offline bertahan walau tab/browser ditutup
 const OFFLINE_ATTENDANCE_KEY = 'sdn_bobong_offline_attendance_queue';
 
 export interface OfflineAttendanceItem {
@@ -16,11 +17,14 @@ export interface OfflineAttendanceItem {
   distanceMeters: number;
   notes?: string;
   timestamp: number;
+  // Fix #11: Tambah field shift dan status agar tidak hilang saat sync
+  shift?: 'pagi' | 'siang';
+  status?: 'hadir' | 'terlambat';
 }
 
 export function getOfflineAttendanceQueue(): OfflineAttendanceItem[] {
   try {
-    const raw = sessionStorage.getItem(OFFLINE_ATTENDANCE_KEY);
+    const raw = localStorage.getItem(OFFLINE_ATTENDANCE_KEY); // Fix #12
     return raw ? JSON.parse(raw) : [];
   } catch (e) {
     return [];
@@ -30,7 +34,7 @@ export function getOfflineAttendanceQueue(): OfflineAttendanceItem[] {
 export function saveOfflineAttendanceItem(item: OfflineAttendanceItem): void {
   const queue = getOfflineAttendanceQueue();
   queue.push(item);
-  sessionStorage.setItem(OFFLINE_ATTENDANCE_KEY, JSON.stringify(queue));
+  localStorage.setItem(OFFLINE_ATTENDANCE_KEY, JSON.stringify(queue)); // Fix #12
 }
 
 export async function syncOfflineAttendanceQueue(): Promise<number> {
@@ -58,7 +62,9 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
         checkOutTime: item.type === 'out' ? item.time : undefined,
         selfieUrl: selfieUrl || undefined,
         distanceMeters: item.distanceMeters,
-        status: 'hadir',
+        // Fix #11: Gunakan status & shift yang tersimpan, bukan hardcode 'hadir'
+        status: item.status || 'hadir',
+        shift: item.shift,
         notes: item.notes || `Presensi ${item.type === 'in' ? 'Masuk' : 'Pulang'} (Offline Sync)`
       };
 
@@ -73,6 +79,6 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
     }
   }
 
-  sessionStorage.setItem(OFFLINE_ATTENDANCE_KEY, JSON.stringify(remainingItems));
+  localStorage.setItem(OFFLINE_ATTENDANCE_KEY, JSON.stringify(remainingItems)); // Fix #12
   return syncedCount;
 }

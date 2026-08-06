@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, CheckCircle, Clock, AlertTriangle, UserMinus } from 'lucide-react';
+import { Users, CheckCircle, Clock, AlertTriangle, UserMinus, LogOut } from 'lucide-react';
 
 interface AdminStatBarProps {
   totalGuru: number;
@@ -7,46 +7,19 @@ interface AdminStatBarProps {
   totalTerlambat: number;
   totalIzin: number;
   totalBelumAbsen: number;
+  totalSudahPulang: number; // Fix #14
 }
 
 export const AdminStatBar: React.FC<AdminStatBarProps> = ({
-  totalGuru,
-  totalHadir,
-  totalTerlambat,
-  totalIzin,
-  totalBelumAbsen
+  totalGuru, totalHadir, totalTerlambat, totalIzin, totalBelumAbsen, totalSudahPulang
 }) => {
   const stats = [
-    {
-      label: 'Total Guru',
-      value: totalGuru,
-      icon: <Users size={16} />,
-      color: 'var(--text-muted)'
-    },
-    {
-      label: 'Hadir Pagi/Siang',
-      value: totalHadir,
-      icon: <CheckCircle size={16} />,
-      color: 'var(--success)'
-    },
-    {
-      label: 'Terlambat',
-      value: totalTerlambat,
-      icon: <Clock size={16} />,
-      color: 'var(--warning)'
-    },
-    {
-      label: 'Izin Disetujui',
-      value: totalIzin,
-      icon: <AlertTriangle size={16} />,
-      color: 'var(--primary)'
-    },
-    {
-      label: 'Belum Presensi',
-      value: totalBelumAbsen,
-      icon: <UserMinus size={16} />,
-      color: 'var(--danger)'
-    }
+    { label: 'Total Guru',      value: totalGuru,         icon: <Users size={16} />,        color: 'var(--text-muted)' },
+    { label: 'Hadir Pagi/Siang', value: totalHadir,        icon: <CheckCircle size={16} />,  color: 'var(--success)' },
+    { label: 'Terlambat',        value: totalTerlambat,    icon: <Clock size={16} />,        color: 'var(--warning)' },
+    { label: 'Izin Disetujui',   value: totalIzin,         icon: <AlertTriangle size={16} />, color: 'var(--primary)' },
+    { label: 'Sudah Pulang',     value: totalSudahPulang,  icon: <LogOut size={16} />,       color: '#34d399' }, // Fix #14
+    { label: 'Belum Presensi',   value: totalBelumAbsen,   icon: <UserMinus size={16} />,    color: 'var(--danger)' },
   ];
 
   return (

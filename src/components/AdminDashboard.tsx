@@ -43,6 +43,8 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
   const totalTerlambat = recordsToday.filter(r => r.status === 'terlambat').length;
   const totalIzin = recordsToday.filter(r => r.status === 'izin').length;
   const totalBelumAbsen = Math.max(0, totalGuru - (totalHadir + totalTerlambat + totalIzin));
+  // Fix #14: Hitung guru yang sudah absen pulang
+  const totalSudahPulang = recordsToday.filter(r => r.checkOutTime).length;
 
   const pendingLeaves = leaveRequests.filter(l => l.status === 'pending');
 
@@ -65,7 +67,12 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
             <Settings size={14} /><span>Pengaturan GPS</span>
           </button>
           <button
-            onClick={() => onGenerateAlfa(selectedDate)}
+            onClick={() => {
+              // Fix #15: Konfirmasi sebelum generate alfa
+              if (confirm(`Buat rekap ALFA untuk semua guru yang belum hadir pada ${selectedDate}?\nTindakan ini tidak dapat dibatalkan.`)) {
+                onGenerateAlfa(selectedDate);
+              }
+            }}
             className="btn"
             title="Buat rekap ALFA untuk guru yang belum absen pada tanggal dipilih"
             style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px', background: 'rgba(255,69,58,0.15)', color: 'var(--danger)', border: '1px solid rgba(255,69,58,0.3)' }}
@@ -79,12 +86,13 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
       </div>
 
       {/* Menampilkan Statistik SaaS Modern */}
-      <AdminStatBar 
-        totalGuru={totalGuru} 
-        totalHadir={totalHadir} 
-        totalTerlambat={totalTerlambat} 
-        totalIzin={totalIzin} 
-        totalBelumAbsen={totalBelumAbsen} 
+      <AdminStatBar
+        totalGuru={totalGuru}
+        totalHadir={totalHadir}
+        totalTerlambat={totalTerlambat}
+        totalIzin={totalIzin}
+        totalBelumAbsen={totalBelumAbsen}
+        totalSudahPulang={totalSudahPulang}
       />
 
       {/* Tampilan Gps Row Sekolah */}

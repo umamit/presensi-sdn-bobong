@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, Clock, MapPin, CheckCircle, Navigation, User, FileText } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, CheckCircle, Navigation, User, FileText, Layers } from 'lucide-react';
 import { AttendanceRecord } from '../../types';
 import { formatDateIndo, formatTime } from '../../utils/haversine';
 
@@ -116,11 +116,14 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ record, onClos
                 <span style={{ fontSize: '0.82rem', fontWeight: 500, color: '#fff' }}>{formatDateIndo(record.date)}</span>
               </div>
 
+              {/* Fix #13: Tampilkan info Shift */}
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <MapPin size={11} /> JARAK GPS
+                  <Layers size={11} /> SHIFT
                 </span>
-                <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--secondary)' }}>{record.distanceMeters ?? 0} Meter</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 500, color: record.shift === 'siang' ? 'var(--warning)' : 'var(--primary)' }}>
+                  {record.shift ? record.shift.toUpperCase() : '-'}
+                </span>
               </div>
 
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
