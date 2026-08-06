@@ -1,4 +1,4 @@
-import { SchoolSettings } from '../types';
+import { SchoolSettings } from '../types/index';
 import { supabase } from './supabaseClient';
 
 export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> {
@@ -15,14 +15,44 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
   }
 
   const rawAddress = data.address || 'Taliabu Barat';
-  let cleanAddress = rawAddress;
+  let workingText = rawAddress;
   let groqApiKey = '';
+  let pagiCheckInOpen = '06:00';
+  let pagiWorkStart = '07:15';
+  let pagiCheckOutStart = '11:45';
+  let pagiCheckOutEnd = '12:00';
+  let siangCheckInOpen = '12:10';
+  let siangWorkStart = '12:45';
+  let siangCheckOutStart = '16:00';
+  let siangCheckOutEnd = '16:45';
 
-  if (rawAddress.includes('|| groq_key:')) {
-    const parts = rawAddress.split('|| groq_key:');
-    cleanAddress = parts[0].trim();
+  // 1. Ekstrak Groq API Key jika ada
+  if (workingText.includes('|| groq_key:')) {
+    const parts = workingText.split('|| groq_key:');
     groqApiKey = parts[1].trim();
+    workingText = parts[0].trim();
   }
+
+  // 2. Ekstrak data jam presensi pagi & siang jika ada
+  if (workingText.includes('|| times:')) {
+    const parts = workingText.split('|| times:');
+    const timeString = parts[1].trim();
+    workingText = parts[0].trim();
+
+    const timeParts = timeString.split('|');
+    if (timeParts.length === 8) {
+      pagiCheckInOpen = timeParts[0];
+      pagiWorkStart = timeParts[1];
+      pagiCheckOutStart = timeParts[2];
+      pagiCheckOutEnd = timeParts[3];
+      siangCheckInOpen = timeParts[4];
+      siangWorkStart = timeParts[5];
+      siangCheckOutStart = timeParts[6];
+      siangCheckOutEnd = timeParts[7];
+    }
+  }
+
+  const cleanAddress = workingText.trim();
 
   return {
     id: data.id,
@@ -32,25 +62,33 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
     longitude: data.longitude,
     radiusMeters: data.radius_meters || 10,
     polygonCoords: data.polygon_coords,
-    pagiCheckInOpen: data.pagi_check_in_open || '06:00',
-    pagiWorkStart: data.pagi_work_start || '07:15',
-    pagiCheckOutStart: data.pagi_check_out_start || '11:45',
-    pagiCheckOutEnd: data.pagi_check_out_end || '12:00',
-    siangCheckInOpen: data.siang_check_in_open || '12:10',
-    siangWorkStart: data.siang_work_start || '12:45',
-    siangCheckOutStart: data.siang_check_out_start || '16:00',
-    siangCheckOutEnd: data.siang_check_out_end || '16:45',
-    groqApiKey: groqApiKey
+    pagiCheckInOpen,
+    pagiWorkStart,
+    pagiCheckOutStart,
+    pagiCheckOutEnd,
+    siangCheckInOpen,
+    siangWorkStart,
+    siangCheckOutStart,
+    siangCheckOutEnd,
+    groqApiKey
   };
 }
 
 export async function saveSchoolSettingsLive(s: SchoolSettings): Promise<boolean> {
   if (!supabase) return false;
 
+  // 1. Pack times & groq key ke dalam string alamat untuk disimpan di Supabase
   let dbAddress = s.address;
+  const timeString = `${s.pagiCheckInOpen}|${s.pagiWorkStart}|${s.pagiCheckOutStart}|${s.pagiCheckOutEnd}|${s.siangCheckInOpen}|${s.siangWorkStart}|${s.siangCheckOutStart}|${s.siangCheckOutEnd}`;
+  dbAddress = `${dbAddress} || times: ${timeString}`;
+
   if (s.groqApiKey) {
-    dbAddress = `${s.address} || groq_key: ${s.groqApiKey}`;
+    dbAddress = `${dbAddress} || groq_key: ${s.groqApiKey}`;
   }
+
+  // 2. Format waktu kerja utama untuk kompatibilitas kolom di Supabase
+  const formattedWorkStart = s.pagiWorkStart ? `${s.pagiWorkStart}:00` : '07:15:00';
+  const formattedWorkEnd = s.pagiCheckOutEnd ? `${s.pagiCheckOutEnd}:00` : '12:00:00';
 
   const payload: any = {
     id: 1,
@@ -58,18 +96,12 @@ export async function saveSchoolSettingsLive(s: SchoolSettings): Promise<boolean
     address: dbAddress,
     latitude: s.latitude,
     longitude: s.longitude,
-    radius_meters: s.radiusMeters
+    radius_meters: s.radiusMeters,
+    work_start_time: formattedWorkStart,
+    work_end_time: formattedWorkEnd
   };
 
   if (s.polygonCoords) payload.polygon_coords = s.polygonCoords;
-  if (s.pagiCheckInOpen) payload.pagi_check_in_open = s.pagiCheckInOpen;
-  if (s.pagiWorkStart) payload.pagi_work_start = s.pagiWorkStart;
-  if (s.pagiCheckOutStart) payload.pagi_check_out_start = s.pagiCheckOutStart;
-  if (s.pagiCheckOutEnd) payload.pagi_check_out_end = s.pagiCheckOutEnd;
-  if (s.siangCheckInOpen) payload.siang_check_in_open = s.siangCheckInOpen;
-  if (s.siangWorkStart) payload.siang_work_start = s.siangWorkStart;
-  if (s.siangCheckOutStart) payload.siang_check_out_start = s.siangCheckOutStart;
-  if (s.siangCheckOutEnd) payload.siang_check_out_end = s.siangCheckOutEnd;
 
   const { error } = await supabase
     .from('school_settings')
