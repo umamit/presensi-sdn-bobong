@@ -29,7 +29,8 @@ export const App: React.FC = () => {
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
-    handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword
+    handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
+    handleGenerateAlfa
   } = useAppData();
 
   // Deteksi mode pembukaan aplikasi
@@ -81,6 +82,7 @@ export const App: React.FC = () => {
             onUpdateLeaveStatus={handleUpdateLeaveStatus}
             onExportReport={() => exportAttendanceCsv(attendanceRecords)}
             onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+            onGenerateAlfa={handleGenerateAlfa}
           />
         )}
       </main>

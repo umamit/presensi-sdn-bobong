@@ -87,19 +87,30 @@ export function useAppData() {
   };
 
   const handleCheckIn = async (newRecord: Partial<AttendanceRecord>) => {
+    // Fix 1: Cegah absen ganda — cek apakah sudah ada record hari ini untuk user ini
+    const alreadyExists = attendanceRecords.some(
+      r => r.userNip === newRecord.userNip && r.date === newRecord.date
+    );
+    if (alreadyExists) {
+      alert('Anda sudah melakukan presensi masuk hari ini.');
+      return;
+    }
+
     let cloudSelfieUrl = newRecord.selfieUrl;
     if (newRecord.selfieUrl && newRecord.selfieUrl.startsWith('data:image')) {
       const uploaded = await uploadSelfie(newRecord.selfieUrl, newRecord.userId!);
       if (uploaded) cloudSelfieUrl = uploaded;
     }
 
+    // Fix 4: Sertakan field shift agar tersimpan ke Supabase
     const fullRecord: AttendanceRecord = {
       id: `att-${Date.now()}`,
       userId: newRecord.userId!, userName: newRecord.userName!, userNip: newRecord.userNip!,
       date: newRecord.date!, checkInTime: newRecord.checkInTime,
       checkInLat: newRecord.checkInLat, checkInLng: newRecord.checkInLng,
       distanceMeters: newRecord.distanceMeters, status: newRecord.status || 'hadir',
-      notes: newRecord.notes, selfieUrl: cloudSelfieUrl
+      notes: newRecord.notes, selfieUrl: cloudSelfieUrl,
+      shift: newRecord.shift
     };
 
     setAttendanceRecords(prev => [fullRecord, ...prev]);
@@ -137,14 +148,26 @@ export function useAppData() {
     if (newStatus === 'approved') {
       const targetReq = leaveRequests.find(l => l.id === requestId);
       if (targetReq) {
-        const leaveAtt: AttendanceRecord = {
-          id: `att-leave-${Date.now()}`,
-          userId: targetReq.userId, userName: targetReq.userName,
-          userNip: targetReq.userNip, date: targetReq.startDate,
-          status: 'izin', notes: `Izin Disetujui: ${targetReq.description}`
-        };
-        setAttendanceRecords(prev => [leaveAtt, ...prev]);
-        if (isSupabaseConfigured) await saveAttendanceLive(leaveAtt);
+        // Fix 2: Buat attendance record untuk SEMUA hari dari startDate sampai endDate
+        const start = new Date(targetReq.startDate);
+        const end = new Date(targetReq.endDate);
+        const newRecords: AttendanceRecord[] = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          // Lewati jika sudah ada record untuk tanggal ini
+          const exists = attendanceRecords.some(r => r.userNip === targetReq.userNip && r.date === dateStr);
+          if (exists) continue;
+          newRecords.push({
+            id: `att-leave-${Date.now()}-${dateStr}`,
+            userId: targetReq.userId, userName: targetReq.userName,
+            userNip: targetReq.userNip, date: dateStr,
+            status: 'izin', notes: `Izin Disetujui (${targetReq.leaveType}): ${targetReq.description}`
+          });
+        }
+        setAttendanceRecords(prev => [...newRecords, ...prev]);
+        if (isSupabaseConfigured) {
+          for (const rec of newRecords) await saveAttendanceLive(rec);
+        }
       }
     }
   };
@@ -157,11 +180,38 @@ export function useAppData() {
     if (isSupabaseConfigured) await updateUserPasswordLive(userId, newPass);
   };
 
+  // Fix 3: Generate rekap alfa untuk semua guru yang tidak punya record hari ini
+  const handleGenerateAlfa = async (todayStr: string) => {
+    const guruList = allUsers.filter(u => u.role === 'guru');
+    const newAlfaRecords: AttendanceRecord[] = [];
+    for (const guru of guruList) {
+      const hasRecord = attendanceRecords.some(r => r.userNip === guru.nip && r.date === todayStr);
+      if (!hasRecord) {
+        newAlfaRecords.push({
+          id: `att-alfa-${Date.now()}-${guru.nip}`,
+          userId: guru.id, userName: guru.fullName, userNip: guru.nip,
+          date: todayStr, status: 'alfa',
+          notes: 'Tidak hadir tanpa keterangan (dibuat otomatis oleh Admin)'
+        });
+      }
+    }
+    if (newAlfaRecords.length === 0) {
+      alert('Semua guru sudah memiliki catatan kehadiran hari ini.');
+      return;
+    }
+    setAttendanceRecords(prev => [...newAlfaRecords, ...prev]);
+    if (isSupabaseConfigured) {
+      for (const rec of newAlfaRecords) await saveAttendanceLive(rec);
+    }
+    alert(`${newAlfaRecords.length} rekap ALFA berhasil dibuat untuk: ${newAlfaRecords.map(r => r.userName).join(', ')}.`);
+  };
+
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
-    handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword
+    handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
+    handleGenerateAlfa
   };
 }

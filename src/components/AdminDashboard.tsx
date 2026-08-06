@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, SchoolSettings, LeaveRequest } from '../types';
-import { FileSpreadsheet, Settings, ShieldCheck, RefreshCw } from 'lucide-react';
+import { FileSpreadsheet, Settings, ShieldCheck, RefreshCw, UserX } from 'lucide-react';
 import { AdminStatBar } from './attendance/AdminStatBar';
 import { AdminGpsRow } from './admin/AdminGpsRow';
 import { AttendanceTable } from './attendance/AttendanceTable';
@@ -19,11 +19,12 @@ interface AdminDashboardProps {
   onUpdateLeaveStatus: (requestId: string, newStatus: 'approved' | 'rejected') => void;
   onExportReport: () => void;
   onOpenSettingsModal: () => void;
+  onGenerateAlfa: (todayStr: string) => void;
 }
 
 export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProps>> = ({
   allUsers, schoolSettings, leaveRequests,
-  onUpdateLeaveStatus, onExportReport, onOpenSettingsModal
+  onUpdateLeaveStatus, onExportReport, onOpenSettingsModal, onGenerateAlfa
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
@@ -57,20 +58,22 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button 
-            onClick={refetch} 
-            className="btn btn-secondary" 
-            style={{ padding: '0.55rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
-            title="Refresh Data"
-            disabled={loading}
-          >
+          <button onClick={refetch} className="btn btn-secondary" style={{ padding: '0.55rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }} title="Refresh Data" disabled={loading}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
           <button onClick={onOpenSettingsModal} className="btn btn-secondary" style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px' }}>
             <Settings size={14} /><span>Pengaturan GPS</span>
           </button>
+          <button
+            onClick={() => onGenerateAlfa(selectedDate)}
+            className="btn"
+            title="Buat rekap ALFA untuk guru yang belum absen pada tanggal dipilih"
+            style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px', background: 'rgba(255,69,58,0.15)', color: 'var(--danger)', border: '1px solid rgba(255,69,58,0.3)' }}
+          >
+            <UserX size={14} /><span>Rekap Alfa</span>
+          </button>
           <button onClick={onExportReport} className="btn btn-success" style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px', background: 'var(--success)' }}>
-            <FileSpreadsheet size={14} /><span>Ekspor Rekap (Excel/CSV)</span>
+            <FileSpreadsheet size={14} /><span>Ekspor CSV</span>
           </button>
         </div>
       </div>
