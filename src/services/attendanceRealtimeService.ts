@@ -1,51 +1,54 @@
 import { AttendanceRecord } from '../types';
 import { supabase } from '../services/supabaseClient';
 
-/**
- * Service khusus Realtime Notification Supabase (Poin 1 Kode 1 File)
- * Mendengarkan secara realtime ketika ada guru yang melakukan presensi baru di Supabase DB
- */
+/** Konversi raw Supabase row → AttendanceRecord */
+function mapRow(item: any): AttendanceRecord {
+  return {
+    id: item.id,
+    userId: item.user_id,
+    userName: item.user_name,
+    userNip: item.user_nip,
+    date: item.date,
+    checkInTime: item.check_in_time,
+    checkOutTime: item.check_out_time,
+    checkInLat: item.check_in_lat,
+    checkInLng: item.check_in_lng,
+    distanceMeters: item.distance_meters,
+    status: item.status,
+    notes: item.notes,
+    selfieUrl: item.selfie_url || undefined,
+    shift: item.shift || undefined,
+  };
+}
+
 export function subscribeAttendanceRealtime(
-  onNewAttendance: (record: AttendanceRecord) => void
+  onInsert: (record: AttendanceRecord) => void,
+  onUpdate: (record: AttendanceRecord) => void,
+  onDelete: (id: string) => void,
 ): () => void {
   if (!supabase) return () => {};
 
   const channel = supabase
-    .channel('realtime_attendance_notifications')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'attendance' },
-      (payload) => {
-        const item = payload.new;
-        const extractedSelfie = item.selfie_url || undefined;
-
-        const newRecord: AttendanceRecord = {
-          id: item.id,
-          userId: item.user_id,
-          userName: item.user_name,
-          userNip: item.user_nip,
-          date: item.date,
-          checkInTime: item.check_in_time,
-          checkOutTime: item.check_out_time,
-          checkInLat: item.check_in_lat,
-          checkInLng: item.check_in_lng,
-          distanceMeters: item.distance_meters,
-          status: item.status,
-          notes: item.notes,
-          selfieUrl: extractedSelfie
-        };
-
-        // Kirim Notifikasi Push Browser jika diizinkan
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Presensi Guru Terbaru! 🔔', {
-            body: `${newRecord.userName} (${newRecord.userNip}) telah melakukan presensi masuk (${newRecord.status.toUpperCase()}).`,
-            icon: '/apple-touch-icon.png'
-          });
-        }
-
-        onNewAttendance(newRecord);
+    .channel('realtime_attendance_all')
+    // Fix #5a: Tangani INSERT
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'attendance' }, (payload) => {
+      const record = mapRow(payload.new);
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Presensi Guru Terbaru! 🔔', {
+          body: `${record.userName} telah presensi masuk (${record.status.toUpperCase()}).`,
+          icon: '/apple-touch-icon.png'
+        });
       }
-    )
+      onInsert(record);
+    })
+    // Fix #5b: Tangani UPDATE (mis. checkout, perubahan status)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'attendance' }, (payload) => {
+      onUpdate(mapRow(payload.new));
+    })
+    // Fix #5c: Tangani DELETE (mis. admin hapus record langsung di Supabase)
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'attendance' }, (payload) => {
+      onDelete(payload.old.id as string);
+    })
     .subscribe();
 
   return () => {

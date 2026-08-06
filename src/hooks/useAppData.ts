@@ -44,13 +44,26 @@ export function useAppData() {
         if (liveLeaves) setLeaveRequests(liveLeaves);
       });
 
-      // Berlangganan Notifikasi Realtime Supabase
-      const unsubscribe = subscribeAttendanceRealtime((newRecord) => {
-        setAttendanceRecords(prev => {
-          if (prev.some(r => r.id === newRecord.id)) return prev;
-          return [newRecord, ...prev];
-        });
-      });
+      // Berlangganan Realtime Supabase: INSERT, UPDATE, DELETE
+      const unsubscribe = subscribeAttendanceRealtime(
+        // onInsert
+        (newRecord) => {
+          setAttendanceRecords(prev => {
+            if (prev.some(r => r.id === newRecord.id)) return prev;
+            return [newRecord, ...prev];
+          });
+        },
+        // onUpdate — sync checkout & perubahan status dari Supabase langsung
+        (updatedRecord) => {
+          setAttendanceRecords(prev =>
+            prev.map(r => r.id === updatedRecord.id ? { ...r, ...updatedRecord } : r)
+          );
+        },
+        // onDelete — hapus dari state jika record dihapus di Supabase
+        (deletedId) => {
+          setAttendanceRecords(prev => prev.filter(r => r.id !== deletedId));
+        }
+      );
 
       return () => unsubscribe();
     }
