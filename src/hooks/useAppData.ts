@@ -11,6 +11,7 @@ import {
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
+import { saveOfflineAttendanceItem } from '../services/offlineSyncService';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
@@ -127,12 +128,59 @@ export function useAppData() {
     };
 
     setAttendanceRecords(prev => [fullRecord, ...prev]);
-    if (isSupabaseConfigured) await saveAttendanceLive(fullRecord);
+
+    if (isSupabaseConfigured) {
+      const success = await saveAttendanceLive(fullRecord);
+      if (!success) {
+        // Fallback: simpan data mentah ke antrean offline jika koneksi Supabase gagal
+        saveOfflineAttendanceItem({
+          id: fullRecord.id,
+          userId: fullRecord.userId,
+          userName: fullRecord.userName,
+          userNip: fullRecord.userNip,
+          date: fullRecord.date,
+          time: fullRecord.checkInTime || new Date().toISOString(),
+          type: 'in',
+          selfieBase64: newRecord.selfieUrl || '',
+          distanceMeters: fullRecord.distanceMeters || 0,
+          notes: fullRecord.notes,
+          timestamp: Date.now(),
+          shift: fullRecord.shift,
+          status: fullRecord.status
+        });
+        alert('Koneksi server terganggu. Presensi masuk Anda disimpan di antrean HP secara offline dan akan disinkronkan otomatis.');
+      }
+    }
   };
 
   const handleCheckOut = async (recordId: string, checkOutTime: string) => {
     setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, checkOutTime } : r)));
-    if (isSupabaseConfigured) await updateCheckOutLive(recordId, checkOutTime);
+    
+    if (isSupabaseConfigured) {
+      const success = await updateCheckOutLive(recordId, checkOutTime);
+      if (!success) {
+        // Fallback: simpan data checkout ke antrean offline
+        const targetRecord = attendanceRecords.find(r => r.id === recordId);
+        if (targetRecord) {
+          saveOfflineAttendanceItem({
+            id: recordId,
+            userId: targetRecord.userId,
+            userName: targetRecord.userName,
+            userNip: targetRecord.userNip,
+            date: targetRecord.date,
+            time: checkOutTime,
+            type: 'out',
+            selfieBase64: '',
+            distanceMeters: targetRecord.distanceMeters || 0,
+            notes: targetRecord.notes,
+            timestamp: Date.now(),
+            shift: targetRecord.shift,
+            status: targetRecord.status
+          });
+          alert('Koneksi server terganggu. Presensi pulang Anda disimpan di antrean HP secara offline dan akan disinkronkan otomatis.');
+        }
+      }
+    }
   };
 
   const handleLeaveSubmit = async (req: Partial<LeaveRequest>) => {

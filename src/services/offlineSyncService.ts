@@ -1,5 +1,5 @@
-import { AttendanceRecord } from '../types';
-import { saveAttendanceLive } from './attendanceService';
+import { AttendanceRecord, AttendanceStatus } from '../types';
+import { saveAttendanceLive, updateCheckOutLive } from './attendanceService';
 import { uploadSelfie } from './storageService';
 
 // Fix #12: Ganti sessionStorage → localStorage agar antrean offline bertahan walau tab/browser ditutup
@@ -19,7 +19,7 @@ export interface OfflineAttendanceItem {
   timestamp: number;
   // Fix #11: Tambah field shift dan status agar tidak hilang saat sync
   shift?: 'pagi' | 'siang';
-  status?: 'hadir' | 'terlambat';
+  status?: AttendanceStatus;
 }
 
 export function getOfflineAttendanceQueue(): OfflineAttendanceItem[] {
@@ -46,29 +46,36 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
 
   for (const item of queue) {
     try {
-      let selfieUrl = '';
-      if (item.selfieBase64) {
-        const uploaded = await uploadSelfie(item.selfieBase64, item.userId);
-        selfieUrl = uploaded || '';
+      let success = false;
+      
+      if (item.type === 'in') {
+        let selfieUrl = '';
+        if (item.selfieBase64) {
+          const uploaded = await uploadSelfie(item.selfieBase64, item.userId);
+          selfieUrl = uploaded || '';
+        }
+
+        const rec: AttendanceRecord = {
+          id: item.id,
+          userId: item.userId,
+          userName: item.userName,
+          userNip: item.userNip,
+          date: item.date,
+          checkInTime: item.time,
+          selfieUrl: selfieUrl || undefined,
+          distanceMeters: item.distanceMeters,
+          // Fix #11: Gunakan status & shift yang tersimpan, bukan hardcode 'hadir'
+          status: item.status || 'hadir',
+          shift: item.shift,
+          notes: item.notes || `Presensi Masuk (Offline Sync)`
+        };
+
+        success = await saveAttendanceLive(rec);
+      } else {
+        // Fix offline check-out: panggil updateCheckOutLive dengan parameter userNip & date sebagai fallback
+        success = await updateCheckOutLive(item.id, item.time, item.userNip, item.date);
       }
 
-      const rec: AttendanceRecord = {
-        id: item.id,
-        userId: item.userId,
-        userName: item.userName,
-        userNip: item.userNip,
-        date: item.date,
-        checkInTime: item.type === 'in' ? item.time : undefined,
-        checkOutTime: item.type === 'out' ? item.time : undefined,
-        selfieUrl: selfieUrl || undefined,
-        distanceMeters: item.distanceMeters,
-        // Fix #11: Gunakan status & shift yang tersimpan, bukan hardcode 'hadir'
-        status: item.status || 'hadir',
-        shift: item.shift,
-        notes: item.notes || `Presensi ${item.type === 'in' ? 'Masuk' : 'Pulang'} (Offline Sync)`
-      };
-
-      const success = await saveAttendanceLive(rec);
       if (success) {
         syncedCount++;
       } else {

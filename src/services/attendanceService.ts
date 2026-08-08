@@ -76,7 +76,12 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
   return true;
 }
 
-export async function updateCheckOutLive(id: string, checkOutTime: string): Promise<boolean> {
+export async function updateCheckOutLive(
+  id: string,
+  checkOutTime: string,
+  userNip?: string,
+  date?: string
+): Promise<boolean> {
   if (!supabase) return false;
 
   // Fix #6: Fetch notes lama dulu, lalu append info jam pulang tanpa menimpa notes masuk
@@ -84,9 +89,21 @@ export async function updateCheckOutLive(id: string, checkOutTime: string): Prom
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
 
-  const { data: existing } = await supabase
-    .from('attendance').select('notes').eq('id', id).maybeSingle();
+  // Cari record yang ada: utamakan ID jika UUID valid, jika tidak gunakan userNip + date
+  let query = supabase.from('attendance').select('id, notes');
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  
+  if (isUuid) {
+    query = query.eq('id', id);
+  } else if (userNip && date) {
+    query = query.eq('user_nip', userNip).eq('date', date);
+  } else {
+    query = query.eq('id', id);
+  }
 
+  const { data: existing } = await query.maybeSingle();
+
+  const recordId = existing?.id || id;
   const existingNotes = existing?.notes || '';
   const updatedNotes = existingNotes
     ? `${existingNotes} | Pulang: ${checkOutTimeStr} WIT`
@@ -95,7 +112,7 @@ export async function updateCheckOutLive(id: string, checkOutTime: string): Prom
   const { error } = await supabase
     .from('attendance')
     .update({ check_out_time: checkOutTime, notes: updatedNotes })
-    .eq('id', id);
+    .eq('id', recordId);
 
   if (error) {
     console.error('Error updating checkout in Supabase:', error.message);
