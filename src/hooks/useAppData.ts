@@ -11,7 +11,7 @@ import {
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
-import { saveOfflineAttendanceItem } from '../services/offlineSyncService';
+import { detectAppType } from '../utils/haversine';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
@@ -121,6 +121,11 @@ export function useAppData() {
       }
     }
 
+    const appType = detectAppType();
+    const finalNotes = newRecord.notes 
+      ? `${newRecord.notes} | Lewat: ${appType}`
+      : `Lewat: ${appType}`;
+
     // Fix 4: Sertakan field shift agar tersimpan ke Supabase
     const fullRecord: AttendanceRecord = {
       id: `att-${Date.now()}`,
@@ -128,7 +133,7 @@ export function useAppData() {
       date: newRecord.date!, checkInTime: newRecord.checkInTime,
       checkInLat: newRecord.checkInLat, checkInLng: newRecord.checkInLng,
       distanceMeters: newRecord.distanceMeters, status: newRecord.status || 'hadir',
-      notes: newRecord.notes, selfieUrl: cloudSelfieUrl,
+      notes: finalNotes, selfieUrl: cloudSelfieUrl,
       shift: newRecord.shift
     };
 

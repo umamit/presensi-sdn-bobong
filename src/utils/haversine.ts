@@ -79,3 +79,20 @@ export function getLocalDateString(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Mendeteksi platform aplikasi yang digunakan (Capacitor APK, PWA Standalone, atau Web Browser biasa)
+ */
+export function detectAppType(): string {
+  const win = window as any;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+  const isCapacitor = !!win.Capacitor?.isNativePlatform();
+
+  if (isCapacitor) {
+    return 'APK Android';
+  } else if (isStandalone) {
+    return 'PWA Standalone';
+  } else {
+    return 'Browser Web';
+  }
+}
+
