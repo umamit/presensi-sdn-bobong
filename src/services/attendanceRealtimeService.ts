@@ -3,6 +3,14 @@ import { supabase } from '../services/supabaseClient';
 
 /** Konversi raw Supabase row → AttendanceRecord */
 function mapRow(item: any): AttendanceRecord {
+  let extractedShift = item.shift || undefined;
+  if (!extractedShift && item.notes) {
+    const match = item.notes.match(/Shift:\s*(\w+)/i);
+    if (match) {
+      extractedShift = match[1].toLowerCase();
+    }
+  }
+
   return {
     id: item.id,
     userId: item.user_id,
@@ -17,7 +25,7 @@ function mapRow(item: any): AttendanceRecord {
     status: item.status,
     notes: item.notes,
     selfieUrl: item.selfie_url || undefined,
-    shift: item.shift || undefined,
+    shift: extractedShift,
   };
 }
 

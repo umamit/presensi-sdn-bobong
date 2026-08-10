@@ -16,6 +16,15 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
   return data.map(item => {
     const extractedSelfie = item.selfie_url || undefined;
 
+    // Ekstrak shift secara cerdas dari notes jika kolom shift kosong/tidak ada di Supabase
+    let extractedShift = undefined;
+    if (item.notes) {
+      const match = item.notes.match(/Shift:\s*(\w+)/i);
+      if (match) {
+        extractedShift = match[1].toLowerCase();
+      }
+    }
+
     return {
       id: item.id,
       userId: item.user_id,
@@ -29,7 +38,8 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
       distanceMeters: item.distance_meters,
       status: item.status,
       notes: item.notes,
-      selfieUrl: extractedSelfie
+      selfieUrl: extractedSelfie,
+      shift: extractedShift
     };
   });
 }
