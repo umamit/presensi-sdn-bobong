@@ -52,6 +52,13 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
 
   const isUuid = rec.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rec.userId);
 
+  // Solusi Aman: Gabungkan info shift ke dalam kolom notes karena kolom shift tidak ada di tabel Supabase
+  const shiftPrefix = rec.shift ? `Shift: ${rec.shift.toUpperCase()}` : '';
+  const existingNotes = rec.notes || 'Presensi Verified';
+  const finalNotes = existingNotes.includes('Shift:') 
+    ? existingNotes 
+    : (shiftPrefix ? `${shiftPrefix} | ${existingNotes}` : existingNotes);
+
   const payload: any = {
     user_name: rec.userName,
     user_nip: rec.userNip,
@@ -61,9 +68,8 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: rec.notes || 'Presensi Verified',
-    selfie_url: rec.selfieUrl || null,
-    shift: rec.shift || null,
+    notes: finalNotes,
+    selfie_url: rec.selfieUrl || null
   };
 
   if (isUuid) payload.user_id = rec.userId;
