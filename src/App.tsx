@@ -14,7 +14,6 @@ import { useAppData } from './hooks/useAppData';
 import { exportAttendanceCsv } from './utils/exportCsv';
 
 import { PwaGuidePage } from './components/login/PwaGuidePage';
-import { useNetworkStatus } from './hooks/useNetworkStatus';
 
 export const App: React.FC = () => {
   const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
@@ -24,7 +23,6 @@ export const App: React.FC = () => {
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
 
   const { isPwaInstallable, handleInstallPwa } = usePwaInstall();
-  const { isOnline, pendingSyncCount, syncOfflineData } = useNetworkStatus();
 
   const {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
@@ -65,53 +63,7 @@ export const App: React.FC = () => {
       />
 
       <main className="app-container">
-        {/* Indikator Offline & Antrean Sync */}
-        {pendingSyncCount > 0 && (
-          <div
-            className="glass-panel animate-pulse"
-            style={{
-              padding: '0.85rem 1.15rem',
-              background: 'rgba(251, 146, 60, 0.08)',
-              borderColor: 'rgba(251, 146, 60, 0.25)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'between',
-              gap: '1rem',
-              marginBottom: '1rem'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flex: 1 }}>
-              <span className="dot-ping" style={{ width: '8px', height: '8px' }}>
-                <span className="dot-ping-wave" style={{ backgroundColor: '#fb923c' }} />
-                <span className="dot-ping-core" style={{ backgroundColor: '#fb923c' }} />
-              </span>
-              <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 500, lineHeight: 1.3 }}>
-                Koneksi offline / lambat. Terdeteksi <strong>{pendingSyncCount} data presensi</strong> mengantre di memori HP. Data akan dikirim otomatis saat internet stabil.
-              </div>
-            </div>
-            <button
-              onClick={async () => {
-                const count = await syncOfflineData();
-                if (count > 0) alert(`${count} data presensi berhasil disinkronkan ke server!`);
-                else alert('Belum dapat terhubung ke server. Silakan coba lagi nanti.');
-              }}
-              className="btn btn-secondary"
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.35rem 0.65rem',
-                background: 'rgba(251, 146, 60, 0.15)',
-                color: '#fb923c',
-                border: '1px solid rgba(251, 146, 60, 0.3)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              Sinkronkan Sekarang
-            </button>
-          </div>
-        )}
+
 
         {(currentUser.role === 'guru' || (currentUser.role === 'admin' && adminViewMode === 'guru')) ? (
           <GuruDashboard
