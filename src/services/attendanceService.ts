@@ -16,9 +16,9 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
   return data.map(item => {
     const extractedSelfie = item.selfie_url || undefined;
 
-    // Ekstrak shift secara cerdas dari notes jika kolom shift kosong/tidak ada di Supabase
-    let extractedShift = undefined;
-    if (item.notes) {
+    // Ekstrak shift: gunakan kolom shift database, jika kosong gunakan fallback notes (data lama)
+    let extractedShift = item.shift || undefined;
+    if (!extractedShift && item.notes) {
       const match = item.notes.match(/Shift:\s*(\w+)/i);
       if (match) {
         extractedShift = match[1].toLowerCase();
@@ -62,13 +62,6 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
 
   const isUuid = rec.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rec.userId);
 
-  // Solusi Aman: Gabungkan info shift ke dalam kolom notes karena kolom shift tidak ada di tabel Supabase
-  const shiftPrefix = rec.shift ? `Shift: ${rec.shift.toUpperCase()}` : '';
-  const existingNotes = rec.notes || 'Presensi Verified';
-  const finalNotes = existingNotes.includes('Shift:') 
-    ? existingNotes 
-    : (shiftPrefix ? `${shiftPrefix} | ${existingNotes}` : existingNotes);
-
   const payload: any = {
     user_name: rec.userName,
     user_nip: rec.userNip,
@@ -78,8 +71,9 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     check_in_lng: rec.checkInLng,
     distance_meters: rec.distanceMeters,
     status: rec.status,
-    notes: finalNotes,
-    selfie_url: rec.selfieUrl || null
+    notes: rec.notes || 'Presensi Verified',
+    selfie_url: rec.selfieUrl || null,
+    shift: rec.shift || null // Simpan langsung ke kolom baru di Supabase
   };
 
   if (isUuid) payload.user_id = rec.userId;
