@@ -31,6 +31,7 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   notes?: string;
   selfieUrl?: string;
+  selfieOutUrl?: string;
   shift?: ShiftType;
 }
 

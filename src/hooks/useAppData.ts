@@ -150,17 +150,41 @@ export function useAppData() {
     }
   };
 
-  const handleCheckOut = async (recordId: string, checkOutTime: string) => {
+  const handleCheckOut = async (recordId: string, checkOutTime: string, selfieUrl?: string) => {
+    const targetRecord = attendanceRecords.find(r => r.id === recordId);
+    let cloudSelfieOutUrl = undefined;
+
+    if (selfieUrl && selfieUrl.startsWith('data:image')) {
+      const userId = targetRecord?.userId || 'unknown';
+      const uploaded = await uploadSelfie(selfieUrl, userId);
+      if (uploaded) {
+        cloudSelfieOutUrl = uploaded;
+      } else {
+        alert('Gagal mengirim presensi pulang: Gagal mengunggah foto selfie pulang ke server.');
+        return;
+      }
+    }
+
     if (isSupabaseConfigured) {
-      const success = await updateCheckOutLive(recordId, checkOutTime);
+      const success = await updateCheckOutLive(
+        recordId,
+        checkOutTime,
+        targetRecord?.userNip,
+        targetRecord?.date,
+        cloudSelfieOutUrl
+      );
       if (success) {
-        setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, checkOutTime } : r)));
+        setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
+          ...r, 
+          checkOutTime, 
+          selfieOutUrl: cloudSelfieOutUrl || r.selfieOutUrl 
+        } : r)));
         alert('Presensi pulang berhasil tersimpan dan tersinkronisasi ke server cloud.');
       } else {
         alert('Gagal mengirim presensi pulang: Koneksi internet terganggu atau server database tidak merespon. Silakan cari sinyal stabil dan coba lagi.');
       }
     } else {
-      setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, checkOutTime } : r)));
+      setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, checkOutTime, selfieOutUrl: selfieUrl } : r)));
     }
   };
 

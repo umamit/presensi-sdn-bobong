@@ -21,7 +21,7 @@ interface GuruDashboardProps {
   schoolSettings: SchoolSettings;
   attendanceRecords: AttendanceRecord[];
   onCheckIn: (record: Partial<AttendanceRecord>) => void;
-  onCheckOut: (recordId: string, checkOutTime: string) => void;
+  onCheckOut: (recordId: string, checkOutTime: string, selfieUrl?: string) => void;
   onOpenLeaveModal: () => void;
   onUpdatePassword: (userId: string, newPass: string) => void;
 }
@@ -35,6 +35,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isChangePassOpen, setIsChangePassOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
+  const [selfieMode, setSelfieMode] = useState<'in' | 'out' | null>(null);
 
   const todayStr = getLocalDateString();
   const userTodayRecord = attendanceRecords.find(r => r.userNip === user.nip && r.date === todayStr);
@@ -105,13 +106,20 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       distanceMeters: distance || 0, status: attendanceStatus, shift: detectedShift,
       notes: latenessNote
     });
+    setSelfieMode('in');
     setIsSelfieOpen(true);
   };
 
   const handleSelfieCapture = (imageDataUrl: string) => {
-    if (!pendingCheckIn) return;
-    onCheckIn({ ...pendingCheckIn, selfieUrl: imageDataUrl });
-    setPendingCheckIn(null);
+    if (selfieMode === 'in') {
+      if (!pendingCheckIn) return;
+      onCheckIn({ ...pendingCheckIn, selfieUrl: imageDataUrl });
+      setPendingCheckIn(null);
+    } else if (selfieMode === 'out') {
+      if (!userTodayRecord) return;
+      onCheckOut(userTodayRecord.id, new Date().toISOString(), imageDataUrl);
+    }
+    setSelfieMode(null);
     setIsSelfieOpen(false);
   };
 
@@ -124,7 +132,15 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     if (nowTimeStr < targetCheckOutStart) { alert(`Absen pulang belum dibuka (Mulai ${targetCheckOutStart} WIT).`); return; }
     if (nowTimeStr > targetCheckOutEnd) { alert(`Batas waktu presensi telah berakhir (${targetCheckOutEnd} WIT).`); return; }
-    onCheckOut(userTodayRecord.id, new Date().toISOString());
+    
+    // Minta deteksi GPS pulang terlebih dahulu untuk memastikan guru berada di lokasi saat pulang
+    if (!isInRadius) {
+      alert(`Gagal Absen Pulang: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
+      return;
+    }
+
+    setSelfieMode('out');
+    setIsSelfieOpen(true);
   };
 
   return (

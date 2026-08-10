@@ -39,6 +39,7 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
       status: item.status,
       notes: item.notes,
       selfieUrl: extractedSelfie,
+      selfieOutUrl: item.selfie_out_url || undefined,
       shift: extractedShift
     };
   });
@@ -90,7 +91,8 @@ export async function updateCheckOutLive(
   id: string,
   checkOutTime: string,
   userNip?: string,
-  date?: string
+  date?: string,
+  selfieOutUrl?: string
 ): Promise<boolean> {
   if (!supabase) return false;
 
@@ -119,9 +121,17 @@ export async function updateCheckOutLive(
     ? `${existingNotes} | Pulang: ${checkOutTimeStr} WIT`
     : `Pulang: ${checkOutTimeStr} WIT`;
 
+  const updatePayload: any = { 
+    check_out_time: checkOutTime, 
+    notes: updatedNotes 
+  };
+  if (selfieOutUrl) {
+    updatePayload.selfie_out_url = selfieOutUrl;
+  }
+
   const { error } = await supabase
     .from('attendance')
-    .update({ check_out_time: checkOutTime, notes: updatedNotes })
+    .update(updatePayload)
     .eq('id', recordId);
 
   if (error) {

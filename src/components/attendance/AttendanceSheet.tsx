@@ -51,49 +51,74 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ record, onClos
 
         {/* 2-Column Responsive Layout */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1, minHeight: 0 }}>
-          {/* Kolom Foto (Atas/Kiri) */}
-          {record.selfieUrl ? (
-            <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)', background: '#090d16', flexShrink: 0 }}>
-              <img
-                src={record.selfieUrl}
-                alt={`Swafoto ${record.userName}`}
-                style={{ width: '100%', maxHeight: '280px', objectFit: 'cover', display: 'block' }}
-              />
-              {/* Watermark GPS */}
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: 'linear-gradient(to top, rgba(9, 13, 22, 0.95) 30%, rgba(9, 13, 22, 0.5) 70%, transparent)',
-                  padding: '0.75rem 1rem',
-                  fontSize: '0.68rem',
-                  color: 'rgba(255, 255, 255, 0.85)',
-                  fontFamily: 'monospace',
-                  lineHeight: 1.35
-                }}
-              >
-                <div>DATE: {record.date} {formatTime(record.checkInTime)}</div>
-                <div>GPS: {record.checkInLat ? `${record.checkInLat.toFixed(6)}, ${record.checkInLng?.toFixed(6)}` : 'UNKNOWN'}</div>
-                <div>DIST: {record.distanceMeters ?? 0} METERS (VERIFIED)</div>
+          {/* Foto Presensi Section (Masuk & Pulang) */}
+          <div style={{ display: 'grid', gridTemplateColumns: record.selfieOutUrl ? '1fr 1fr' : '1fr', gap: '0.75rem', flexShrink: 0 }}>
+            {/* Foto Masuk */}
+            {record.selfieUrl ? (
+              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)', background: '#090d16' }}>
+                <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(16, 185, 129, 0.85)', color: '#fff', fontSize: '0.62rem', padding: '0.15rem 0.35rem', borderRadius: '4px', fontWeight: 600, zIndex: 10 }}>MASUK</div>
+                <img
+                  src={record.selfieUrl}
+                  alt={`Swafoto Masuk ${record.userName}`}
+                  style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+                />
+                {/* Watermark GPS */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(to top, rgba(9, 13, 22, 0.95) 30%, rgba(9, 13, 22, 0.5) 70%, transparent)',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.62rem',
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    fontFamily: 'monospace',
+                    lineHeight: 1.3
+                  }}
+                >
+                  <div>DATE: {record.date} {formatTime(record.checkInTime)}</div>
+                  <div>GPS: {record.checkInLat ? `${record.checkInLat.toFixed(6)}, ${record.checkInLng?.toFixed(6)}` : 'UNKNOWN'}</div>
+                  <div>DIST: {record.distanceMeters ?? 0} METERS</div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                padding: '3rem 1.5rem',
-                textAlign: 'center',
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px dashed rgba(255, 255, 255, 0.08)',
-                borderRadius: '12px',
-                color: 'var(--text-muted)',
-                fontSize: '0.8rem'
-              }}
-            >
-              Bukti swafoto (selfie) tidak tersedia.
-            </div>
-          )}
+            ) : (
+              <div style={{ padding: '2rem 1rem', textAlign: 'center', background: 'rgba(255, 255, 255, 0.02)', border: '1px dashed rgba(255, 255, 255, 0.08)', borderRadius: '12px', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                Bukti swafoto masuk tidak tersedia.
+              </div>
+            )}
+
+            {/* Foto Pulang */}
+            {record.selfieOutUrl && (
+              <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)', background: '#090d16' }}>
+                <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(245, 158, 11, 0.85)', color: '#fff', fontSize: '0.62rem', padding: '0.15rem 0.35rem', borderRadius: '4px', fontWeight: 600, zIndex: 10 }}>PULANG</div>
+                <img
+                  src={record.selfieOutUrl}
+                  alt={`Swafoto Pulang ${record.userName}`}
+                  style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+                />
+                {/* Watermark GPS Pulang */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(to top, rgba(9, 13, 22, 0.95) 30%, rgba(9, 13, 22, 0.5) 70%, transparent)',
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.62rem',
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    fontFamily: 'monospace',
+                    lineHeight: 1.3
+                  }}
+                >
+                  <div>DATE: {record.date} {formatTime(record.checkOutTime)}</div>
+                  <div>GPS: {record.checkInLat ? `${record.checkInLat.toFixed(6)}, ${record.checkInLng?.toFixed(6)}` : 'UNKNOWN'}</div>
+                  <div>STATUS: PULANG VERIFIED</div>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Kolom Informasi Detail (Bawah/Kanan) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

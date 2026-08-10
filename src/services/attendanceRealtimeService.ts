@@ -25,6 +25,7 @@ function mapRow(item: any): AttendanceRecord {
     status: item.status,
     notes: item.notes,
     selfieUrl: item.selfie_url || undefined,
+    selfieOutUrl: item.selfie_out_url || undefined,
     shift: extractedShift,
   };
 }
