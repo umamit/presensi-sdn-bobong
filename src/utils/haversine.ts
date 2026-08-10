@@ -43,11 +43,26 @@ export function isPointInPolygon(
 }
 
 /**
- * Format jam menit dari ISO String atau HH:mm:ss
+ * Format jam menit dari ISO String atau HH:mm:ss dengan proteksi Safari iOS (iPhone)
  */
 export function formatTime(isoString?: string): string {
   if (!isoString) return '--:-- WIT';
-  const date = new Date(isoString);
+  
+  let cleanString = isoString;
+  if (typeof isoString === 'string') {
+    cleanString = isoString.replace(/\s+/g, 'T'); // Ganti spasi dengan T untuk standarisasi ISO
+  }
+
+  const date = new Date(cleanString);
+  if (isNaN(date.getTime())) {
+    // Fallback: Ambil HH:MM menggunakan regex jika parser native browser gagal
+    const timeMatch = isoString.match(/(\d{2}):(\d{2})/);
+    if (timeMatch) {
+      return `${timeMatch[1]}:${timeMatch[2]} WIT`;
+    }
+    return '--:-- WIT';
+  }
+
   return date.toLocaleTimeString('id-ID', {
     hour: '2-digit',
     minute: '2-digit',
@@ -56,11 +71,30 @@ export function formatTime(isoString?: string): string {
 }
 
 /**
- * Format tanggal Indonesia (Contoh: Jumat, 31 Juli 2026)
+ * Format tanggal Indonesia (Contoh: Jumat, 31 Juli 2026) dengan proteksi Safari iOS (iPhone)
  */
 export function formatDateIndo(dateStr?: string): string {
   if (!dateStr) return '';
-  const date = new Date(dateStr);
+  
+  let cleanString = dateStr;
+  if (typeof dateStr === 'string') {
+    cleanString = dateStr.replace(/\s+/g, 'T');
+  }
+
+  const date = new Date(cleanString);
+  if (isNaN(date.getTime())) {
+    // Fallback: Parsing manual jika Invalid Date di Safari
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const day = parseInt(parts[2], 10);
+      const monthIndex = parseInt(parts[1], 10) - 1;
+      const year = parts[0];
+      return `${day} ${months[monthIndex]} ${year}`;
+    }
+    return dateStr;
+  }
+
   return date.toLocaleDateString('id-ID', {
     weekday: 'long',
     day: 'numeric',
