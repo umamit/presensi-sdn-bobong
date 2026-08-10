@@ -33,11 +33,16 @@ export const App: React.FC = () => {
     handleGenerateAlfa
   } = useAppData();
 
-  // Deteksi mode pembukaan aplikasi
+  // Deteksi mode pembukaan aplikasi (PWA/APK) dengan bypass untuk Laptop/PC & Localhost
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
   const isStandalone = 
     window.matchMedia('(display-mode: standalone)').matches || 
     (navigator as any).standalone || 
-    (window as any).Capacitor?.isNativePlatform();
+    (window as any).Capacitor?.isNativePlatform() ||
+    isLocalHost ||
+    !isMobileDevice; // Bebaskan akses jika dibuka dari komputer / laptop admin
 
   if (!isStandalone) {
     return <PwaGuidePage schoolName={schoolSettings.schoolName} />;
