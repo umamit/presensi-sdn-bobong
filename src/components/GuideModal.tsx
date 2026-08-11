@@ -76,7 +76,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ schoolSettings, onClose 
               <strong style={{ fontSize: '0.8rem', color: '#fff', display: 'block', marginBottom: '0.15rem' }}>Untuk PWA (Melalui Google Chrome / Safari):</strong>
               <ol style={{ fontSize: '0.78rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', margin: 0 }}>
                 <li>Tekan ikon <strong>Gembok / Pengaturan</strong> di kiri baris alamat website (URL) browser HP Anda.</li>
-                <li>Pilih <strong>Izin Situs (Site Settings)</strong> $\rightarrow$ Ubah <strong>Lokasi & Kamera</strong> menjadi <strong>"Izinkan / Allow"</strong>.</li>
+                <li>Pilih <strong>Izin Situs (Site Settings)</strong> &rarr; Ubah <strong>Lokasi & Kamera</strong> menjadi <strong>"Izinkan / Allow"</strong>.</li>
                 <li>Muat ulang (*refresh*) halaman web Anda.</li>
               </ol>
             </div>
@@ -85,8 +85,8 @@ export const GuideModal: React.FC<GuideModalProps> = ({ schoolSettings, onClose 
               <strong style={{ fontSize: '0.8rem', color: '#fff', display: 'block', marginBottom: '0.15rem' }}>Untuk APK (Aplikasi HP Terinstal):</strong>
               <ol style={{ fontSize: '0.78rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.2rem', margin: 0 }}>
                 <li>Buka menu <strong>Pengaturan / Settings</strong> di HP Android Anda.</li>
-                <li>Pilih <strong>Aplikasi / Apps</strong> $\rightarrow$ Cari <strong>Presensi SDN Bobong</strong>.</li>
-                <li>Pilih <strong>Izin / Permissions</strong> $\rightarrow$ Ubah <strong>Lokasi & Kamera</strong> menjadi <strong>"Izinkan / Allow"</strong>.</li>
+                <li>Pilih <strong>Aplikasi / Apps</strong> &rarr; Cari <strong>Presensi SDN Bobong</strong>.</li>
+                <li>Pilih <strong>Izin / Permissions</strong> &rarr; Ubah <strong>Lokasi & Kamera</strong> menjadi <strong>"Izinkan / Allow"</strong>.</li>
               </ol>
             </div>
           </div>
