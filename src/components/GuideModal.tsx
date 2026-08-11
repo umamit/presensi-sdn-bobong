@@ -1,11 +1,13 @@
 import React from 'react';
 import { X, MapPin, Camera, CheckCircle2, ShieldCheck, HelpCircle } from 'lucide-react';
+import { SchoolSettings } from '../types';
 
 interface GuideModalProps {
+  schoolSettings: SchoolSettings;
   onClose: () => void;
 }
 
-export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
+export const GuideModal: React.FC<GuideModalProps> = ({ schoolSettings, onClose }) => {
   return (
     <div className="modal-backdrop">
       <div className="glass-panel" style={{ width: '100%', maxWidth: '520px', padding: '1.75rem', background: '#0a0f1a', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -43,11 +45,23 @@ export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
             <h4 style={{ color: '#fbbf24', fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <CheckCircle2 size={16} /> 3. Ketentuan Jam Sekolah (WIT)
             </h4>
-            <ul style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <li>Absen Masuk dibuka mulai jam <strong>06:00 WIT</strong></li>
-              <li>Batas waktu tepat waktu adalah jam <strong>07:15 WIT</strong></li>
-              <li>Absen Pulang resmi dimulai jam <strong>16:00 WIT</strong></li>
-            </ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div>
+                <strong style={{ color: 'var(--primary)', display: 'block', marginBottom: '0.15rem', fontSize: '0.82rem' }}>SHIFT PAGI:</strong>
+                <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <li>Absen Masuk: <strong>{schoolSettings.pagiCheckInOpen || '06:00'} - {schoolSettings.pagiWorkStart || '07:15'} WIT</strong> (Tepat waktu)</li>
+                  <li>Absen Pulang: <strong>{schoolSettings.pagiCheckOutStart || '12:00'} - {schoolSettings.pagiCheckOutEnd || '13:10'} WIT</strong></li>
+                </ul>
+              </div>
+
+              <div style={{ borderTop: '1px dashed rgba(255,255,255,0.08)', paddingTop: '0.5rem' }}>
+                <strong style={{ color: 'var(--warning)', display: 'block', marginBottom: '0.15rem', fontSize: '0.82rem' }}>SHIFT SIANG:</strong>
+                <ul style={{ paddingLeft: '1.2rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <li>Absen Masuk: <strong>{schoolSettings.siangCheckInOpen || '13:30'} - {schoolSettings.siangWorkStart || '14:00'} WIT</strong> (Tepat waktu)</li>
+                  <li>Absen Pulang: <strong>{schoolSettings.siangCheckOutStart || '16:00'} - {schoolSettings.siangCheckOutEnd || '16:45'} WIT</strong></li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div style={{ background: 'rgba(255,69,58,0.08)', border: '1px solid rgba(255,69,58,0.2)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>

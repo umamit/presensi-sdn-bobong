@@ -174,7 +174,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       </div>
 
       {isSelfieOpen && <SelfieModal guruName={user.fullName} onCapture={handleSelfieCapture} onClose={() => { setPendingCheckIn(null); setIsSelfieOpen(false); }} />}
-      {isGuideOpen && <GuideModal onClose={() => setIsGuideOpen(false)} />}
+      {isGuideOpen && <GuideModal schoolSettings={schoolSettings} onClose={() => setIsGuideOpen(false)} />}
       {isChangePassOpen && <ChangePasswordModal currentUser={user} onClose={() => setIsChangePassOpen(false)} onUpdatePassword={onUpdatePassword} />}
     </>
   );
