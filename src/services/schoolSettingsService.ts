@@ -1,19 +1,7 @@
 import { SchoolSettings } from '../types/index';
 import { supabase } from './supabaseClient';
 
-export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> {
-  if (!supabase) return null;
-  const { data, error } = await supabase
-    .from('school_settings')
-    .select('*')
-    .eq('id', 1)
-    .single();
-
-  if (error || !data) {
-    console.warn('Error fetching school settings from Supabase:', error?.message);
-    return null;
-  }
-
+export function parseSchoolSettingsRow(data: any): SchoolSettings {
   const rawAddress = data.address || 'Taliabu Barat';
   let workingText = rawAddress;
   let groqApiKey = '';
@@ -71,6 +59,41 @@ export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> 
     siangCheckOutStart,
     siangCheckOutEnd,
     groqApiKey
+  };
+}
+
+export async function fetchSchoolSettingsLive(): Promise<SchoolSettings | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('school_settings')
+    .select('*')
+    .eq('id', 1)
+    .single();
+
+  if (error || !data) {
+    console.warn('Error fetching school settings from Supabase:', error?.message);
+    return null;
+  }
+
+  return parseSchoolSettingsRow(data);
+}
+
+export function subscribeSchoolSettingsRealtime(onUpdate: (settings: SchoolSettings) => void): () => void {
+  if (!supabase) return () => {};
+
+  const channel = supabase
+    .channel('realtime_school_settings')
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'school_settings', filter: 'id=eq.1' },
+      (payload) => {
+        onUpdate(parseSchoolSettingsRow(payload.new));
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase?.removeChannel(channel);
   };
 }
 

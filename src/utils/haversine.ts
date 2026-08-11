@@ -64,6 +64,7 @@ export function formatTime(isoString?: string): string {
   }
 
   return date.toLocaleTimeString('id-ID', {
+    timeZone: 'Asia/Jayapura',
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
@@ -96,6 +97,7 @@ export function formatDateIndo(dateStr?: string): string {
   }
 
   return date.toLocaleDateString('id-ID', {
+    timeZone: 'Asia/Jayapura',
     weekday: 'long',
     day: 'numeric',
     month: 'long',

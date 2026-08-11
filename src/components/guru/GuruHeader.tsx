@@ -19,7 +19,7 @@ export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime, schoo
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '1.9rem', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
-            {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>WIT • {formatDateIndo(currentTime.toISOString())}</div>
         </div>

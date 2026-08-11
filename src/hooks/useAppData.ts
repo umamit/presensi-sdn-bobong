@@ -6,7 +6,7 @@ import {
   fetchLeavesLive, saveLeaveLive, updateLeaveStatusLive,
   fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive, updateUserLive,
   uploadSelfie, uploadLeaveDocument,
-  fetchSchoolSettingsLive, saveSchoolSettingsLive
+  fetchSchoolSettingsLive, saveSchoolSettingsLive, subscribeSchoolSettingsRealtime
 } from '../lib/supabase';
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
@@ -46,7 +46,7 @@ export function useAppData() {
       });
 
       // Berlangganan Realtime Supabase: INSERT, UPDATE, DELETE
-      const unsubscribe = subscribeAttendanceRealtime(
+      const unsubscribeAtt = subscribeAttendanceRealtime(
         // onInsert
         (newRecord) => {
           setAttendanceRecords(prev => {
@@ -66,7 +66,15 @@ export function useAppData() {
         }
       );
 
-      return () => unsubscribe();
+      // Berlangganan Realtime Perubahan Pengaturan Sekolah
+      const unsubscribeSettings = subscribeSchoolSettingsRealtime((updatedSettings) => {
+        setSchoolSettings(updatedSettings);
+      });
+
+      return () => {
+        unsubscribeAtt();
+        unsubscribeSettings();
+      };
     }
   }, []);
 

@@ -98,6 +98,7 @@ export async function updateCheckOutLive(
 
   // Fix #6: Fetch notes lama dulu, lalu append info jam pulang tanpa menimpa notes masuk
   const checkOutTimeStr = new Date(checkOutTime).toLocaleTimeString('id-ID', {
+    timeZone: 'Asia/Jayapura',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
   });
 

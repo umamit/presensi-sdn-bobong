@@ -60,7 +60,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
 
     const nowISO = new Date().toISOString();
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
     const detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
 
     const checkInOpen   = detectedShift === 'pagi' ? (schoolSettings.pagiCheckInOpen   || '06:00') : (schoolSettings.siangCheckInOpen   || '12:00');
@@ -85,7 +85,15 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         const [h, m] = t.split(':').map(Number);
         return h * 3600 + m * 60;
       };
-      const nowSecs = currentTime.getHours() * 3600 + currentTime.getMinutes() * 60 + currentTime.getSeconds();
+      const formatter = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jayapura',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      });
+      const parts = formatter.formatToParts(currentTime);
+      const h = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+      const m = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+      const s = parseInt(parts.find(p => p.type === 'second')?.value || '0', 10);
+      const nowSecs = h * 3600 + m * 60 + s;
       const workSecs = toSecs(workStart);
       const diffSecs = nowSecs - workSecs;
       const jm = Math.floor(diffSecs / 3600);
@@ -125,7 +133,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   const handleCheckOutSubmit = () => {
     if (!userTodayRecord) return;
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
     const userShift = userTodayRecord.shift || 'pagi';
     const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
     const targetCheckOutEnd = userShift === 'pagi' ? (schoolSettings.pagiCheckOutEnd || '12:00') : (schoolSettings.siangCheckOutEnd || '16:45');

@@ -125,7 +125,7 @@ export const AttendanceSheet: React.FC<AttendanceSheetProps> = ({ record, onClos
             {/* Profil Guru */}
             <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Karyawan</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pegawai</span>
                 <span className={`badge badge-${record.status}`}>{record.status.toUpperCase()}</span>
               </div>
               <strong style={{ fontSize: '1rem', color: '#fff', display: 'block', marginBottom: '0.2rem' }}>{record.userName}</strong>

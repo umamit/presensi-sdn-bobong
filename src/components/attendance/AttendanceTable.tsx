@@ -101,34 +101,71 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 {/* Atas: Profile & Status */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                    {rec.selfieUrl ? (
-                      <button
+                    {rec.selfieUrl || rec.selfieOutUrl ? (
+                      <div
                         onClick={() => setSelectedRecord(rec)}
-                        title="Klik untuk melihat detail & foto selfie"
+                        title="Klik untuk melihat detail & foto presensi"
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          padding: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          position: 'relative',
+                          width: rec.selfieUrl && rec.selfieOutUrl ? '52px' : '36px',
+                          height: '36px',
                           cursor: 'pointer',
-                          borderRadius: '50%',
-                          overflow: 'hidden',
-                          display: 'block'
+                          flexShrink: 0
                         }}
                       >
-                        <img
-                          src={rec.selfieUrl}
-                          alt="Selfie"
-                          style={{
-                            width: '36px',
-                            height: '36px',
-                            objectFit: 'cover',
-                            border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                            transition: 'transform 0.15s'
-                          }}
-                          onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.08)')}
-                          onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                        />
-                      </button>
+                        {rec.selfieUrl && (
+                          <img
+                            src={rec.selfieUrl}
+                            alt="Masuk"
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '1.5px solid #1c1c1e',
+                              position: 'absolute',
+                              left: 0,
+                              zIndex: 2,
+                              transition: 'transform 0.15s'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.1)';
+                              e.currentTarget.style.zIndex = '10';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.zIndex = '2';
+                            }}
+                          />
+                        )}
+                        {rec.selfieOutUrl && (
+                          <img
+                            src={rec.selfieOutUrl}
+                            alt="Pulang"
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '1.5px solid #1c1c1e',
+                              position: 'absolute',
+                              left: rec.selfieUrl ? '16px' : 0,
+                              zIndex: 1,
+                              transition: 'transform 0.15s'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.1)';
+                              e.currentTarget.style.zIndex = '10';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.zIndex = '1';
+                            }}
+                          />
+                        )}
+                      </div>
                     ) : (
                       <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>-</div>
                     )}
