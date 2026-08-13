@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           {/* Brand */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <img src="/logo-sdn-bobong.jpg" alt="Logo SD Negeri Bobong" style={{ width: '34px', height: '34px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }} />
+            <img src="/logo-sdn-bobong.png" alt="Logo SD Negeri Bobong" style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>Presensi Guru</div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: 1 }}>{schoolName}</div>

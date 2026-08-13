@@ -13,7 +13,7 @@ export const LoginHeader: React.FC<LoginHeaderProps> = ({ schoolName }) => (
       boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)',
       border: '2px solid rgba(99, 102, 241, 0.3)'
     }}>
-      <img src="/logo-sdn-bobong.jpg" alt="Logo SD Negeri Bobong" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <img src="/logo-sdn-bobong.png" alt="Logo SD Negeri Bobong" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
     <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>
       Presensi<span style={{ color: 'var(--secondary)' }}>Guru</span>
