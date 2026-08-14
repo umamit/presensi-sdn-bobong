@@ -65,7 +65,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
 
     const nowISO = new Date().toISOString();
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
+    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
     const detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
 
     const checkInOpen   = detectedShift === 'pagi' ? (schoolSettings.pagiCheckInOpen   || '06:00') : (schoolSettings.siangCheckInOpen   || '12:00');
@@ -138,7 +138,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   const handleCheckOutSubmit = () => {
     if (!userTodayRecord) return;
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
+    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
     const userShift = userTodayRecord.shift || 'pagi';
     const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
     const targetCheckOutEnd = userShift === 'pagi' ? (schoolSettings.pagiCheckOutEnd || '12:00') : (schoolSettings.siangCheckOutEnd || '16:45');

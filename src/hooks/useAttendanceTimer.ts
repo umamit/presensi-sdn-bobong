@@ -111,7 +111,7 @@ export function useAttendanceTimer(
       setCurrentTime(now);
 
       // Fallback web notification jika berjalan di browser non-mobile
-      const hoursStr = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
+      const hoursStr = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
       if (hoursStr === pagiMasukStr && !userTodayRecord && 'Notification' in window && Notification.permission === 'granted') {
         new Notification('Pengingat Presensi SD Negeri Bobong', {
           body: `Ayo lakukan presensi masuk pagi sekarang sebelum jam ${schoolSettings?.pagiWorkStart || '07:15'} WIT!`,

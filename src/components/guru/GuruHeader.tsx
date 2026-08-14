@@ -79,7 +79,7 @@ export const GuruHeader: React.FC<GuruHeaderProps> = ({ user, currentTime, schoo
                 fontFamily: 'monospace, sans-serif'
               }}
             >
-              {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':')}
             </span>
             <span style={{ fontSize: '0.68rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.15rem 0.35rem', borderRadius: '4px', fontWeight: 700, letterSpacing: '0.05em' }}>WIT</span>
           </div>

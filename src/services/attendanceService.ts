@@ -100,7 +100,7 @@ export async function updateCheckOutLive(
   const checkOutTimeStr = new Date(checkOutTime).toLocaleTimeString('id-ID', {
     timeZone: 'Asia/Jayapura',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-  });
+  }).replace(/\./g, ':');
 
   // Cari record yang ada: utamakan ID jika UUID valid, jika tidak gunakan userNip + date
   let query = supabase.from('attendance').select('id, notes');

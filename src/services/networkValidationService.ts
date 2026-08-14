@@ -7,6 +7,9 @@ export interface NetworkValidationResult {
  * Validasi Jaringan IP & WiFi Mesh Sekolah SD Negeri Bobong (Poin 4)
  */
 export async function validateSchoolNetwork(): Promise<NetworkValidationResult> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return { isWifiMatched: false, networkInfo: 'Koneksi: Offline / Luar Jaringan' };
+  }
   try {
     const nav = navigator as any;
     const connection = nav.connection || nav.mozConnection || nav.webkitConnection;

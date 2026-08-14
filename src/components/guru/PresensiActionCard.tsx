@@ -28,7 +28,7 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   schoolSettings,
   userShift = 'pagi'
 }) => {
-  const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
+  const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
   const openTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckInOpen || '06:00') : (schoolSettings?.siangCheckInOpen || '12:00');
   const workStart = userShift === 'pagi' ? (schoolSettings?.pagiWorkStart || '07:15') : (schoolSettings?.siangWorkStart || '12:45');
   const closeTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutStart || '11:45') : (schoolSettings?.siangCheckOutStart || '16:00');
