@@ -12,7 +12,7 @@ import { QuickActionButtons } from './guru/QuickActionButtons';
 import { PersonalHistoryList } from './guru/PersonalHistoryList';
 
 import { useGpsLocation } from '../hooks/useGpsLocation';
-import { useAttendanceTimer } from '../hooks/useAttendanceTimer';
+import { useAttendanceTimer, useClockTick } from '../hooks/useAttendanceTimer';
 import { getLocalDateString } from '../utils/haversine';
 import { Fingerprint, History, Menu, Map } from 'lucide-react';
 
@@ -45,7 +45,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     .filter(r => r.userNip === user.nip)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const currentTime = useAttendanceTimer(userTodayRecord, schoolSettings);
+  const currentTime = useClockTick();
+  useAttendanceTimer(userTodayRecord, schoolSettings);
   const { userCoords, distance, gpsLoading, gpsError, isInRadius, fetchGpsLocation } = useGpsLocation(schoolSettings);
 
   const requestNotificationAccess = () => {
