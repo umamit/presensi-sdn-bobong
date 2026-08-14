@@ -27,12 +27,13 @@ interface GuruDashboardProps {
   onUpdatePassword: (userId: string, newPass: string) => void;
   isUpdateAvailable?: boolean;
   currentAppVersion?: string;
+  latestAppVersion?: string;
 }
 
 export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   user, schoolSettings, attendanceRecords,
   onCheckIn, onCheckOut, onOpenLeaveModal, onUpdatePassword,
-  isUpdateAvailable, currentAppVersion
+  isUpdateAvailable, currentAppVersion, latestAppVersion
 }) => {
   const [notes, setNotes] = useState('');
   const [isSelfieOpen, setIsSelfieOpen] = useState(false);
@@ -161,7 +162,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         {isUpdateAvailable && currentAppVersion && (
           <UpdateNoticeBanner
             currentVersion={currentAppVersion}
-            latestVersion={schoolSettings.latestVersion || '1.0.0'}
+            latestVersion={latestAppVersion || '?'}
           />
         )}
         <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />

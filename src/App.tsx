@@ -26,7 +26,7 @@ export const App: React.FC = () => {
 
   const {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
-    isUpdateAvailable, currentAppVersion,
+    isUpdateAvailable, currentAppVersion, latestAppVersion,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
@@ -82,6 +82,7 @@ export const App: React.FC = () => {
             onUpdatePassword={handleUpdateUserPassword}
             isUpdateAvailable={isUpdateAvailable}
             currentAppVersion={currentAppVersion}
+            latestAppVersion={latestAppVersion}
           />
         ) : (
           <AdminDashboard

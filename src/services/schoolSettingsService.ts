@@ -58,8 +58,7 @@ export function parseSchoolSettingsRow(data: any): SchoolSettings {
     siangWorkStart,
     siangCheckOutStart,
     siangCheckOutEnd,
-    groqApiKey,
-    latestVersion: data.latest_version || '1.0.0'
+    groqApiKey
   };
 }
 

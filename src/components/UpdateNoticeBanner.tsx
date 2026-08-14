@@ -21,7 +21,7 @@ export const UpdateNoticeBanner: React.FC<UpdateNoticeBannerProps> = ({ currentV
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1 }}>
         <AlertTriangle size={18} color="#ff9f0a" style={{ flexShrink: 0 }} />
         <span style={{ fontSize: '0.82rem', color: '#ffe0a0', lineHeight: 1.4 }}>
-          <strong>Versi baru tersedia (v{latestVersion})</strong> — Anda menggunakan v{currentVersion}.
+          <strong>Versi baru tersedia (v{latestVersion})</strong> — Anda menggunakan v{currentVersion}.{' '}
           Silakan hubungi <strong>Kepala Sekolah</strong> untuk mendapatkan APK terbaru.
         </span>
       </div>

@@ -12,7 +12,7 @@ import {
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
 import { detectAppType } from '../utils/haversine';
-import { App as CapApp } from '@capacitor/app';
+import { checkForUpdate } from '../services/versionCheckService';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
@@ -22,6 +22,7 @@ export function useAppData() {
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [currentAppVersion, setCurrentAppVersion] = useState('1.0.0');
+  const [latestAppVersion, setLatestAppVersion] = useState('1.0.0');
 
   useEffect(() => {
     const sessionUser = getSessionUser();
@@ -40,16 +41,16 @@ export function useAppData() {
     fetchSchoolSettingsLive().then((liveSettings: SchoolSettings | null) => {
       if (liveSettings) {
         setSchoolSettings(liveSettings);
-        // Cek versi APK terpasang vs latest_version dari Supabase
-        CapApp.getInfo().then(info => {
-          setCurrentAppVersion(info.version);
-          const latest = liveSettings.latestVersion || '1.0.0';
-          if (info.version < latest) setIsUpdateAvailable(true);
-        }).catch(() => {
-          // Berjalan di browser/PWA — skip version check
-        });
       }
     });
+    // Cek versi APK otomatis via buildTime: lokal (bundel APK) vs live (Vercel)
+    checkForUpdate().then(({ isUpdateAvailable: hasUpdate, currentVersion, latestVersion }) => {
+      if (hasUpdate) {
+        setIsUpdateAvailable(true);
+        setCurrentAppVersion(currentVersion);
+        setLatestAppVersion(latestVersion);
+      }
+    }).catch(() => {/* skip jika offline */});
     if (isSupabaseConfigured) {
       fetchAttendanceLive().then((liveAtt: AttendanceRecord[] | null) => {
         if (liveAtt) setAttendanceRecords(liveAtt);
@@ -295,7 +296,7 @@ export function useAppData() {
 
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
-    isUpdateAvailable, currentAppVersion,
+    isUpdateAvailable, currentAppVersion, latestAppVersion,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
