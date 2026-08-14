@@ -1,26 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import { writeFileSync } from 'fs';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-const pkg = require('./package.json');
-
-// Plugin: auto-generate public/version.json saat build
-const autoVersionJson = {
-  name: 'auto-version-json',
-  buildStart() {
-    writeFileSync('public/version.json', JSON.stringify({
-      version: pkg.version,
-      buildTime: Date.now()
-    }));
-  }
-};
 
 export default defineConfig({
   plugins: [
-    autoVersionJson,
     react(),
     VitePWA({
       registerType: 'autoUpdate',

@@ -4,7 +4,6 @@ import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
 import { GuideModal } from './GuideModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
-import { UpdateNoticeBanner } from './UpdateNoticeBanner';
 
 import { GuruHeader } from './guru/GuruHeader';
 import { GpsStatusCard } from './guru/GpsStatusCard';
@@ -25,15 +24,11 @@ interface GuruDashboardProps {
   onCheckOut: (recordId: string, checkOutTime: string, selfieUrl?: string) => void;
   onOpenLeaveModal: () => void;
   onUpdatePassword: (userId: string, newPass: string) => void;
-  isUpdateAvailable?: boolean;
-  currentAppVersion?: string;
-  latestAppVersion?: string;
 }
 
 export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   user, schoolSettings, attendanceRecords,
-  onCheckIn, onCheckOut, onOpenLeaveModal, onUpdatePassword,
-  isUpdateAvailable, currentAppVersion, latestAppVersion
+  onCheckIn, onCheckOut, onOpenLeaveModal, onUpdatePassword
 }) => {
   const [notes, setNotes] = useState('');
   const [isSelfieOpen, setIsSelfieOpen] = useState(false);
@@ -159,12 +154,6 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {isUpdateAvailable && currentAppVersion && (
-          <UpdateNoticeBanner
-            currentVersion={currentAppVersion}
-            latestVersion={latestAppVersion || '?'}
-          />
-        )}
         <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
         <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
         <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />

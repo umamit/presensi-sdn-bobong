@@ -12,7 +12,6 @@ import {
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
 import { detectAppType } from '../utils/haversine';
-import { checkForUpdate } from '../services/versionCheckService';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
@@ -20,9 +19,6 @@ export function useAppData() {
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(INITIAL_SCHOOL_SETTINGS);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
-  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
-  const [currentAppVersion, setCurrentAppVersion] = useState('1.0.0');
-  const [latestAppVersion, setLatestAppVersion] = useState('1.0.0');
 
   useEffect(() => {
     const sessionUser = getSessionUser();
@@ -43,14 +39,6 @@ export function useAppData() {
         setSchoolSettings(liveSettings);
       }
     });
-    // Cek versi APK otomatis via buildTime: lokal (bundel APK) vs live (Vercel)
-    checkForUpdate().then(({ isUpdateAvailable: hasUpdate, currentVersion, latestVersion }) => {
-      if (hasUpdate) {
-        setIsUpdateAvailable(true);
-        setCurrentAppVersion(currentVersion);
-        setLatestAppVersion(latestVersion);
-      }
-    }).catch(() => {/* skip jika offline */});
     if (isSupabaseConfigured) {
       fetchAttendanceLive().then((liveAtt: AttendanceRecord[] | null) => {
         if (liveAtt) setAttendanceRecords(liveAtt);
@@ -296,7 +284,6 @@ export function useAppData() {
 
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
-    isUpdateAvailable, currentAppVersion, latestAppVersion,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
