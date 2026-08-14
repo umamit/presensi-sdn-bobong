@@ -23,7 +23,7 @@ export const AdminGpsRow: React.FC<AdminGpsRowProps> = ({ schoolSettings, onOpen
           Area GPS Presensi: {schoolSettings.schoolName}
         </strong>
         <span style={{ fontSize: '0.78rem', color: '#8e8e93' }}>
-          Koordinat ({schoolSettings.latitude}, {schoolSettings.longitude}) • Max Radius: <strong>{schoolSettings.radiusMeters}m</strong> • Shift Pagi (06:00-12:00) & Shift Siang (12:00-16:45) WIT
+          Koordinat ({schoolSettings.latitude}, {schoolSettings.longitude}) • Max Radius: <strong>{schoolSettings.radiusMeters}m</strong> • Shift Pagi ({schoolSettings.pagiCheckInOpen}-{schoolSettings.pagiCheckOutEnd}) &amp; Shift Siang ({schoolSettings.siangCheckInOpen}-{schoolSettings.siangCheckOutEnd}) WIT
         </span>
       </div>
     </div>

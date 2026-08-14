@@ -43,7 +43,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     .filter(r => r.userNip === user.nip)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const currentTime = useAttendanceTimer(userTodayRecord);
+  const currentTime = useAttendanceTimer(userTodayRecord, schoolSettings);
   const { userCoords, distance, gpsLoading, gpsError, isInRadius, fetchGpsLocation } = useGpsLocation(schoolSettings);
 
   const requestNotificationAccess = () => {

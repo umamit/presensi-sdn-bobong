@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AttendanceRecord } from '../types';
+import { AttendanceRecord, SchoolSettings } from '../types';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 export function useClockTick(): Date {
@@ -13,8 +13,18 @@ export function useClockTick(): Date {
   return currentTime;
 }
 
-// Inisialisasi dan penjadwalan alarm notifikasi lokal sekali saja
-async function setupLocalNotifications() {
+// Helper: hitung jam & menit X menit sebelum dari string "HH:MM"
+function getAlarmTimeBefore(timeStr: string, minutesBefore: number): { hour: number; minute: number } {
+  const [h, m] = timeStr.split(':').map(Number);
+  const totalMinutes = h * 60 + m - minutesBefore;
+  return {
+    hour: Math.floor(totalMinutes / 60),
+    minute: totalMinutes % 60
+  };
+}
+
+// Jadwalkan alarm notifikasi lokal secara dinamis berdasarkan schoolSettings
+async function setupLocalNotifications(s: SchoolSettings) {
   try {
     const perm = await LocalNotifications.checkPermissions();
     if (perm.display !== 'granted') {
@@ -27,15 +37,20 @@ async function setupLocalNotifications() {
       await LocalNotifications.cancel(pending);
     }
 
-    // Jadwalkan notifikasi harian berulang sesuai 2 shift SDN Bobong
+    const pagiMasukAlarm  = getAlarmTimeBefore(s.pagiWorkStart     || '07:15', 15);
+    const pagiPulangAlarm = getAlarmTimeBefore(s.pagiCheckOutStart  || '11:45',  0);
+    const siangMasukAlarm  = getAlarmTimeBefore(s.siangWorkStart    || '12:45', 15);
+    const siangPulangAlarm = getAlarmTimeBefore(s.siangCheckOutStart || '16:00',  0);
+
+    // Jadwalkan notifikasi harian berulang sesuai 2 shift SDN Bobong (dinamis)
     await LocalNotifications.schedule({
       notifications: [
         {
           id: 201,
           title: 'Presensi Masuk Pagi',
-          body: 'Ayo lakukan absen masuk pagi! Batas jam masuk adalah 07:15 WIT.',
+          body: `Ayo lakukan absen masuk pagi! Batas jam masuk adalah ${s.pagiWorkStart || '07:15'} WIT.`,
           schedule: {
-            on: { hour: 6, minute: 45 }, // 15 menit sebelum batas masuk pagi
+            on: pagiMasukAlarm,
             repeats: true,
             allowWhileIdle: true
           }
@@ -43,9 +58,9 @@ async function setupLocalNotifications() {
         {
           id: 202,
           title: 'Presensi Pulang Pagi',
-          body: 'Jam pulang pagi sudah dibuka. Jangan lupa absen pulang pagi sebelum 12:00 WIT!',
+          body: `Jam pulang pagi sudah dibuka. Jangan lupa absen pulang pagi sebelum ${s.pagiCheckOutEnd || '12:00'} WIT!`,
           schedule: {
-            on: { hour: 11, minute: 45 }, // Tepat saat checkout pagi dibuka
+            on: pagiPulangAlarm,
             repeats: true,
             allowWhileIdle: true
           }
@@ -53,9 +68,9 @@ async function setupLocalNotifications() {
         {
           id: 203,
           title: 'Presensi Masuk Siang',
-          body: 'Ayo lakukan absen masuk siang! Batas jam masuk adalah 12:45 WIT.',
+          body: `Ayo lakukan absen masuk siang! Batas jam masuk adalah ${s.siangWorkStart || '12:45'} WIT.`,
           schedule: {
-            on: { hour: 12, minute: 20 }, // Sebelum batas masuk siang
+            on: siangMasukAlarm,
             repeats: true,
             allowWhileIdle: true
           }
@@ -63,44 +78,50 @@ async function setupLocalNotifications() {
         {
           id: 204,
           title: 'Presensi Pulang Siang',
-          body: 'Jam pulang siang sudah dibuka. Jangan lupa absen pulang siang sebelum 16:45 WIT!',
+          body: `Jam pulang siang sudah dibuka. Jangan lupa absen pulang siang sebelum ${s.siangCheckOutEnd || '16:45'} WIT!`,
           schedule: {
-            on: { hour: 16, minute: 0 }, // Tepat saat checkout siang dibuka
+            on: siangPulangAlarm,
             repeats: true,
             allowWhileIdle: true
           }
         }
       ]
     });
-    console.log('✅ Capacitor Local Notifications successfully scheduled for 2 shifts!');
+    console.log('✅ Capacitor Local Notifications successfully scheduled (dynamic shifts)!');
   } catch (err) {
     console.warn('Failed to schedule local notifications:', err);
   }
 }
 
-export function useAttendanceTimer(userTodayRecord: AttendanceRecord | undefined): Date {
+export function useAttendanceTimer(
+  userTodayRecord: AttendanceRecord | undefined,
+  schoolSettings?: SchoolSettings
+): Date {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   useEffect(() => {
     // Setup notifikasi lokal native saat hook pertama kali berjalan
-    setupLocalNotifications();
+    if (schoolSettings) {
+      setupLocalNotifications(schoolSettings);
+    }
 
+    const pagiMasukStr = schoolSettings?.pagiWorkStart || '06:45';
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
 
       // Fallback web notification jika berjalan di browser non-mobile
       const hoursStr = now.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false });
-      if (hoursStr === '06:45' && !userTodayRecord && 'Notification' in window && Notification.permission === 'granted') {
+      if (hoursStr === pagiMasukStr && !userTodayRecord && 'Notification' in window && Notification.permission === 'granted') {
         new Notification('Pengingat Presensi SD Negeri Bobong', {
-          body: 'Ayo lakukan presensi masuk pagi sekarang sebelum jam 07:15 WIT!',
+          body: `Ayo lakukan presensi masuk pagi sekarang sebelum jam ${schoolSettings?.pagiWorkStart || '07:15'} WIT!`,
           icon: '/icon-192.png'
         });
       }
     }, 60000); // Cek per menit untuk fallback web
 
     return () => clearInterval(timer);
-  }, [userTodayRecord]);
+  }, [userTodayRecord, schoolSettings]);
 
   return currentTime;
 }
