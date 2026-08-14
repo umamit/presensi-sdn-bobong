@@ -18,12 +18,34 @@ export const UpdateNoticeBanner: React.FC<UpdateNoticeBannerProps> = ({ currentV
       borderRadius: '14px', padding: '0.85rem 1rem', marginBottom: '0.75rem',
       flexWrap: 'wrap'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, flexWrap: 'wrap' }}>
         <AlertTriangle size={18} color="#ff9f0a" style={{ flexShrink: 0 }} />
-        <span style={{ fontSize: '0.82rem', color: '#ffe0a0', lineHeight: 1.4 }}>
-          <strong>Versi baru tersedia (v{latestVersion})</strong> — Anda menggunakan v{currentVersion}.{' '}
-          Silakan hubungi <strong>Kepala Sekolah</strong> untuk mendapatkan APK terbaru.
+        <span style={{ fontSize: '0.82rem', color: '#ffe0a0', lineHeight: 1.4, flex: 1, minWidth: '200px' }}>
+          <strong>Versi baru tersedia (v{latestVersion})</strong> — Anda menggunakan v{currentVersion}.
         </span>
+        <a
+          href="https://presensi.sdnegeribobong.sch.id/Presensi_SDN_Bobong.apk"
+          download="Presensi_SDN_Bobong.apk"
+          style={{
+            background: '#ff9f0a',
+            color: '#000000',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.4rem 0.8rem',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s ease'
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
+          onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+        >
+          Perbarui Sekarang
+        </a>
       </div>
       <button
         onClick={() => setDismissed(true)}
