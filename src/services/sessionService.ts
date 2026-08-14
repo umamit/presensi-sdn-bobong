@@ -3,30 +3,30 @@ import { UserProfile } from '../types';
 const SESSION_KEY = 'sdn_bobong_session_user';
 
 /**
- * Menyimpan sesi pengguna di sessionStorage (otomatis terhapus saat tab browser ditutup, tidak menggunakan localStorage)
+ * Menyimpan sesi pengguna di localStorage agar bertahan saat APK ditutup & dibuka kembali
  */
 export function saveSessionUser(user: UserProfile | null): void {
   try {
     if (!user) {
-      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
     } else {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
     }
   } catch (e) {
-    console.warn('SessionStorage Error:', e);
+    console.warn('LocalStorage Error:', e);
   }
 }
 
 /**
- * Mengambil sesi pengguna aktif dari sessionStorage saat halaman di-refresh
+ * Mengambil sesi pengguna aktif dari localStorage saat aplikasi dibuka kembali
  */
 export function getSessionUser(): UserProfile | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch (e) {
-    console.warn('SessionStorage Read Error:', e);
+    console.warn('LocalStorage Read Error:', e);
     return null;
   }
 }
