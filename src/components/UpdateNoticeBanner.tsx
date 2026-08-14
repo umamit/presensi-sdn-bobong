@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import { Browser } from '@capacitor/browser';
 
 interface UpdateNoticeBannerProps {
   currentVersion: string;
@@ -10,6 +11,19 @@ export const UpdateNoticeBanner: React.FC<UpdateNoticeBannerProps> = ({ currentV
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
+
+  const handleUpdateClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const url = 'https://presensi.sdnegeribobong.sch.id/Presensi_SDN_Bobong.apk';
+    try {
+      // Buka tautan di browser sistem bawaan HP (seperti Google Chrome)
+      // agar proses unduh file APK berjalan sukses di luar sandbox WebView
+      await Browser.open({ url });
+    } catch (err) {
+      // Fallback untuk browser web biasa jika dijalankan bukan sebagai APK
+      window.open(url, '_blank');
+    }
+  };
 
   return (
     <div style={{
@@ -25,7 +39,7 @@ export const UpdateNoticeBanner: React.FC<UpdateNoticeBannerProps> = ({ currentV
         </span>
         <a
           href="https://presensi.sdnegeribobong.sch.id/Presensi_SDN_Bobong.apk"
-          download="Presensi_SDN_Bobong.apk"
+          onClick={handleUpdateClick}
           style={{
             background: '#ff9f0a',
             color: '#000000',
