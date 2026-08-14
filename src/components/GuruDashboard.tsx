@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
 import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
@@ -14,7 +14,7 @@ import { PersonalHistoryList } from './guru/PersonalHistoryList';
 import { useGpsLocation } from '../hooks/useGpsLocation';
 import { useAttendanceTimer } from '../hooks/useAttendanceTimer';
 import { getLocalDateString } from '../utils/haversine';
-import { useState } from 'react';
+import { Fingerprint, History, Menu, Map } from 'lucide-react';
 
 interface GuruDashboardProps {
   user: UserProfile;
@@ -36,6 +36,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [isChangePassOpen, setIsChangePassOpen] = useState(false);
   const [pendingCheckIn, setPendingCheckIn] = useState<Partial<AttendanceRecord> | null>(null);
   const [selfieMode, setSelfieMode] = useState<'in' | 'out' | null>(null);
+  const [activeTab, setActiveTab] = useState<'absen' | 'riwayat' | 'menu'>('absen');
+  const [showMap, setShowMap] = useState(false);
 
   const todayStr = getLocalDateString();
   const userTodayRecord = attendanceRecords.find(r => r.userNip === user.nip && r.date === todayStr);
@@ -153,24 +155,145 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
-        <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
-        <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
-        <PresensiActionCard
-          todayStr={todayStr}
-          userTodayRecord={userTodayRecord}
-          notes={notes}
-          setNotes={setNotes}
-          isInRadius={isInRadius}
-          handleCheckInSubmit={handleCheckInSubmit}
-          handleCheckOutSubmit={handleCheckOutSubmit}
-          currentTime={currentTime}
-          schoolSettings={schoolSettings}
-          userShift={user.shift || 'pagi'}
-        />
-        <QuickActionButtons setIsChangePassOpen={setIsChangePassOpen} setIsGuideOpen={setIsGuideOpen} onOpenLeaveModal={onOpenLeaveModal} />
-        <PersonalHistoryList userHistory={userHistory} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: '75px' }}>
+        {activeTab === 'absen' && (
+          <>
+            <GuruHeader user={user} currentTime={currentTime} schoolSettings={schoolSettings} />
+            <GpsStatusCard isInRadius={isInRadius} distance={distance} gpsLoading={gpsLoading} gpsError={gpsError} userCoords={userCoords} schoolSettings={schoolSettings} fetchGpsLocation={fetchGpsLocation} />
+            
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="btn btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                fontSize: '0.8rem',
+                padding: '0.5rem 1rem',
+                width: '100%',
+                marginTop: '-0.5rem',
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                cursor: 'pointer'
+              }}
+            >
+              <Map size={14} />
+              {showMap ? 'Sembunyikan Peta Lokasi' : 'Tampilkan Peta Lokasi'}
+            </button>
+
+            {showMap && (
+              <GeofenceMap userCoords={userCoords} centerCoords={{ lat: schoolSettings.latitude, lng: schoolSettings.longitude }} radiusMeters={schoolSettings.radiusMeters} isInRadius={isInRadius} distanceMeters={distance} />
+            )}
+
+            <PresensiActionCard
+              todayStr={todayStr}
+              userTodayRecord={userTodayRecord}
+              notes={notes}
+              setNotes={setNotes}
+              isInRadius={isInRadius}
+              handleCheckInSubmit={handleCheckInSubmit}
+              handleCheckOutSubmit={handleCheckOutSubmit}
+              currentTime={currentTime}
+              schoolSettings={schoolSettings}
+              userShift={user.shift || 'pagi'}
+            />
+          </>
+        )}
+
+        {activeTab === 'riwayat' && (
+          <>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', paddingLeft: '0.25rem', marginBottom: '-0.5rem' }}>RIWAYAT KEHADIRAN PRIBADI</div>
+            <PersonalHistoryList userHistory={userHistory} />
+          </>
+        )}
+
+        {activeTab === 'menu' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem', paddingLeft: '0.25rem' }}>PILIHAN MENU</div>
+            <QuickActionButtons setIsChangePassOpen={setIsChangePassOpen} setIsGuideOpen={setIsGuideOpen} onOpenLeaveModal={onOpenLeaveModal} />
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Navigation Bar */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        background: 'rgba(28,28,30,0.95)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '60px',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        zIndex: 1000
+      }}>
+        <button
+          onClick={() => setActiveTab('absen')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'none',
+            border: 'none',
+            color: activeTab === 'absen' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            transition: 'color 0.2s ease',
+            flex: 1
+          }}
+        >
+          <Fingerprint size={20} color={activeTab === 'absen' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>Presensi</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('riwayat')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'none',
+            border: 'none',
+            color: activeTab === 'riwayat' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            transition: 'color 0.2s ease',
+            flex: 1
+          }}
+        >
+          <History size={20} color={activeTab === 'riwayat' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>Riwayat</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('menu')}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'none',
+            border: 'none',
+            color: activeTab === 'menu' ? 'var(--primary)' : 'var(--text-muted)',
+            gap: '3px',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            transition: 'color 0.2s ease',
+            flex: 1
+          }}
+        >
+          <Menu size={20} color={activeTab === 'menu' ? 'var(--primary)' : 'var(--text-muted)'} />
+          <span>Menu</span>
+        </button>
       </div>
 
       {isSelfieOpen && <SelfieModal guruName={user.fullName} onCapture={handleSelfieCapture} onClose={() => { setPendingCheckIn(null); setIsSelfieOpen(false); }} />}
