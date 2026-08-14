@@ -20,7 +20,8 @@ export const INITIAL_SCHOOL_SETTINGS: SchoolSettings = {
   siangCheckInOpen: '12:10',
   siangWorkStart: '12:45',
   siangCheckOutStart: '16:00',
-  siangCheckOutEnd: '16:45'
+  siangCheckOutEnd: '16:45',
+  latestVersion: '1.0.0'
 };
 
 export const INITIAL_OFFLINE_USERS: UserProfile[] = [

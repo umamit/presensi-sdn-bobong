@@ -12,6 +12,7 @@ import {
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
 import { detectAppType } from '../utils/haversine';
+import { App as CapApp } from '@capacitor/app';
 
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
@@ -19,6 +20,8 @@ export function useAppData() {
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(INITIAL_SCHOOL_SETTINGS);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+  const [currentAppVersion, setCurrentAppVersion] = useState('1.0.0');
 
   useEffect(() => {
     const sessionUser = getSessionUser();
@@ -35,7 +38,17 @@ export function useAppData() {
       }
     });
     fetchSchoolSettingsLive().then((liveSettings: SchoolSettings | null) => {
-      if (liveSettings) setSchoolSettings(liveSettings);
+      if (liveSettings) {
+        setSchoolSettings(liveSettings);
+        // Cek versi APK terpasang vs latest_version dari Supabase
+        CapApp.getInfo().then(info => {
+          setCurrentAppVersion(info.version);
+          const latest = liveSettings.latestVersion || '1.0.0';
+          if (info.version < latest) setIsUpdateAvailable(true);
+        }).catch(() => {
+          // Berjalan di browser/PWA — skip version check
+        });
+      }
     });
     if (isSupabaseConfigured) {
       fetchAttendanceLive().then((liveAtt: AttendanceRecord[] | null) => {
@@ -282,6 +295,7 @@ export function useAppData() {
 
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
+    isUpdateAvailable, currentAppVersion,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
