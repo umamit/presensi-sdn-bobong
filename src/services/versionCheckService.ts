@@ -1,4 +1,4 @@
-const VERCEL_VERSION_URL = 'https://presensi-sdn-bobong.vercel.app/version.json';
+const VERCEL_VERSION_URL = 'https://presensi.sdnegeribobong.sch.id/version.json';
 
 interface VersionInfo {
   version: string;
