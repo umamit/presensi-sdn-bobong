@@ -16,7 +16,17 @@ import { detectAppType } from '../utils/haversine';
 export function useAppData() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>(INITIAL_OFFLINE_USERS);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getSessionUser());
-  const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(INITIAL_SCHOOL_SETTINGS);
+  const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
+    const cached = localStorage.getItem('sdn_bobong_school_settings');
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {
+        console.warn('Failed to parse cached school settings:', e);
+      }
+    }
+    return INITIAL_SCHOOL_SETTINGS;
+  });
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
 
@@ -37,6 +47,7 @@ export function useAppData() {
     fetchSchoolSettingsLive().then((liveSettings: SchoolSettings | null) => {
       if (liveSettings) {
         setSchoolSettings(liveSettings);
+        localStorage.setItem('sdn_bobong_school_settings', JSON.stringify(liveSettings));
       }
     });
     if (isSupabaseConfigured) {
@@ -71,6 +82,7 @@ export function useAppData() {
       // Berlangganan Realtime Perubahan Pengaturan Sekolah
       const unsubscribeSettings = subscribeSchoolSettingsRealtime((updatedSettings) => {
         setSchoolSettings(updatedSettings);
+        localStorage.setItem('sdn_bobong_school_settings', JSON.stringify(updatedSettings));
       });
 
       return () => {
@@ -107,6 +119,7 @@ export function useAppData() {
 
   const handleUpdateSettings = async (newSettings: SchoolSettings) => {
     setSchoolSettings(newSettings);
+    localStorage.setItem('sdn_bobong_school_settings', JSON.stringify(newSettings));
     if (isSupabaseConfigured) await saveSchoolSettingsLive(newSettings);
   };
 
