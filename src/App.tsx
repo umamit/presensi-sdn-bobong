@@ -14,12 +14,15 @@ import { useAppData } from './hooks/useAppData';
 import { exportAttendanceCsv } from './utils/exportCsv';
 
 import { PwaGuidePage } from './components/login/PwaGuidePage';
+import { useNetworkStatus } from './hooks/useNetworkStatus';
+import { WifiOff, Clock } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
+  const { isOnline, pendingSyncCount, syncOfflineData } = useNetworkStatus();
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
 
   const { isPwaInstallable, handleInstallPwa } = usePwaInstall();
@@ -69,6 +72,46 @@ export const App: React.FC = () => {
       />
 
       <main className="app-container">
+        {!isOnline && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '0.6rem',
+            background: 'rgba(255, 69, 58, 0.15)', border: '1px solid rgba(255, 69, 58, 0.4)',
+            borderRadius: '12px', padding: '0.75rem 1rem', marginBottom: '1rem',
+            fontSize: '0.82rem', color: '#ffb3b3', lineHeight: 1.4
+          }}>
+            <WifiOff size={16} color="#ff453a" style={{ flexShrink: 0 }} />
+            <span>
+              <strong>Koneksi Offline (Tanpa Internet)</strong>. Presensi masuk/pulang Anda akan disimpan aman di HP sementara, dan disinkronkan otomatis ke server saat sinyal kembali bagus.
+            </span>
+          </div>
+        )}
+
+        {isOnline && pendingSyncCount > 0 && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem',
+            background: 'rgba(10, 132, 255, 0.15)', border: '1px solid rgba(10, 132, 255, 0.4)',
+            borderRadius: '12px', padding: '0.75rem 1rem', marginBottom: '1rem',
+            fontSize: '0.82rem', color: '#b3d7ff', flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1 }}>
+              <Clock size={16} color="#0a84ff" style={{ flexShrink: 0 }} />
+              <span>
+                Ada <strong>{pendingSyncCount} data presensi offline</strong> belum disinkronkan ke server.
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                syncOfflineData().then(count => {
+                  if (count > 0) alert(`Berhasil sinkronisasi ${count} data presensi offline ke server!`);
+                });
+              }}
+              className="btn btn-primary"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', borderRadius: '8px' }}
+            >
+              Sinkronkan Sekarang
+            </button>
+          </div>
+        )}
 
 
         {(currentUser.role === 'guru' || (currentUser.role === 'admin' && adminViewMode === 'guru')) ? (
