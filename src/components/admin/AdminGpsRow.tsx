@@ -4,10 +4,10 @@ import { MapPin } from 'lucide-react';
 
 interface AdminGpsRowProps {
   schoolSettings: SchoolSettings;
-  onOpenSettingsModal: () => void;
+  onOpenGpsSettings: () => void;
 }
 
-export const AdminGpsRow: React.FC<AdminGpsRowProps> = ({ schoolSettings, onOpenSettingsModal }) => (
+export const AdminGpsRow: React.FC<AdminGpsRowProps> = ({ schoolSettings, onOpenGpsSettings }) => (
   <div style={{
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     background: 'rgba(28, 28, 30, 0.6)', backdropFilter: 'blur(20px)',
@@ -27,7 +27,7 @@ export const AdminGpsRow: React.FC<AdminGpsRowProps> = ({ schoolSettings, onOpen
         </span>
       </div>
     </div>
-    <button onClick={onOpenSettingsModal} className="btn btn-secondary" style={{ fontSize: '0.8rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
+    <button onClick={onOpenGpsSettings} className="btn btn-secondary" style={{ fontSize: '0.8rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)' }}>
       Ubah Titik GPS
     </button>
   </div>

@@ -6,6 +6,7 @@ import { GuruDashboard } from './components/GuruDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { LeaveRequestModal } from './components/LeaveRequestModal';
 import { SchoolSettingsModal } from './components/SchoolSettingsModal';
+import { ShiftSettingsModal } from './components/ShiftSettingsModal';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { TeacherManagementModal } from './components/TeacherManagementModal';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
@@ -20,7 +21,8 @@ import { WifiOff, Clock } from 'lucide-react';
 export const App: React.FC = () => {
   const [adminViewMode, setAdminViewMode] = useState<'admin' | 'guru'>('admin');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isGpsSettingsOpen, setIsGpsSettingsOpen] = useState(false);
+  const [isTimeSettingsOpen, setIsTimeSettingsOpen] = useState(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
   const { isOnline, pendingSyncCount, syncOfflineData } = useNetworkStatus();
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
@@ -131,14 +133,16 @@ export const App: React.FC = () => {
             onUpdateSettings={handleUpdateSettings}
             onUpdateLeaveStatus={handleUpdateLeaveStatus}
             onExportReport={() => exportAttendanceCsv(attendanceRecords)}
-            onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+            onOpenGpsSettings={() => setIsGpsSettingsOpen(true)}
+            onOpenTimeSettings={() => setIsTimeSettingsOpen(true)}
             onGenerateAlfa={handleGenerateAlfa}
           />
         )}
       </main>
 
       {isLeaveModalOpen && <LeaveRequestModal currentUser={currentUser} onClose={() => setIsLeaveModalOpen(false)} onSubmit={handleLeaveSubmit} />}
-      {isSettingsModalOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsSettingsModalOpen(false)} onSave={handleUpdateSettings} />}
+      {isGpsSettingsOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsGpsSettingsOpen(false)} onSave={handleUpdateSettings} />}
+      {isTimeSettingsOpen && <ShiftSettingsModal settings={schoolSettings} onClose={() => setIsTimeSettingsOpen(false)} onSave={handleUpdateSettings} />}
       {isSupabaseModalOpen && <SupabaseConfigModal onClose={() => setIsSupabaseModalOpen(false)} isConfigured={isSupabaseConfigured} />}
       {isTeacherModalOpen && <TeacherManagementModal allUsers={allUsers} onClose={() => setIsTeacherModalOpen(false)} onAddTeacher={handleAddTeacher} onDeleteTeacher={handleDeleteTeacher} onEditTeacher={handleUpdateTeacher} />}
       {isPwaInstallable && <PwaInstallBanner onInstall={handleInstallPwa} />}

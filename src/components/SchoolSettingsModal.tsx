@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { SchoolSettings } from '../types';
 import { X, Save, MapPin, Navigation } from 'lucide-react';
-import { ShiftSettingsForm } from './settings/ShiftSettingsForm';
 import { Geolocation } from '@capacitor/geolocation';
 
 interface SchoolSettingsModalProps {
@@ -126,11 +125,9 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
             </span>
           </div>
 
-          <ShiftSettingsForm formData={formData} setFormData={setFormData} />
-
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Batal</button>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}><Save size={16} /> Simpan Lokasi & Aturan</button>
+            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}><Save size={16} /> Simpan Setelan GPS</button>
           </div>
         </form>
       </div>

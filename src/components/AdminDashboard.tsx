@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile, SchoolSettings, LeaveRequest } from '../types';
-import { FileSpreadsheet, Settings, ShieldCheck, RefreshCw, UserX } from 'lucide-react';
+import { FileSpreadsheet, Settings, ShieldCheck, RefreshCw, UserX, Clock, MapPin } from 'lucide-react';
 import { AdminStatBar } from './attendance/AdminStatBar';
 import { AdminGpsRow } from './admin/AdminGpsRow';
 import { AttendanceTable } from './attendance/AttendanceTable';
@@ -18,13 +18,14 @@ interface AdminDashboardProps {
   onUpdateSettings: (newSettings: SchoolSettings) => void;
   onUpdateLeaveStatus: (requestId: string, newStatus: 'approved' | 'rejected') => void;
   onExportReport: () => void;
-  onOpenSettingsModal: () => void;
+  onOpenGpsSettings: () => void;
+  onOpenTimeSettings: () => void;
   onGenerateAlfa: (todayStr: string) => void;
 }
 
 export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProps>> = ({
   allUsers, schoolSettings, leaveRequests,
-  onUpdateLeaveStatus, onExportReport, onOpenSettingsModal, onGenerateAlfa
+  onUpdateLeaveStatus, onExportReport, onOpenGpsSettings, onOpenTimeSettings, onGenerateAlfa
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
@@ -63,8 +64,11 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
           <button onClick={refetch} className="btn btn-secondary" style={{ padding: '0.55rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }} title="Refresh Data" disabled={loading}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
-          <button onClick={onOpenSettingsModal} className="btn btn-secondary" style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px' }}>
-            <Settings size={14} /><span>Pengaturan GPS</span>
+          <button onClick={onOpenGpsSettings} className="btn btn-secondary" style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <MapPin size={14} /><span>Setelan GPS</span>
+          </button>
+          <button onClick={onOpenTimeSettings} className="btn btn-secondary" style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Clock size={14} /><span>Setelan Waktu</span>
           </button>
           <button
             onClick={() => {
@@ -96,14 +100,14 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
       />
 
       {/* Tampilan Gps Row Sekolah */}
-      <AdminGpsRow schoolSettings={schoolSettings} onOpenSettingsModal={onOpenSettingsModal} />
+      <AdminGpsRow schoolSettings={schoolSettings} onOpenGpsSettings={onOpenGpsSettings} />
 
       {/* Analisis Laporan Cerdas AI Groq */}
       <SmartInsightsSection 
         records={recordsToday} 
         totalGuru={totalGuru} 
         schoolSettings={schoolSettings} 
-        onOpenSettingsModal={onOpenSettingsModal} 
+        onOpenSettingsModal={onOpenGpsSettings} 
       />
 
       {/* Loading & Empty State Handling */}
