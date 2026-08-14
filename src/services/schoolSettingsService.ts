@@ -29,14 +29,14 @@ export function parseSchoolSettingsRow(data: any): SchoolSettings {
 
     const timeParts = timeString.split('|');
     if (timeParts.length === 8) {
-      pagiCheckInOpen = timeParts[0];
-      pagiWorkStart = timeParts[1];
-      pagiCheckOutStart = timeParts[2];
-      pagiCheckOutEnd = timeParts[3];
-      siangCheckInOpen = timeParts[4];
-      siangWorkStart = timeParts[5];
-      siangCheckOutStart = timeParts[6];
-      siangCheckOutEnd = timeParts[7];
+      pagiCheckInOpen = timeParts[0].replace(/\./g, ':');
+      pagiWorkStart = timeParts[1].replace(/\./g, ':');
+      pagiCheckOutStart = timeParts[2].replace(/\./g, ':');
+      pagiCheckOutEnd = timeParts[3].replace(/\./g, ':');
+      siangCheckInOpen = timeParts[4].replace(/\./g, ':');
+      siangWorkStart = timeParts[5].replace(/\./g, ':');
+      siangCheckOutStart = timeParts[6].replace(/\./g, ':');
+      siangCheckOutEnd = timeParts[7].replace(/\./g, ':');
     }
   }
 
