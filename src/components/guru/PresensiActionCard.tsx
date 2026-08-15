@@ -49,7 +49,7 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
 
   let buttonText = 'Absen Masuk Sekarang';
   if (isDinasLuar) {
-    buttonText = 'Absen Dinas Luar (Bypass GPS)';
+    buttonText = 'Absen Masuk Dinas Luar';
   } else if (!isInRadius) {
     buttonText = 'Di Luar Radius Sekolah';
   } else if (isTooEarly) {
@@ -79,7 +79,7 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>Dinas Luar / Tugas Luar</span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Abaikan radius aman GPS sekolah</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Presensi dinas di luar lingkungan sekolah</span>
           </div>
           <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px' }}>
             <input
