@@ -72,8 +72,20 @@ export async function syncOfflineAttendanceQueue(): Promise<number> {
 
         success = await saveAttendanceLive(rec);
       } else {
-        // Fix offline check-out: panggil updateCheckOutLive dengan parameter userNip & date sebagai fallback
-        success = await updateCheckOutLive(item.id, item.time, item.userNip, item.date);
+        let selfieOutUrl = undefined;
+        if (item.selfieBase64) {
+          const uploaded = await uploadSelfie(item.selfieBase64, item.userId);
+          selfieOutUrl = uploaded || undefined;
+        }
+        // Fix offline check-out: unggah selfieOutUrl dan teruskan catatan darurat (jika ada) ke updateCheckOutLive
+        success = await updateCheckOutLive(
+          item.id, 
+          item.time, 
+          item.userNip, 
+          item.date, 
+          selfieOutUrl, 
+          item.notes
+        );
       }
 
       if (success) {

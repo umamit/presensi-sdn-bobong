@@ -9,10 +9,11 @@ interface TeacherManagementModalProps {
   onAddTeacher: (newTeacher: UserProfile) => void;
   onDeleteTeacher: (userId: string, fullName: string) => void;
   onEditTeacher: (updatedTeacher: UserProfile) => void;
+  onResetFace?: (userId: string, fullName: string) => void;
 }
 
 export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
-  allUsers, onClose, onAddTeacher, onDeleteTeacher, onEditTeacher
+  allUsers, onClose, onAddTeacher, onDeleteTeacher, onEditTeacher, onResetFace
 }) => {
   const [activeTab, setActiveTab] = useState<'list' | 'add' | 'edit'>('list');
   const [editingTeacher, setEditingTeacher] = useState<UserProfile | null>(null);
@@ -56,6 +57,7 @@ export const TeacherManagementModal: React.FC<TeacherManagementModalProps> = ({
                 user={u} 
                 onDelete={onDeleteTeacher} 
                 onEditClick={handleStartEdit} 
+                onResetFace={onResetFace}
               />
             ))}
           </div>

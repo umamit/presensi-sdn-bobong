@@ -92,7 +92,8 @@ export async function updateCheckOutLive(
   checkOutTime: string,
   userNip?: string,
   date?: string,
-  selfieOutUrl?: string
+  selfieOutUrl?: string,
+  bypassNote?: string
 ): Promise<boolean> {
   if (!supabase) return false;
 
@@ -118,9 +119,13 @@ export async function updateCheckOutLive(
 
   const recordId = existing?.id || id;
   const existingNotes = existing?.notes || '';
-  const updatedNotes = existingNotes
+  let updatedNotes = existingNotes
     ? `${existingNotes} | Pulang: ${checkOutTimeStr} WIT`
     : `Pulang: ${checkOutTimeStr} WIT`;
+
+  if (bypassNote) {
+    updatedNotes = `${updatedNotes} | ${bypassNote}`;
+  }
 
   const updatePayload: any = { 
     check_out_time: checkOutTime, 

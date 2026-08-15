@@ -9,6 +9,7 @@ import { SchoolSettingsModal } from './components/SchoolSettingsModal';
 import { ShiftSettingsModal } from './components/ShiftSettingsModal';
 import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { TeacherManagementModal } from './components/TeacherManagementModal';
+import { FaceEnrollmentModal } from './components/FaceEnrollmentModal';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { useAppData } from './hooks/useAppData';
@@ -35,7 +36,7 @@ export const App: React.FC = () => {
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
-    handleGenerateAlfa
+    handleGenerateAlfa, handleRegisterFace
   } = useAppData();
 
   // Deteksi mode pembukaan aplikasi (PWA/APK) dengan bypass untuk Laptop/PC & Localhost
@@ -143,8 +144,29 @@ export const App: React.FC = () => {
       {isGpsSettingsOpen && <SchoolSettingsModal settings={schoolSettings} onClose={() => setIsGpsSettingsOpen(false)} onSave={handleUpdateSettings} />}
       {isTimeSettingsOpen && <ShiftSettingsModal settings={schoolSettings} onClose={() => setIsTimeSettingsOpen(false)} onSave={handleUpdateSettings} />}
       {isSupabaseModalOpen && <SupabaseConfigModal onClose={() => setIsSupabaseModalOpen(false)} isConfigured={isSupabaseConfigured} />}
-      {isTeacherModalOpen && <TeacherManagementModal allUsers={allUsers} onClose={() => setIsTeacherModalOpen(false)} onAddTeacher={handleAddTeacher} onDeleteTeacher={handleDeleteTeacher} onEditTeacher={handleUpdateTeacher} />}
+      {isTeacherModalOpen && (
+        <TeacherManagementModal
+          allUsers={allUsers}
+          onClose={() => setIsTeacherModalOpen(false)}
+          onAddTeacher={handleAddTeacher}
+          onDeleteTeacher={handleDeleteTeacher}
+          onEditTeacher={handleUpdateTeacher}
+          onResetFace={(userId, fullName) => {
+            if (confirm(`Reset pendaftaran wajah guru ${fullName}?\nSetelah di-reset, guru wajib mendaftarkan wajahnya kembali saat login berikutnya.`)) {
+              handleRegisterFace(userId, '');
+            }
+          }}
+        />
+      )}
       {isPwaInstallable && <PwaInstallBanner onInstall={handleInstallPwa} />}
+
+      {currentUser && currentUser.role === 'guru' && !currentUser.faceDescriptor && (
+        <FaceEnrollmentModal
+          guruName={currentUser.fullName}
+          onRegister={(desc) => handleRegisterFace(currentUser.id, desc)}
+          onClose={() => handleLogout()}
+        />
+      )}
     </div>
   );
 };

@@ -13,6 +13,7 @@ export interface UserProfile {
   phone?: string;
   password?: string;
   shift?: ShiftType; // 'pagi' | 'siang'
+  faceDescriptor?: string;
 }
 
 export type AttendanceStatus = 'hadir' | 'terlambat' | 'izin' | 'alfa';

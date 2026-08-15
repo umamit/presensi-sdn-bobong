@@ -6,11 +6,13 @@ import {
   fetchLeavesLive, saveLeaveLive, updateLeaveStatusLive,
   fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive, updateUserLive,
   uploadSelfie, uploadLeaveDocument,
-  fetchSchoolSettingsLive, saveSchoolSettingsLive, subscribeSchoolSettingsRealtime
+  fetchSchoolSettingsLive, saveSchoolSettingsLive, subscribeSchoolSettingsRealtime,
+  updateUserFaceDescriptorLive
 } from '../lib/supabase';
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
+import { saveOfflineAttendanceItem } from '../services/offlineSyncService';
 import { detectAppType } from '../utils/haversine';
 
 export function useAppData() {
@@ -166,14 +168,33 @@ export function useAppData() {
         setAttendanceRecords(prev => [fullRecord, ...prev]);
         alert('Presensi masuk berhasil tersimpan dan tersinkronisasi ke server cloud.');
       } else {
-        alert('Gagal mengirim presensi: Koneksi internet terganggu atau server database tidak merespon. Silakan cari sinyal stabil dan coba lagi.');
+        // Simpan ke antrean offline jika gagal (misal koneksi down)
+        const offlineItem = {
+          id: fullRecord.id,
+          userId: fullRecord.userId,
+          userName: fullRecord.userName,
+          userNip: fullRecord.userNip,
+          date: fullRecord.date,
+          time: fullRecord.checkInTime || new Date().toISOString(),
+          type: 'in' as const,
+          selfieBase64: newRecord.selfieUrl || '',
+          distanceMeters: fullRecord.distanceMeters || 0,
+          notes: fullRecord.notes,
+          timestamp: Date.now(),
+          shift: fullRecord.shift,
+          status: fullRecord.status
+        };
+        saveOfflineAttendanceItem(offlineItem);
+        
+        setAttendanceRecords(prev => [fullRecord, ...prev]);
+        alert('Jaringan terganggu. Presensi disimpan sementara di HP lokal dan akan otomatis tersinkronisasi saat sinyal kembali pulih.');
       }
     } else {
       setAttendanceRecords(prev => [fullRecord, ...prev]);
     }
   };
 
-  const handleCheckOut = async (recordId: string, checkOutTime: string, selfieUrl?: string) => {
+  const handleCheckOut = async (recordId: string, checkOutTime: string, selfieUrl?: string, bypassNote?: string) => {
     const targetRecord = attendanceRecords.find(r => r.id === recordId);
     let cloudSelfieOutUrl = undefined;
 
@@ -194,20 +215,51 @@ export function useAppData() {
         checkOutTime,
         targetRecord?.userNip,
         targetRecord?.date,
-        cloudSelfieOutUrl
+        cloudSelfieOutUrl,
+        bypassNote
       );
       if (success) {
         setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
           ...r, 
           checkOutTime, 
-          selfieOutUrl: cloudSelfieOutUrl || r.selfieOutUrl 
+          selfieOutUrl: cloudSelfieOutUrl || r.selfieOutUrl,
+          notes: bypassNote ? `${r.notes || ''} | ${bypassNote}` : r.notes
         } : r)));
         alert('Presensi pulang berhasil tersimpan dan tersinkronisasi ke server cloud.');
       } else {
-        alert('Gagal mengirim presensi pulang: Koneksi internet terganggu atau server database tidak merespon. Silakan cari sinyal stabil dan coba lagi.');
+        // Simpan ke antrean offline jika gagal (offline)
+        const offlineItem = {
+          id: recordId,
+          userId: targetRecord?.userId || 'unknown',
+          userName: targetRecord?.userName || 'unknown',
+          userNip: targetRecord?.userNip || 'unknown',
+          date: targetRecord?.date || new Date().toISOString().split('T')[0],
+          time: checkOutTime,
+          type: 'out' as const,
+          selfieBase64: selfieUrl || '',
+          distanceMeters: targetRecord?.distanceMeters || 0,
+          notes: bypassNote,
+          timestamp: Date.now(),
+          shift: targetRecord?.shift,
+          status: targetRecord?.status
+        };
+        saveOfflineAttendanceItem(offlineItem);
+
+        setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
+          ...r, 
+          checkOutTime, 
+          selfieOutUrl: selfieUrl,
+          notes: bypassNote ? `${r.notes || ''} | ${bypassNote}` : r.notes
+        } : r)));
+        alert('Jaringan terganggu. Presensi pulang disimpan sementara di HP lokal dan akan otomatis tersinkronisasi saat sinyal kembali pulih.');
       }
     } else {
-      setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, checkOutTime, selfieOutUrl: selfieUrl } : r)));
+      setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
+        ...r, 
+        checkOutTime, 
+        selfieOutUrl: selfieUrl,
+        notes: bypassNote ? `${r.notes || ''} | ${bypassNote}` : r.notes
+      } : r)));
     }
   };
 
@@ -295,12 +347,32 @@ export function useAppData() {
     alert(`${newAlfaRecords.length} rekap ALFA berhasil dibuat untuk: ${newAlfaRecords.map(r => r.userName).join(', ')}.`);
   };
 
+  const handleRegisterFace = async (userId: string, faceDescriptorStr: string) => {
+    if (isSupabaseConfigured) {
+      const success = await updateUserFaceDescriptorLive(userId, faceDescriptorStr);
+      if (!success) {
+        alert('Gagal menyimpan sidik jari wajah ke server database. Periksa koneksi internet Anda.');
+        return;
+      }
+    }
+
+    // Perbarui state lokal untuk users
+    setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, faceDescriptor: faceDescriptorStr } : u));
+
+    // Perbarui session & currentUser jika user aktif
+    if (currentUser && currentUser.id === userId) {
+      const updatedUser = { ...currentUser, faceDescriptor: faceDescriptorStr };
+      setCurrentUser(updatedUser);
+      saveSessionUser(updatedUser);
+    }
+  };
+
   return {
     allUsers, currentUser, schoolSettings, attendanceRecords, leaveRequests,
     handleLoginSuccess, handleLogout,
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
-    handleGenerateAlfa
+    handleGenerateAlfa, handleRegisterFace
   };
 }

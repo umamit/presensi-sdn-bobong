@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../../types';
-import { UserPlus, Trash2, Edit2 } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, RotateCcw } from 'lucide-react';
 
 interface TeacherAddFormProps {
   allUsers: UserProfile[];
@@ -140,13 +140,20 @@ interface TeacherListItemProps {
   user: UserProfile;
   onDelete: (userId: string, fullName: string) => void;
   onEditClick: (user: UserProfile) => void;
+  onResetFace?: (userId: string, fullName: string) => void;
 }
 
-export const TeacherListItem: React.FC<TeacherListItemProps> = ({ user, onDelete, onEditClick }) => (
+export const TeacherListItem: React.FC<TeacherListItemProps> = ({ user, onDelete, onEditClick, onResetFace }) => (
   <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.9rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
       <span style={{ color: '#ffffff', fontSize: '0.92rem', fontWeight: 700 }}>{user.fullName}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+        {user.faceDescriptor && onResetFace && (
+          <button onClick={() => onResetFace(user.id, user.fullName)} style={{ background: 'rgba(255,159,10,0.15)', border: '1px solid rgba(255,159,10,0.3)', color: '#ff9f0a', borderRadius: '6px', padding: '0.2rem 0.4rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }} title="Reset Registrasi Wajah">
+            <RotateCcw size={11} />
+            <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Reset Wajah</span>
+          </button>
+        )}
         <span className={`badge ${user.role === 'admin' ? 'badge-terlambat' : 'badge-izin'}`} style={{ fontSize: '0.65rem' }}>{user.role.toUpperCase()}</span>
         <button onClick={() => onEditClick(user)} style={{ background: 'rgba(10,132,255,0.15)', border: '1px solid rgba(10,132,255,0.3)', color: '#0a84ff', borderRadius: '6px', padding: '0.2rem 0.4rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }} title="Edit Profil Guru">
           <Edit2 size={12} />

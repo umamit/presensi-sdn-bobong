@@ -19,7 +19,8 @@ export async function fetchUsersLive(): Promise<UserProfile[] | null> {
     email: item.email,
     role: item.role,
     subject: item.subject,
-    password: item.password
+    password: item.password,
+    faceDescriptor: item.face_descriptor || undefined
   }));
 }
 
@@ -51,6 +52,20 @@ export async function updateUserPasswordLive(userId: string, newPassword: string
 
   if (error) {
     console.error('Error updating user password in Supabase:', error.message);
+    return false;
+  }
+  return true;
+}
+
+export async function updateUserFaceDescriptorLive(userId: string, descriptor: string | null): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from('users')
+    .update({ face_descriptor: descriptor })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating user face descriptor in Supabase:', error.message);
     return false;
   }
   return true;

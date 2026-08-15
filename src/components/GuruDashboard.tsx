@@ -21,7 +21,7 @@ interface GuruDashboardProps {
   schoolSettings: SchoolSettings;
   attendanceRecords: AttendanceRecord[];
   onCheckIn: (record: Partial<AttendanceRecord>) => void;
-  onCheckOut: (recordId: string, checkOutTime: string, selfieUrl?: string) => void;
+  onCheckOut: (recordId: string, checkOutTime: string, selfieUrl?: string, bypassNote?: string) => void;
   onOpenLeaveModal: () => void;
   onUpdatePassword: (userId: string, newPass: string) => void;
 }
@@ -121,14 +121,20 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     setIsSelfieOpen(true);
   };
 
-  const handleSelfieCapture = (imageDataUrl: string) => {
+  const handleSelfieCapture = (imageDataUrl: string, bypassNote?: string) => {
     if (selfieMode === 'in') {
       if (!pendingCheckIn) return;
-      onCheckIn({ ...pendingCheckIn, selfieUrl: imageDataUrl });
+      let finalCheckIn = { ...pendingCheckIn, selfieUrl: imageDataUrl };
+      if (bypassNote) {
+        finalCheckIn.notes = finalCheckIn.notes 
+          ? `${finalCheckIn.notes} | ${bypassNote}` 
+          : bypassNote;
+      }
+      onCheckIn(finalCheckIn);
       setPendingCheckIn(null);
     } else if (selfieMode === 'out') {
       if (!userTodayRecord) return;
-      onCheckOut(userTodayRecord.id, new Date().toISOString(), imageDataUrl);
+      onCheckOut(userTodayRecord.id, new Date().toISOString(), imageDataUrl, bypassNote);
     }
     setSelfieMode(null);
     setIsSelfieOpen(false);
@@ -297,7 +303,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
         </button>
       </div>
 
-      {isSelfieOpen && <SelfieModal guruName={user.fullName} onCapture={handleSelfieCapture} onClose={() => { setPendingCheckIn(null); setIsSelfieOpen(false); }} />}
+      {isSelfieOpen && <SelfieModal guruName={user.fullName} faceDescriptor={user.faceDescriptor} onCapture={handleSelfieCapture} onClose={() => { setPendingCheckIn(null); setIsSelfieOpen(false); }} />}
       {isGuideOpen && <GuideModal schoolSettings={schoolSettings} onClose={() => setIsGuideOpen(false)} />}
       {isChangePassOpen && <ChangePasswordModal currentUser={user} onClose={() => setIsChangePassOpen(false)} onUpdatePassword={onUpdatePassword} />}
     </>
