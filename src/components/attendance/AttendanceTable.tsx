@@ -12,6 +12,7 @@ interface AttendanceTableProps {
   selectedDate: string;
   setSelectedDate: (val: string) => void;
   onRefresh?: () => void;
+  onConfirmDinasLuar?: (recordId: string) => void;
 }
 
 export const AttendanceTable: React.FC<AttendanceTableProps> = ({
@@ -20,7 +21,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   setSearchTerm,
   selectedDate,
   setSelectedDate,
-  onRefresh
+  onRefresh,
+  onConfirmDinasLuar
 }) => {
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
 
@@ -31,7 +33,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       case 'terlambat': return 'var(--warning)';
       case 'izin': return 'var(--primary)';
       case 'sakit': return 'var(--warning)';
-      case 'dinas_luar': return '#0a84ff';
+      case 'dinas_luar': return '#ff9f0a';
+      case 'dinas_luar_approved': return '#0a84ff';
       default: return 'var(--danger)';
     }
   };
@@ -178,7 +181,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
                   {/* Status Badge with active pinging dot */}
                   <span
-                    className={`badge badge-${rec.status}`}
+                    className={`badge badge-${rec.status === 'dinas_luar_approved' ? 'dinas_luar' : rec.status}`}
                     style={{
                       flexShrink: 0,
                       gap: '0.35rem',
@@ -191,7 +194,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <span className="dot-ping-wave" style={{ backgroundColor: dotColor }} />
                       <span className="dot-ping-core" style={{ backgroundColor: dotColor }} />
                     </span>
-                    <span>{rec.status.toUpperCase()}</span>
+                    <span>
+                      {rec.status === 'dinas_luar'
+                        ? 'DL (PENDING)'
+                        : rec.status === 'dinas_luar_approved'
+                          ? 'DL (DISETUJUI)'
+                          : rec.status.toUpperCase()}
+                    </span>
                   </span>
                 </div>
 
@@ -237,6 +246,46 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   }}>
                     <AlertTriangle size={13} />
                     <span>{rec.notes}</span>
+                  </div>
+                )}
+
+                {/* Tombol Konfirmasi Dinas Luar (Opsi B) */}
+                {rec.status === 'dinas_luar' && onConfirmDinasLuar && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'rgba(255, 159, 10, 0.08)',
+                    border: '1px solid rgba(255, 159, 10, 0.2)',
+                    borderRadius: '8px',
+                    padding: '0.45rem 0.75rem',
+                    marginTop: '0.25rem',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    <span style={{ fontSize: '0.74rem', color: '#ff9f0a', fontWeight: 500 }}>
+                      ⚠️ Memerlukan konfirmasi Kepala Sekolah
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Konfirmasi kehadiran tugas luar untuk ${rec.userName}?`)) {
+                          onConfirmDinasLuar(rec.id);
+                        }
+                      }}
+                      style={{
+                        background: 'var(--primary)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.35rem 0.75rem',
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'background 0.2s'
+                      }}
+                    >
+                      Konfirmasi Hadir
+                    </button>
                   </div>
                 )}
               </div>

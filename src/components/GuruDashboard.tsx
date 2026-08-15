@@ -155,7 +155,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     if (nowTimeStr > targetCheckOutEnd) { alert(`Batas waktu presensi telah berakhir (${targetCheckOutEnd} WIT).`); return; }
     
     // Minta deteksi GPS pulang terlebih dahulu (kecuali jika berstatus Dinas Luar)
-    const activeDinasLuar = userTodayRecord.status === 'dinas_luar';
+    const activeDinasLuar = userTodayRecord.status === 'dinas_luar' || userTodayRecord.status === 'dinas_luar_approved';
     if (!activeDinasLuar && !isInRadius) {
       alert(`Gagal Absen Pulang: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
       return;

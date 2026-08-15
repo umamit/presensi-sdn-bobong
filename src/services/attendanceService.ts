@@ -146,3 +146,30 @@ export async function updateCheckOutLive(
   }
   return true;
 }
+
+export async function updateAttendanceStatusLive(id: string, status: string): Promise<boolean> {
+  if (!supabase) return false;
+
+  let recordId = id;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  if (!isUuid) {
+    // Cari row yang valid dengan query jika ID aslinya berupa custom ID
+    const { data: existing } = await supabase
+      .from('attendance')
+      .select('id')
+      .eq('id', id)
+      .maybeSingle();
+    if (existing) recordId = existing.id;
+  }
+
+  const { error } = await supabase
+    .from('attendance')
+    .update({ status })
+    .eq('id', recordId);
+
+  if (error) {
+    console.error('Error updating attendance status in Supabase:', error.message);
+    return false;
+  }
+  return true;
+}

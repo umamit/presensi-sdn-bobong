@@ -43,7 +43,7 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   const isTimeValid = !isTooEarly && !isTooLate;
 
   // Jika sedang Dinas Luar, abaikan pengecekan radius GPS sekolah
-  const activeDinasLuar = userTodayRecord ? (userTodayRecord.status === 'dinas_luar') : isDinasLuar;
+  const activeDinasLuar = userTodayRecord ? (userTodayRecord.status === 'dinas_luar' || userTodayRecord.status === 'dinas_luar_approved') : isDinasLuar;
   const isEffectiveInRadius = activeDinasLuar || isInRadius;
   const isButtonEnabled = isEffectiveInRadius && isTimeValid;
 

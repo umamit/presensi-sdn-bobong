@@ -7,7 +7,7 @@ import {
   fetchUsersLive, addUserLive, deleteUserLive, updateUserPasswordLive, updateUserLive,
   uploadSelfie, uploadLeaveDocument,
   fetchSchoolSettingsLive, saveSchoolSettingsLive, subscribeSchoolSettingsRealtime,
-  updateUserFaceDescriptorLive
+  updateUserFaceDescriptorLive, updateAttendanceStatusLive
 } from '../lib/supabase';
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
@@ -321,6 +321,20 @@ export function useAppData() {
     if (isSupabaseConfigured) await updateUserPasswordLive(userId, newPass);
   };
 
+  const handleConfirmDinasLuar = async (recordId: string) => {
+    setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { ...r, status: 'dinas_luar_approved' } : r)));
+    if (isSupabaseConfigured) {
+      const success = await updateAttendanceStatusLive(recordId, 'dinas_luar_approved');
+      if (success) {
+        alert('Kehadiran Dinas Luar berhasil dikonfirmasi oleh Admin!');
+      } else {
+        alert('Gagal memperbarui status di database.');
+      }
+    } else {
+      alert('Mode luring: Status dinas luar dikonfirmasi lokal.');
+    }
+  };
+
   // Fix 3: Generate rekap alfa untuk semua guru yang tidak punya record hari ini
   const handleGenerateAlfa = async (todayStr: string) => {
     const guruList = allUsers.filter(u => u.role === 'guru');
@@ -373,6 +387,6 @@ export function useAppData() {
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
-    handleGenerateAlfa, handleRegisterFace
+    handleGenerateAlfa, handleRegisterFace, handleConfirmDinasLuar
   };
 }

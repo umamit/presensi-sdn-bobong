@@ -22,11 +22,12 @@ interface AdminDashboardProps {
   onOpenGpsSettings: () => void;
   onOpenTimeSettings: () => void;
   onGenerateAlfa: (todayStr: string) => void;
+  onConfirmDinasLuar: (recordId: string) => void;
 }
 
 export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProps>> = ({
   allUsers, schoolSettings, leaveRequests,
-  onUpdateLeaveStatus, onOpenGpsSettings, onOpenTimeSettings, onGenerateAlfa
+  onUpdateLeaveStatus, onOpenGpsSettings, onOpenTimeSettings, onGenerateAlfa, onConfirmDinasLuar
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState(getLocalDateString());
@@ -199,6 +200,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
             selectedDate={selectedDate} 
             setSelectedDate={setSelectedDate} 
             onRefresh={refetch}
+            onConfirmDinasLuar={onConfirmDinasLuar}
           />
           <EmptyState 
             onRefresh={refetch} 
@@ -213,6 +215,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
           selectedDate={selectedDate} 
           setSelectedDate={setSelectedDate} 
           onRefresh={refetch}
+          onConfirmDinasLuar={onConfirmDinasLuar}
         />
       )}
 

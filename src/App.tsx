@@ -36,7 +36,7 @@ export const App: React.FC = () => {
     handleAddTeacher, handleDeleteTeacher, handleUpdateTeacher, handleUpdateSettings,
     handleCheckIn, handleCheckOut,
     handleLeaveSubmit, handleUpdateLeaveStatus, handleUpdateUserPassword,
-    handleGenerateAlfa, handleRegisterFace
+    handleGenerateAlfa, handleRegisterFace, handleConfirmDinasLuar
   } = useAppData();
 
   // Deteksi mode pembukaan aplikasi (PWA/APK) dengan bypass untuk Laptop/PC & Localhost
@@ -136,6 +136,7 @@ export const App: React.FC = () => {
             onOpenGpsSettings={() => setIsGpsSettingsOpen(true)}
             onOpenTimeSettings={() => setIsTimeSettingsOpen(true)}
             onGenerateAlfa={handleGenerateAlfa}
+            onConfirmDinasLuar={handleConfirmDinasLuar}
           />
         )}
       </main>
