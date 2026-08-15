@@ -194,6 +194,8 @@ h1, h2, h3, h4 {
 .badge-alfa   { background: var(--danger-bg); color: var(--danger); }
 .badge-terlambat { background: var(--warning-bg); color: var(--warning); }
 .badge-sakit  { background: var(--warning-bg); color: var(--warning); }
+.badge-dinas_luar { background: rgba(10, 132, 255, 0.15); color: #0a84ff; }
+
 
 /* === GPS PULSE === */
 @keyframes pulse-ring {

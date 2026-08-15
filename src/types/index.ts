@@ -16,7 +16,7 @@ export interface UserProfile {
   faceDescriptor?: string;
 }
 
-export type AttendanceStatus = 'hadir' | 'terlambat' | 'izin' | 'alfa';
+export type AttendanceStatus = 'hadir' | 'terlambat' | 'izin' | 'alfa' | 'dinas_luar';
 
 export interface AttendanceRecord {
   id: string;

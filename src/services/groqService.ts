@@ -26,7 +26,8 @@ export async function fetchAttendanceInsights(
   const totalHadir = records.filter(r => r.status === 'hadir').length;
   const totalTerlambat = records.filter(r => r.status === 'terlambat').length;
   const totalIzin = records.filter(r => r.status === 'izin').length;
-  const totalBelumAbsen = Math.max(0, totalGuru - (totalHadir + totalTerlambat + totalIzin));
+  const totalDinasLuar = records.filter(r => r.status === 'dinas_luar').length;
+  const totalBelumAbsen = Math.max(0, totalGuru - (totalHadir + totalTerlambat + totalIzin + totalDinasLuar));
 
   const prompt = `Anda adalah seorang Konsultan Manajemen Sekolah dan Asisten AI Kepala Sekolah SDN Bobong yang ahli, bijaksana, dan profesional.
 Tugas Anda adalah menganalisis data kehadiran guru hari ini dan memberikan ringkasan eksekutif (Executive Summary Insights) yang bernilai tinggi bagi Kepala Sekolah.
@@ -36,6 +37,7 @@ Berikut Ringkasan Statistik Hari Ini:
 - Hadir Tepat Waktu: ${totalHadir} orang
 - Terlambat: ${totalTerlambat} orang
 - Izin/Sakit: ${totalIzin} orang
+- Dinas Luar / Tugas Luar: ${totalDinasLuar} orang
 - Belum Presensi: ${totalBelumAbsen} orang
 
 Berikut rincian data mentah presensi guru:

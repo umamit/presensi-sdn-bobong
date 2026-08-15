@@ -38,6 +38,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [selfieMode, setSelfieMode] = useState<'in' | 'out' | null>(null);
   const [activeTab, setActiveTab] = useState<'absen' | 'riwayat' | 'menu'>('absen');
   const [showMap, setShowMap] = useState(false);
+  const [isDinasLuar, setIsDinasLuar] = useState(false);
 
   const todayStr = getLocalDateString();
   const userTodayRecord = attendanceRecords.find(r => r.userNip === user.nip && r.date === todayStr);
@@ -57,7 +58,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   const handleCheckInSubmit = () => {
     requestNotificationAccess();
-    if (!isInRadius) {
+    if (!isDinasLuar && !isInRadius) {
       alert(`Gagal Absen: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
       return;
     }
@@ -78,10 +79,13 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
 
     // Hitung status & durasi keterlambatan
-    let attendanceStatus: 'hadir' | 'terlambat' = 'hadir';
+    let attendanceStatus: 'hadir' | 'terlambat' | 'dinas_luar' = 'hadir';
     let latenessNote = notes || `Presensi Masuk Shift ${detectedShift.toUpperCase()}`;
 
-    if (nowTimeStr > workStart) {
+    if (isDinasLuar) {
+      attendanceStatus = 'dinas_luar';
+      latenessNote = notes ? `Dinas Luar: ${notes}` : 'Tugas Dinas Luar';
+    } else if (nowTimeStr > workStart) {
       attendanceStatus = 'terlambat';
       // Hitung selisih detik antara nowTimeStr dan workStart
       const toSecs = (t: string) => {
@@ -150,8 +154,9 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     if (nowTimeStr < targetCheckOutStart) { alert(`Absen pulang belum dibuka (Mulai ${targetCheckOutStart} WIT).`); return; }
     if (nowTimeStr > targetCheckOutEnd) { alert(`Batas waktu presensi telah berakhir (${targetCheckOutEnd} WIT).`); return; }
     
-    // Minta deteksi GPS pulang terlebih dahulu untuk memastikan guru berada di lokasi saat pulang
-    if (!isInRadius) {
+    // Minta deteksi GPS pulang terlebih dahulu (kecuali jika berstatus Dinas Luar)
+    const activeDinasLuar = userTodayRecord.status === 'dinas_luar';
+    if (!activeDinasLuar && !isInRadius) {
       alert(`Gagal Absen Pulang: Anda berada di luar radius sekolah (${distance}m dari max ${schoolSettings.radiusMeters}m).`);
       return;
     }
@@ -205,6 +210,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
               currentTime={currentTime}
               schoolSettings={schoolSettings}
               userShift={user.shift || 'pagi'}
+              isDinasLuar={isDinasLuar}
+              onToggleDinasLuar={setIsDinasLuar}
             />
           </>
         )}

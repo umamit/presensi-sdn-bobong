@@ -14,6 +14,8 @@ interface PresensiActionCardProps {
   currentTime?: Date;
   schoolSettings?: SchoolSettings;
   userShift?: 'pagi' | 'siang';
+  isDinasLuar?: boolean;
+  onToggleDinasLuar?: (val: boolean) => void;
 }
 
 export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
@@ -26,7 +28,9 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   handleCheckOutSubmit,
   currentTime = new Date(),
   schoolSettings,
-  userShift = 'pagi'
+  userShift = 'pagi',
+  isDinasLuar = false,
+  onToggleDinasLuar
 }) => {
   const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
   const openTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckInOpen || '06:00') : (schoolSettings?.siangCheckInOpen || '12:00');
@@ -38,10 +42,15 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   const isLateness = nowTimeStr > workStart && !isTooLate;
   const isTimeValid = !isTooEarly && !isTooLate;
 
-  const isButtonEnabled = isInRadius && isTimeValid;
+  // Jika sedang Dinas Luar, abaikan pengecekan radius GPS sekolah
+  const activeDinasLuar = userTodayRecord ? (userTodayRecord.status === 'dinas_luar') : isDinasLuar;
+  const isEffectiveInRadius = activeDinasLuar || isInRadius;
+  const isButtonEnabled = isEffectiveInRadius && isTimeValid;
 
   let buttonText = 'Absen Masuk Sekarang';
-  if (!isInRadius) {
+  if (isDinasLuar) {
+    buttonText = 'Absen Dinas Luar (Bypass GPS)';
+  } else if (!isInRadius) {
     buttonText = 'Di Luar Radius Sekolah';
   } else if (isTooEarly) {
     buttonText = `Belum Buka (Mulai ${openTime} WIT)`;
@@ -56,6 +65,51 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 500 }}>
         Presensi Hari Ini — {formatDateIndo(todayStr)}
       </div>
+
+      {!userTodayRecord && onToggleDinasLuar && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.06)',
+          borderRadius: '10px',
+          padding: '0.65rem 0.85rem',
+          marginBottom: '0.85rem'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>Dinas Luar / Tugas Luar</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Abaikan radius aman GPS sekolah</span>
+          </div>
+          <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '44px', height: '24px' }}>
+            <input
+              type="checkbox"
+              checked={isDinasLuar}
+              onChange={(e) => onToggleDinasLuar(e.target.checked)}
+              style={{ opacity: 0, width: 0, height: 0 }}
+            />
+            <span style={{
+              position: 'absolute',
+              cursor: 'pointer',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: isDinasLuar ? 'var(--primary)' : '#3a3a3c',
+              borderRadius: '24px',
+              transition: '0.3s'
+            }}>
+              <span style={{
+                position: 'absolute',
+                content: '""',
+                height: '18px', width: '18px',
+                left: isDinasLuar ? '22px' : '3px',
+                bottom: '3px',
+                background: '#fff',
+                borderRadius: '50%',
+                transition: '0.3s'
+              }} />
+            </span>
+          </label>
+        </div>
+      )}
 
       {!userTodayRecord ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -124,10 +178,12 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
               const outEnd = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutEnd || '12:00') : (schoolSettings?.siangCheckOutEnd || '16:45');
               const isOutTooEarly = nowTimeStr < outStart;
               const isOutTooLate = nowTimeStr > outEnd;
-              const isOutEnabled = isInRadius && !isOutTooEarly && !isOutTooLate;
+              const isOutEnabled = isEffectiveInRadius && !isOutTooEarly && !isOutTooLate;
 
               let outButtonText = `Absen Pulang (${nowTimeStr} WIT)`;
-              if (!isInRadius) {
+              if (activeDinasLuar) {
+                outButtonText = 'Absen Pulang Dinas Luar';
+              } else if (!isInRadius) {
                 outButtonText = 'Di Luar Radius Sekolah';
               } else if (isOutTooEarly) {
                 outButtonText = `Pulang Belum Buka (Mulai ${outStart} WIT)`;

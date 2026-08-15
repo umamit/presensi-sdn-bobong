@@ -84,7 +84,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
   };
 
   const totalGuru = allUsers.filter(u => u.role === 'guru').length;
-  const totalHadir = recordsToday.filter(r => r.status === 'hadir').length;
+  const totalHadir = recordsToday.filter(r => r.status === 'hadir' || r.status === 'dinas_luar').length;
   const totalTerlambat = recordsToday.filter(r => r.status === 'terlambat').length;
   const totalIzin = recordsToday.filter(r => r.status === 'izin').length;
   const totalBelumAbsen = Math.max(0, totalGuru - (totalHadir + totalTerlambat + totalIzin));

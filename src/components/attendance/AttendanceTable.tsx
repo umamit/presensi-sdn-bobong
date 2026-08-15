@@ -31,6 +31,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       case 'terlambat': return 'var(--warning)';
       case 'izin': return 'var(--primary)';
       case 'sakit': return 'var(--warning)';
+      case 'dinas_luar': return '#0a84ff';
       default: return 'var(--danger)';
     }
   };
