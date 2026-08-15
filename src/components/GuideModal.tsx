@@ -34,10 +34,13 @@ export const GuideModal: React.FC<GuideModalProps> = ({ schoolSettings, onClose 
 
           <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
             <h4 style={{ color: '#34d399', fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Camera size={16} /> 2. Ambil Foto Selfie Bukti Kehadiran
+              <Camera size={16} /> 2. Verifikasi Wajah AI & Deteksi Keaktifan (Liveness)
             </h4>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.45rem' }}>
+              Saat pertama kali menggunakan aplikasi, Anda akan dipandu untuk melakukan perekaman wajah master sebagai data referensi (cukup dilakukan 1 kali).
+            </p>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-              Saat menekan tombol <strong>"Absen Masuk"</strong>, kamera selfie akan terbuka otomatis. Posisikan wajah Anda pada area panduan oval, lalu ambil foto selfie.
+              Setiap kali absen, posisikan wajah di dalam oval. Anda <strong>wajib mengedipkan mata 1 kali</strong> dan <strong>tersenyum 😊</strong>. Tombol jepret baru akan aktif berwarna hijau setelah wajah Anda terverifikasi oleh AI. Jika deteksi gagal 3 kali, Anda bisa menggunakan tombol <strong>"Absen Darurat"</strong> yang muncul otomatis.
             </p>
           </div>
 
