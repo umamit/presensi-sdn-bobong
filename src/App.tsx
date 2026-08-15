@@ -132,7 +132,6 @@ export const App: React.FC = () => {
             leaveRequests={leaveRequests}
             onUpdateSettings={handleUpdateSettings}
             onUpdateLeaveStatus={handleUpdateLeaveStatus}
-            onExportReport={() => exportAttendanceCsv(attendanceRecords)}
             onOpenGpsSettings={() => setIsGpsSettingsOpen(true)}
             onOpenTimeSettings={() => setIsTimeSettingsOpen(true)}
             onGenerateAlfa={handleGenerateAlfa}

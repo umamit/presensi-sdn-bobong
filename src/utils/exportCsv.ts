@@ -1,6 +1,6 @@
 import { AttendanceRecord } from '../types';
 
-export function exportAttendanceCsv(attendanceRecords: AttendanceRecord[]) {
+export function exportAttendanceCsv(attendanceRecords: AttendanceRecord[], filename?: string) {
   // Fix #9: Tambah kolom Shift dan Durasi Terlambat
   const headers = [
     'NIP', 'Nama Guru', 'Tanggal', 'Shift',
@@ -41,7 +41,9 @@ export function exportAttendanceCsv(attendanceRecords: AttendanceRecord[]) {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement('a');
   link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `rekap_presensi_sdn_bobong_${new Date().toISOString().split('T')[0]}.csv`);
+  
+  const downloadName = filename || `rekap_presensi_sdn_bobong_${new Date().toISOString().split('T')[0]}.csv`;
+  link.setAttribute('download', downloadName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
