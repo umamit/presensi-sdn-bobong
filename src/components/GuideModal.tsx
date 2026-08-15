@@ -37,7 +37,7 @@ export const GuideModal: React.FC<GuideModalProps> = ({ schoolSettings, onClose 
               <Camera size={16} /> 2. Verifikasi Wajah AI & Deteksi Keaktifan (Liveness)
             </h4>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '0.45rem' }}>
-              Saat pertama kali menggunakan aplikasi, Anda akan dipandu untuk melakukan perekaman wajah master sebagai data referensi (cukup dilakukan 1 kali).
+              Perekaman wajah master dilakukan <strong>1 kali saja</strong> saat pertama kali login. Perekaman ini <strong>bisa dilakukan di mana saja (misalnya di rumah)</strong>. Pastikan merekam di tempat yang terang dengan wajah Anda sendiri, karena data ini akan menjadi acuan pencocokan absen harian Anda selamanya.
             </p>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Setiap kali absen, posisikan wajah di dalam oval. Anda <strong>wajib mengedipkan mata 1 kali</strong> dan <strong>tersenyum 😊</strong>. Tombol jepret baru akan aktif berwarna hijau setelah wajah Anda terverifikasi oleh AI. Jika deteksi gagal 3 kali, Anda bisa menggunakan tombol <strong>"Absen Darurat"</strong> yang muncul otomatis.
