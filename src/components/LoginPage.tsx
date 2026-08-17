@@ -33,7 +33,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, allUsers, 
     <div style={{ textAlign: 'center', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.04em', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.4rem', margin: 0 }}>
         <span>Developed by</span>
-        <a href="https://digital.ibraglobalenglish.uk" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', transition: 'opacity 0.2s' }}
+        <a href="https://ibradigital.id" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', transition: 'opacity 0.2s' }}
           onMouseOver={(e) => (e.currentTarget.style.opacity = '0.75')}
           onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}>
           <span>Ibra Digital Engineering</span>
