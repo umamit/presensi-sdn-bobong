@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_service.dart';
+import '../components/presensi_action_card.dart';
 import 'login_view.dart';
 
 class DashboardView extends StatefulWidget {
@@ -115,31 +116,9 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Attendance Actions Placeholder
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.02),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(Icons.lock_clock_rounded, size: 40, color: Colors.grey),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Deteksi Wajah AI & Geofencing GPS',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Modul integrasi sensor presensi native sedang dipersiapkan di Flutter.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+              PresensiActionCard(
+                user: widget.user,
+                onAttendanceSuccess: _loadHistory,
               ),
               const SizedBox(height: 24),
 
