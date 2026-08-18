@@ -71,18 +71,34 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
       setState(() {
         _schoolLat = double.tryParse(settings['latitude']?.toString() ?? '') ?? _schoolLat;
         _schoolLng = double.tryParse(settings['longitude']?.toString() ?? '') ?? _schoolLng;
-        // Gap #1 fix: kolom yang benar adalah radius_meters (mengikuti Vite)
         _allowedRadius = double.tryParse(settings['radius_meters']?.toString() ?? '') ?? _allowedRadius;
 
-        // Simpan jam shift dari school_settings (mengikuti schoolSettingsService.ts Vite)
-        _pagiCheckInOpen   = settings['pagi_check_in_open']?.toString()    ?? _pagiCheckInOpen;
-        _pagiWorkStart     = settings['pagi_work_start']?.toString()        ?? _pagiWorkStart;
-        _pagiCheckOutStart = settings['pagi_check_out_start']?.toString()   ?? _pagiCheckOutStart;
-        _pagiCheckOutEnd   = settings['pagi_check_out_end']?.toString()     ?? _pagiCheckOutEnd;
-        _siangCheckInOpen  = settings['siang_check_in_open']?.toString()    ?? _siangCheckInOpen;
-        _siangWorkStart    = settings['siang_work_start']?.toString()       ?? _siangWorkStart;
-        _siangCheckOutStart= settings['siang_check_out_start']?.toString()  ?? _siangCheckOutStart;
-        _siangCheckOutEnd  = settings['siang_check_out_end']?.toString()    ?? _siangCheckOutEnd;
+        // Ekstrak data jam presensi pagi & siang dari kolom address (mengikuti logika parser Vite)
+        final String rawAddress = settings['address']?.toString() ?? '';
+        String workingText = rawAddress;
+        
+        // Ekstrak groq key jika ada
+        if (workingText.contains('|| groq_key:')) {
+          workingText = workingText.split('|| groq_key:')[0].trim();
+        }
+        
+        // Ekstrak times
+        if (workingText.contains('|| times:')) {
+          final parts = workingText.split('|| times:');
+          final timeString = parts[1].trim();
+          final timeParts = timeString.split('|');
+          
+          if (timeParts.length == 8) {
+            _pagiCheckInOpen    = timeParts[0].replaceAll('.', ':').trim();
+            _pagiWorkStart      = timeParts[1].replaceAll('.', ':').trim();
+            _pagiCheckOutStart  = timeParts[2].replaceAll('.', ':').trim();
+            _pagiCheckOutEnd    = timeParts[3].replaceAll('.', ':').trim();
+            _siangCheckInOpen   = timeParts[4].replaceAll('.', ':').trim();
+            _siangWorkStart     = timeParts[5].replaceAll('.', ':').trim();
+            _siangCheckOutStart = timeParts[6].replaceAll('.', ':').trim();
+            _siangCheckOutEnd   = timeParts[7].replaceAll('.', ':').trim();
+          }
+        }
       });
     }
   }
