@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -292,15 +293,34 @@ class _CameraViewState extends State<CameraView> {
 
     // Ambang batas kemiripan biometrik (threshold) standard
     if (distance < 0.65) {
-      // Wajah Cocok! Lakukan penyimpanan absensi
-      await _submitAttendanceRecord(bypassWajah: false);
+      // Wajah Cocok! Ambil foto selfie dan lakukan penyimpanan absensi
+      String? selfieUrl;
+      try {
+        if (_cameraController != null && _cameraController!.value.isInitialized) {
+          final XFile photo = await _cameraController!.takePicture();
+          
+          final nowWit = DateTime.now().toUtc().add(const Duration(hours: 9));
+          final String dateStr = nowWit.toString().substring(0, 10);
+          
+          selfieUrl = await _supabaseService.uploadAttendancePhoto(
+            imageFile: File(photo.path),
+            nip: nip,
+            date: dateStr,
+            mode: widget.mode == 'check_in' ? 'in' : 'out',
+          );
+        }
+      } catch (e) {
+        print('Gagal mengambil/mengunggah foto selfie absensi: $e');
+      }
+
+      await _submitAttendanceRecord(bypassWajah: false, selfieUrl: selfieUrl);
     } else {
       // Wajah Tidak Cocok
       _showFailureNotification('Verifikasi Wajah Gagal. Wajah tidak cocok.');
     }
   }
 
-  Future<void> _submitAttendanceRecord({required bool bypassWajah}) async {
+  Future<void> _submitAttendanceRecord({required bool bypassWajah, String? selfieUrl}) async {
     final String nip = widget.user['nip'] ?? '';
     final now = DateTime.now();
     
@@ -358,6 +378,7 @@ class _CameraViewState extends State<CameraView> {
       'longitude'  : widget.longitude,
       'device_info': 'Flutter Android APK',
       'bypass_wajah': bypassWajah,
+      'selfie_url' : selfieUrl,
     };
 
     if (widget.mode == 'check_in') {
@@ -384,7 +405,7 @@ class _CameraViewState extends State<CameraView> {
         final success = await _supabaseService.updateCheckOut(
           recordId: todayRecord['id'],
           checkOutTime: timeStr,
-          selfieUrl: null,
+          selfieUrl: selfieUrl,
           notes: bypassWajah ? 'Bypass Wajah Darurat (Foto Terlampir)' : null,
           userNip: nip,
           date: dateStr,
@@ -395,6 +416,7 @@ class _CameraViewState extends State<CameraView> {
         } else {
           // Gagal koneksi, simpan ke antrean offline
           record['record_id'] = todayRecord['id'];
+          record['selfie_url'] = selfieUrl;
           await _offlineService.enqueueRecord(record);
           _showSuccessNotification('Absen Pulang Offline Tersimpan!', 'Absen disimpan secara lokal.');
         }
@@ -409,13 +431,36 @@ class _CameraViewState extends State<CameraView> {
 
   /// Tombol Darurat untuk Absen Bypass Wajah
   Future<void> _handleEmergencyBypass() async {
+    if (_isSubmitting) return;
     setState(() {
-      _instructionText = 'Mengirim presensi darurat...';
+      _isSubmitting = true;
       _currentChallenge = LivenessChallenge.processing;
+      _instructionText = 'Mengambil foto darurat...';
     });
 
-    // Simulasikan jepretan foto darurat, lalu simpan absensi dengan bypass_wajah = true
-    await _submitAttendanceRecord(bypassWajah: true);
+    try {
+      _cameraController?.stopImageStream();
+    } catch (_) {}
+
+    final String nip = widget.user['nip'] ?? '';
+    final String dateStr = DateTime.now().toUtc().add(const Duration(hours: 9)).toString().substring(0, 10);
+
+    String? selfieUrl;
+    try {
+      if (_cameraController != null && _cameraController!.value.isInitialized) {
+        final XFile photo = await _cameraController!.takePicture();
+        selfieUrl = await _supabaseService.uploadAttendancePhoto(
+          imageFile: File(photo.path),
+          nip: nip,
+          date: dateStr,
+          mode: widget.mode == 'check_in' ? 'in' : 'out',
+        );
+      }
+    } catch (e) {
+      print('Gagal mengambil/mengunggah foto darurat: $e');
+    }
+
+    await _submitAttendanceRecord(bypassWajah: true, selfieUrl: selfieUrl);
   }
 
   void _showSuccessNotification(String title, String body) {
