@@ -46,6 +46,7 @@ class _CameraViewState extends State<CameraView> {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isProcessingFrame = false;
+  bool _isSubmitting = false;
   
   LivenessChallenge _currentChallenge = LivenessChallenge.centerFace;
   String _instructionText = 'Posisikan wajah Anda di tengah lingkaran';
@@ -93,19 +94,28 @@ class _CameraViewState extends State<CameraView> {
         _isCameraInitialized = true;
       });
 
-      // Mulai analisis aliran gambar (Image Stream) untuk AI Wajah
+      _startImageStream();
+    } catch (e) {
+      print('Camera init error: $e');
+      setState(() {
+        _instructionText = 'Gagal membuka kamera depan. Coba lagi.';
+      });
+    }
+  }
+
+  void _startImageStream() {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+    try {
       _cameraController!.startImageStream((CameraImage image) {
         if (_isProcessingFrame || 
+            _isSubmitting ||
             _currentChallenge == LivenessChallenge.processing ||
             _currentChallenge == LivenessChallenge.success) return;
         
         _processCameraImage(image);
       });
     } catch (e) {
-      print('Camera init error: $e');
-      setState(() {
-        _instructionText = 'Gagal membuka kamera depan. Coba lagi.';
-      });
+      print('Error starting image stream: $e');
     }
   }
 
@@ -233,6 +243,17 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Future<void> _verifyFaceBiometric(CameraImage? image, Face? face) async {
+    if (_isSubmitting) return;
+    setState(() {
+      _isSubmitting = true;
+      _currentChallenge = LivenessChallenge.processing;
+      _instructionText = 'Memproses absensi...';
+    });
+
+    try {
+      _cameraController?.stopImageStream();
+    } catch (_) {}
+
     final String nip = widget.user['nip'] ?? '';
     final String name = widget.user['full_name'] ?? 'Guru';
 
@@ -460,11 +481,13 @@ class _CameraViewState extends State<CameraView> {
             onPressed: () {
               Navigator.pop(dialogCtx); // Tutup dialog
               setState(() {
+                _isSubmitting = false;
                 _hasBlinked = false;
                 _hasSmiled = false;
                 _currentChallenge = LivenessChallenge.centerFace;
                 _instructionText = 'Posisikan wajah Anda di tengah lingkaran';
               });
+              _startImageStream(); // Mulai kembali stream kamera
             },
             child: const Text('Coba Lagi', style: TextStyle(color: Color(0xFF0A84FF), fontWeight: FontWeight.bold)),
           ),
