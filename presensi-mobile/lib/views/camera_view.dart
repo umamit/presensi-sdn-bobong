@@ -421,7 +421,11 @@ class _CameraViewState extends State<CameraView> {
           TextButton(
             onPressed: () {
               Navigator.pop(dialogCtx); // Tutup dialog menggunakan dialogCtx
-              Navigator.pop(context, true); // Kembali ke dasbor dengan status sukses menggunakan context utama
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  Navigator.pop(context, true); // Kembali ke dasbor dengan status sukses
+                }
+              });
             },
             child: const Text('OK', style: TextStyle(color: Color(0xFF0A84FF), fontWeight: FontWeight.bold)),
           ),
