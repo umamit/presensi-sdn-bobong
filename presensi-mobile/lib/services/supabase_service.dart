@@ -96,8 +96,15 @@ class SupabaseService {
           .maybeSingle();
 
       if (userProfile != null) {
-        dbPayload['user_id'] = userProfile['id'];
         dbPayload['user_name'] = userProfile['full_name'];
+        final String userId = userProfile['id']?.toString() ?? '';
+        final bool isUuid = RegExp(
+          r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+          caseSensitive: false,
+        ).hasMatch(userId);
+        if (isUuid) {
+          dbPayload['user_id'] = userId;
+        }
       }
 
       await client.from('attendance').insert([dbPayload]);
