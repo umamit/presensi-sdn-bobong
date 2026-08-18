@@ -205,7 +205,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
             // Status jika wajah belum didaftarkan
             Container(
               padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.bottom(16),
+              margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: Colors.orange.withOpacity(0.1),
                 border: Border.all(color: Colors.orange.withOpacity(0.3)),
