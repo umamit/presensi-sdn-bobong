@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../services/supabase_service.dart';
+import '../services/offline_service.dart';
 import '../components/presensi_action_card.dart';
 import 'login_view.dart';
 
@@ -13,13 +17,62 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   final SupabaseService _supabaseService = SupabaseService();
+  final OfflineService _offlineService = OfflineService();
+  late Map<String, dynamic> _currentUser;
   bool _isLoading = false;
+  bool _isSyncing = false;
+  bool _isOnline = true;
+  int _offlineQueueCount = 0;
   List<Map<String, dynamic>> _history = [];
+
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
+    _currentUser = Map<String, dynamic>.from(widget.user);
     _loadHistory();
+    _refreshOfflineCount();
+    _initConnectivity();
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  void _initConnectivity() {
+    // Cek kondisi koneksi awal
+    Connectivity().checkConnectivity().then((results) {
+      if (mounted) {
+        setState(() {
+          _isOnline = results.any((r) => r != ConnectivityResult.none);
+        });
+      }
+    });
+
+    // Langganan perubahan koneksi secara real-time
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      final online = results.any((r) => r != ConnectivityResult.none);
+      if (mounted) {
+        setState(() {
+          _isOnline = online;
+        });
+        // Auto-sinkron jika baru terhubung kembali dan ada antrean
+        if (online && _offlineQueueCount > 0) {
+          _syncOfflineQueue();
+        }
+      }
+    });
+  }
+
+  void _refreshOfflineCount() {
+    if (mounted) {
+      setState(() {
+        _offlineQueueCount = _offlineService.queueCount;
+      });
+    }
   }
 
   Future<void> _loadHistory() async {
@@ -27,14 +80,57 @@ class _DashboardViewState extends State<DashboardView> {
       _isLoading = true;
     });
     final nip = widget.user['nip'] ?? '';
+    
+    // Refresh user profile details dynamically
+    final freshUser = await _supabaseService.fetchUserByNip(nip);
     final list = await _supabaseService.fetchPersonalHistory(nip);
-    setState(() {
-      _history = list;
-      _isLoading = false;
-    });
+    
+    if (mounted) {
+      setState(() {
+        if (freshUser != null) {
+          _currentUser = freshUser;
+        }
+        _history = list;
+        _isLoading = false;
+      });
+    }
   }
 
-  void _handleLogout() {
+  Future<void> _syncOfflineQueue() async {
+    if (_isSyncing || !_isOnline) return;
+    setState(() {
+      _isSyncing = true;
+    });
+
+    final synced = await _offlineService.syncOfflineData();
+    _refreshOfflineCount();
+
+    if (mounted) {
+      setState(() {
+        _isSyncing = false;
+      });
+      if (synced > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ $synced absensi berhasil tersinkronisasi ke server.'),
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+        _loadHistory();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak ada data antrean atau sinkronisasi gagal.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    await _offlineService.clearSession();
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginView()),
@@ -43,9 +139,9 @@ class _DashboardViewState extends State<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
-    final name = widget.user['full_name'] ?? 'Guru Sekolah';
-    final nip = widget.user['nip'] ?? '-';
-    final subject = widget.user['subject'] ?? 'Guru Kelas';
+    final name = _currentUser['full_name'] ?? 'Guru Sekolah';
+    final nip = _currentUser['nip'] ?? '-';
+    final subject = _currentUser['subject'] ?? 'Guru Kelas';
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0F1A),
@@ -64,7 +160,10 @@ class _DashboardViewState extends State<DashboardView> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadHistory,
+        onRefresh: () async {
+          _refreshOfflineCount();
+          await _loadHistory();
+        },
         color: const Color(0xFF0A84FF),
         backgroundColor: const Color(0xFF111827),
         child: SingleChildScrollView(
@@ -73,7 +172,7 @@ class _DashboardViewState extends State<DashboardView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Welcome Card
+              // Welcome Card + Badge Status Jaringan
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -81,44 +180,156 @@ class _DashboardViewState extends State<DashboardView> {
                   border: Border.all(color: Colors.white.withOpacity(0.06)),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: const Color(0xFF0A84FF).withOpacity(0.15),
-                      radius: 24,
-                      child: const Icon(Icons.person_outline_rounded, color: Color(0xFF0A84FF)),
+                    // Info profil guru
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: const Color(0xFF0A84FF).withOpacity(0.15),
+                          radius: 24,
+                          child: const Icon(Icons.person_outline_rounded, color: Color(0xFF0A84FF)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'NIP: $nip • $subject',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
+                    const SizedBox(height: 12),
+
+                    // Badge Status Jaringan
+                    Row(
+                      children: [
+                        // Badge Online / Offline
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: _isOnline
+                                ? Colors.green.withOpacity(0.12)
+                                : Colors.orange.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _isOnline
+                                  ? Colors.greenAccent.withOpacity(0.4)
+                                  : Colors.orangeAccent.withOpacity(0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                _isOnline ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                                color: _isOnline ? Colors.greenAccent : Colors.orangeAccent,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                _isOnline ? 'Terhubung' : 'Modus Offline',
+                                style: TextStyle(
+                                  color: _isOnline ? Colors.greenAccent : Colors.orangeAccent,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Badge Antrean Offline (hanya tampil jika ada)
+                        if (_offlineQueueCount > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.pending_actions_rounded, color: Colors.redAccent, size: 13),
+                                const SizedBox(width: 5),
+                                Text(
+                                  '$_offlineQueueCount belum tersinkron',
+                                  style: const TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    // Tombol Sinkronisasi Manual (hanya tampil jika ada antrean offline)
+                    if (_offlineQueueCount > 0) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isOnline && !_isSyncing ? _syncOfflineQueue : null,
+                          icon: _isSyncing
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.sync_rounded, size: 16, color: Colors.white),
+                          label: Text(
+                            _isSyncing
+                                ? 'Menyinkronkan...'
+                                : 'Sinkronisasikan Sekarang ($_offlineQueueCount)',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'NIP: $nip • $subject',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.4),
-                              fontSize: 11,
-                            ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0A84FF),
+                            disabledBackgroundColor: Colors.white.withOpacity(0.05),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              const DigitalClock(),
+              const SizedBox(height: 16),
               PresensiActionCard(
-                user: widget.user,
-                onAttendanceSuccess: _loadHistory,
+                user: _currentUser,
+                onAttendanceSuccess: () {
+                  _refreshOfflineCount();
+                  _loadHistory();
+                },
               ),
               const SizedBox(height: 24),
 
@@ -222,6 +433,106 @@ class _DashboardViewState extends State<DashboardView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class DigitalClock extends StatefulWidget {
+  const DigitalClock({super.key});
+
+  @override
+  State<DigitalClock> createState() => _DigitalClockState();
+}
+
+class _DigitalClockState extends State<DigitalClock> {
+  late Timer _timer;
+  late DateTime _currentTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTime = DateTime.now();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentTime = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _formatNumber(int val) => val.toString().padLeft(2, '0');
+
+  String _getDayName(int day) {
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    return days[day - 1];
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return months[month - 1];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Jam WIT (UTC+9) sebagai jam operasional
+    final nowWit = _currentTime.toUtc().add(const Duration(hours: 9));
+    final timeStr = '${_formatNumber(nowWit.hour)}:${_formatNumber(nowWit.minute)}:${_formatNumber(nowWit.second)}';
+    final dateStr = '${_getDayName(nowWit.weekday)}, ${nowWit.day} ${_getMonthName(nowWit.month)} ${nowWit.year}';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A84FF).withOpacity(0.06),
+        border: Border.all(color: const Color(0xFF0A84FF).withOpacity(0.15)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'WAKTU OPERASIONAL (WIT)',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                dateStr,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            timeStr,
+            style: const TextStyle(
+              color: Color(0xFF0A84FF),
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
       ),
     );
   }

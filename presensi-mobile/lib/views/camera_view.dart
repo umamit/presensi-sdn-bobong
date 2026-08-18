@@ -11,6 +11,8 @@ class CameraView extends StatefulWidget {
   final bool isDinasLuar;
   final double latitude;
   final double longitude;
+  final String detectedShift;           // 'pagi' atau 'siang' — dikirim dari PresensiActionCard
+  final Map<String, String> schoolSettings; // jam kerja shift dari Supabase
 
   const CameraView({
     super.key,
@@ -19,6 +21,8 @@ class CameraView extends StatefulWidget {
     required this.isDinasLuar,
     required this.latitude,
     required this.longitude,
+    this.detectedShift = 'pagi',
+    this.schoolSettings = const {},
   });
 
   @override
@@ -277,16 +281,60 @@ class _CameraViewState extends State<CameraView> {
 
   Future<void> _submitAttendanceRecord({required bool bypassWajah}) async {
     final String nip = widget.user['nip'] ?? '';
-    final String dateStr = DateTime.now().toLocal().toString().substring(0, 10);
-    final String timeStr = DateTime.now().toLocal().toIso8601String();
+    final now = DateTime.now();
+    
+    // Standarisasi Waktu Operasional Sekolah (WIT = UTC+9)
+    final nowWit = now.toUtc().add(const Duration(hours: 9));
+    final String dateStr = nowWit.toString().substring(0, 10);
+    final String timeStr = now.toUtc().toIso8601String(); // Standar UTC database
+
+    final nowTimeStr = '${nowWit.hour.toString().padLeft(2, '0')}:${nowWit.minute.toString().padLeft(2, '0')}';
+
+    // Hitung status dan notes — mengikuti Vite GuruDashboard.tsx L82-L115
+    final String shift = widget.detectedShift;
+    final String workStart = shift == 'pagi'
+        ? (widget.schoolSettings['pagi_work_start'] ?? '07:15')
+        : (widget.schoolSettings['siang_work_start'] ?? '12:45');
+
+    String attendanceStatus;
+    String attendanceNotes;
+
+    if (widget.isDinasLuar) {
+      attendanceStatus = 'dinas_luar';
+      attendanceNotes = 'Tugas Dinas Luar';
+    } else if (nowTimeStr.compareTo(workStart) > 0) {
+      // Hitung durasi keterlambatan (mengikuti Vite L91-L114)
+      attendanceStatus = 'terlambat';
+      final workParts = workStart.split(':');
+      final workSeconds = int.parse(workParts[0]) * 3600 + int.parse(workParts[1]) * 60;
+      final nowSeconds = nowWit.hour * 3600 + nowWit.minute * 60 + nowWit.second;
+      final diffSecs = nowSeconds - workSeconds;
+      final jam = diffSecs ~/ 3600;
+      final menit = (diffSecs % 3600) ~/ 60;
+      final detik = diffSecs % 60;
+      final durasiParts = <String>[];
+      if (jam > 0) durasiParts.add('$jam jam');
+      if (menit > 0) durasiParts.add('$menit menit');
+      durasiParts.add('$detik detik');
+      attendanceNotes = 'Terlambat: ${durasiParts.join(' ')}';
+    } else {
+      attendanceStatus = 'hadir';
+      attendanceNotes = 'Presensi Masuk Shift ${shift.toUpperCase()}';
+    }
+
+    if (bypassWajah) {
+      attendanceNotes = '$attendanceNotes | Bypass Wajah Darurat (Foto Terlampir)';
+    }
 
     final Map<String, dynamic> record = {
-      'id': 'att-${DateTime.now().millisecondsSinceEpoch}',
-      'user_nip': nip,
-      'date': dateStr,
-      'status': widget.isDinasLuar ? 'dinas_luar' : 'hadir',
-      'latitude': widget.latitude,
-      'longitude': widget.longitude,
+      'id'         : 'att-${now.millisecondsSinceEpoch}',
+      'user_nip'   : nip,
+      'date'       : dateStr,
+      'status'     : attendanceStatus,
+      'shift'      : shift,                       // Gap #4 fix: kirim kolom shift
+      'notes'      : attendanceNotes,
+      'latitude'   : widget.latitude,
+      'longitude'  : widget.longitude,
       'device_info': 'Flutter Android APK',
       'bypass_wajah': bypassWajah,
     };
@@ -313,10 +361,12 @@ class _CameraViewState extends State<CameraView> {
       final todayRecord = await _supabaseService.fetchTodayRecord(nip, dateStr);
       if (todayRecord != null) {
         final success = await _supabaseService.updateCheckOut(
-          todayRecord['id'],
-          timeStr,
-          null, // selfieUrl
-          bypassWajah ? 'Bypass Wajah Darurat (Foto Terlampir)' : null,
+          recordId: todayRecord['id'],
+          checkOutTime: timeStr,
+          selfieUrl: null,
+          notes: bypassWajah ? 'Bypass Wajah Darurat (Foto Terlampir)' : null,
+          userNip: nip,
+          date: dateStr,
         );
 
         if (success) {
@@ -329,7 +379,7 @@ class _CameraViewState extends State<CameraView> {
         }
       } else {
         // Jika data masuk belum ada, kita enqueue record check-out baru
-        record['record_id'] = 'out-only-${DateTime.now().millisecondsSinceEpoch}';
+        record['record_id'] = 'out-only-${now.millisecondsSinceEpoch}';
         await _offlineService.enqueueRecord(record);
         _showSuccessNotification('Absen Pulang Offline Tersimpan!', 'Tercatat pulang (offline).');
       }
@@ -356,7 +406,7 @@ class _CameraViewState extends State<CameraView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: const Color(0xFF111827),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
@@ -370,8 +420,8 @@ class _CameraViewState extends State<CameraView> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Tutup dialog
-              Navigator.pop(context, true); // Kembali ke dasbor dengan status sukses
+              Navigator.pop(dialogCtx); // Tutup dialog menggunakan dialogCtx
+              Navigator.pop(context, true); // Kembali ke dasbor dengan status sukses menggunakan context utama
             },
             child: const Text('OK', style: TextStyle(color: Color(0xFF0A84FF), fontWeight: FontWeight.bold)),
           ),
@@ -390,7 +440,7 @@ class _CameraViewState extends State<CameraView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: const Color(0xFF111827),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
@@ -404,7 +454,7 @@ class _CameraViewState extends State<CameraView> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogCtx); // Tutup dialog
               setState(() {
                 _hasBlinked = false;
                 _hasSmiled = false;

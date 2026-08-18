@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'services/supabase_service.dart';
 import 'services/offline_service.dart';
 import 'views/login_view.dart';
+import 'views/dashboard_view.dart';
 
 void main() async {
   // Pastikan inisialisasi binding widget Flutter selesai
@@ -25,12 +26,16 @@ void main() async {
   final OfflineService offlineService = OfflineService();
   await offlineService.initialize();
 
-  // 4. Jalankan aplikasi utama
-  runApp(const PresensiApp());
+  // 4. Ambil sesi user jika ada
+  final Map<String, dynamic>? savedUser = offlineService.getSession();
+
+  // 5. Jalankan aplikasi utama
+  runApp(PresensiApp(savedUser: savedUser));
 }
 
 class PresensiApp extends StatelessWidget {
-  const PresensiApp({super.key});
+  final Map<String, dynamic>? savedUser;
+  const PresensiApp({super.key, this.savedUser});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +52,9 @@ class PresensiApp extends StatelessWidget {
         ),
         fontFamily: 'Inter',
       ),
-      home: const LoginView(),
+      home: savedUser != null
+          ? DashboardView(user: savedUser!)
+          : const LoginView(),
     );
   }
 }

@@ -62,13 +62,20 @@ class GpsService {
       }
 
       // Mengambil lokasi dengan akurasi tinggi (LocationAccuracy.high)
-      return await Geolocator.getCurrentPosition(
+      final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 15),
       );
+
+      // Deteksi Fake GPS / Mock Location
+      if (position.isMocked) {
+        throw Exception('mock_location');
+      }
+
+      return position;
     } catch (e) {
       print('Geolocator error: $e');
-      return null;
+      rethrow; // Lempar ulang agar caller bisa membedakan error mock_location
     }
   }
 }

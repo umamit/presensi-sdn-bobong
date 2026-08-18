@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Impor untuk Autofill Context
 import '../services/supabase_service.dart';
+import '../services/offline_service.dart';
 import 'dashboard_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -39,6 +41,12 @@ class _LoginViewState extends State<LoginView> {
     });
 
     if (user != null) {
+      // Simpan sesi login lokal ke Hive
+      await OfflineService().saveSession(user);
+
+      // Picu dialog pop-up simpan sandi bawaan Android (Smart Lock) / iOS (Keychain)
+      TextInput.finishAutofillContext();
+
       if (!mounted) return;
       
       // Navigasi ke halaman dasbor utama
@@ -133,69 +141,79 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(height: 16),
                 ],
 
-                // NIP Input
-                const Text(
-                  'Nomor Induk Pegawai (NIP)',
-                  style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _nipController,
-                  style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.badge_outlined, color: Colors.grey),
-                    hintText: 'Masukkan NIP Anda...',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.03),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Color(0xFF0A84FF)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Password Input
-                const Text(
-                  'Kata Sandi (Password)',
-                  style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: !_showPassword,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.lock_outline_rounded, color: Colors.grey),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: Colors.grey,
+                // AutofillGroup untuk mendukung Smart Lock / Password Manager
+                AutofillGroup(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // NIP Input
+                      const Text(
+                        'Nomor Induk Pegawai (NIP)',
+                        style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _showPassword = !_showPassword;
-                        });
-                      },
-                    ),
-                    hintText: 'Masukkan Password...',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.03),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Color(0xFF0A84FF)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _nipController,
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.number,
+                        autofillHints: const [AutofillHints.username], // Autofill hint username
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.badge_outlined, color: Colors.grey),
+                          hintText: 'Masukkan NIP Anda...',
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.03),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Color(0xFF0A84FF)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Password Input
+                      const Text(
+                        'Kata Sandi (Password)',
+                        style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: !_showPassword,
+                        style: const TextStyle(color: Colors.white),
+                        autofillHints: const [AutofillHints.password], // Autofill hint password
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.lock_outline_rounded, color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _showPassword = !_showPassword;
+                              });
+                            },
+                          ),
+                          hintText: 'Masukkan Password...',
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.03),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Color(0xFF0A84FF)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),

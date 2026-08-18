@@ -27,6 +27,7 @@ class OfflineService {
   List<Map<String, dynamic>> getQueuedRecords() {
     final List<Map<String, dynamic>> list = [];
     for (var key in _box.keys) {
+      if (key == 'logged_in_user') continue; // Abaikan data sesi user
       final data = _box.get(key);
       if (data != null) {
         list.add(Map<String, dynamic>.from(data));
@@ -38,6 +39,25 @@ class OfflineService {
   /// Menghapus item tertentu dari antrean berdasarkan ID
   Future<void> removeRecord(String id) async {
     await _box.delete(id);
+  }
+
+  /// Menyimpan sesi user login lokal
+  Future<void> saveSession(Map<String, dynamic> user) async {
+    await _box.put('logged_in_user', user);
+  }
+
+  /// Mengambil sesi user login saat ini (null jika belum login)
+  Map<String, dynamic>? getSession() {
+    final data = _box.get('logged_in_user');
+    if (data != null) {
+      return Map<String, dynamic>.from(data);
+    }
+    return null;
+  }
+
+  /// Menghapus sesi user login (logout)
+  Future<void> clearSession() async {
+    await _box.delete('logged_in_user');
   }
 
   /// Sinkronisasi otomatis seluruh data offline ke Supabase
@@ -57,10 +77,12 @@ class OfflineService {
       if (isCheckOutOnly) {
         // Jika hanya absen pulang (check-out)
         success = await supabaseService.updateCheckOut(
-          record['record_id'],
-          record['time'],
-          record['selfie_url'],
-          record['notes'],
+          recordId: record['record_id'] ?? '',
+          checkOutTime: record['time'] ?? '',
+          selfieUrl: record['selfie_url'],
+          notes: record['notes'],
+          userNip: record['user_nip'],
+          date: record['date'],
         );
       } else {
         // Jika absen masuk (check-in)
@@ -81,5 +103,11 @@ class OfflineService {
   }
 
   /// Jumlah data antrean offline saat ini
-  int get queueCount => _box.length;
+  int get queueCount {
+    int count = 0;
+    for (var key in _box.keys) {
+      if (key != 'logged_in_user') count++;
+    }
+    return count;
+  }
 }

@@ -209,7 +209,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
               handleCheckOutSubmit={handleCheckOutSubmit}
               currentTime={currentTime}
               schoolSettings={schoolSettings}
-              userShift={user.shift || 'pagi'}
+              userShift={userTodayRecord?.shift || user.shift || (currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':') < '12:00' ? 'pagi' : 'siang')}
               isDinasLuar={isDinasLuar}
               onToggleDinasLuar={setIsDinasLuar}
             />

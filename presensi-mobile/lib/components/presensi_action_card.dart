@@ -24,12 +24,23 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
   bool _isInRadius = false;
   bool _hasFaceMaster = false;
   bool _isDinasLuar = false;
+  bool _isMockLocation = false; // true jika terdeteksi Fake GPS
   String _gpsStatusText = 'Membaca Lokasi GPS...';
 
   // Koordinat SDN Bobong (default fallback)
   double _schoolLat = -1.8329623838275916;
   double _schoolLng = 124.39121966030999;
   double _allowedRadius = 100.0; // 100 meter
+
+  // Jam shift dari school_settings (mengikuti Vite GuruDashboard.tsx)
+  String _pagiCheckInOpen   = '06:00';
+  String _pagiWorkStart     = '07:15';
+  String _pagiCheckOutStart = '11:45';
+  String _pagiCheckOutEnd   = '12:00';
+  String _siangCheckInOpen   = '12:10';
+  String _siangWorkStart     = '12:45';
+  String _siangCheckOutStart = '16:00';
+  String _siangCheckOutEnd   = '16:45';
 
   Timer? _gpsTimer;
 
@@ -60,7 +71,18 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
       setState(() {
         _schoolLat = double.tryParse(settings['latitude']?.toString() ?? '') ?? _schoolLat;
         _schoolLng = double.tryParse(settings['longitude']?.toString() ?? '') ?? _schoolLng;
-        _allowedRadius = double.tryParse(settings['radius']?.toString() ?? '') ?? _allowedRadius;
+        // Gap #1 fix: kolom yang benar adalah radius_meters (mengikuti Vite)
+        _allowedRadius = double.tryParse(settings['radius_meters']?.toString() ?? '') ?? _allowedRadius;
+
+        // Simpan jam shift dari school_settings (mengikuti schoolSettingsService.ts Vite)
+        _pagiCheckInOpen   = settings['pagi_check_in_open']?.toString()    ?? _pagiCheckInOpen;
+        _pagiWorkStart     = settings['pagi_work_start']?.toString()        ?? _pagiWorkStart;
+        _pagiCheckOutStart = settings['pagi_check_out_start']?.toString()   ?? _pagiCheckOutStart;
+        _pagiCheckOutEnd   = settings['pagi_check_out_end']?.toString()     ?? _pagiCheckOutEnd;
+        _siangCheckInOpen  = settings['siang_check_in_open']?.toString()    ?? _siangCheckInOpen;
+        _siangWorkStart    = settings['siang_work_start']?.toString()       ?? _siangWorkStart;
+        _siangCheckOutStart= settings['siang_check_out_start']?.toString()  ?? _siangCheckOutStart;
+        _siangCheckOutEnd  = settings['siang_check_out_end']?.toString()    ?? _siangCheckOutEnd;
       });
     }
   }
@@ -79,37 +101,168 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
       _isCheckingGps = true;
     });
 
-    final position = await _gpsService.getCurrentPosition();
+    try {
+      final position = await _gpsService.getCurrentPosition();
 
-    if (position != null) {
-      final distance = _gpsService.calculateDistanceMeters(
-        position.latitude,
-        position.longitude,
-        _schoolLat,
-        _schoolLng,
-      );
+      if (position != null) {
+        final distance = _gpsService.calculateDistanceMeters(
+          position.latitude,
+          position.longitude,
+          _schoolLat,
+          _schoolLng,
+        );
 
-      setState(() {
-        _currentPosition = position;
-        _distanceToSchool = distance;
-        _isInRadius = distance <= _allowedRadius;
-        _gpsStatusText = _isInRadius
-            ? 'Anda berada di area sekolah (${distance.toStringAsFixed(1)}m)'
-            : 'Di luar area sekolah (${distance.toStringAsFixed(1)}m)';
-        _isCheckingGps = false;
-      });
-    } else {
-      setState(() {
-        _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
-        _isCheckingGps = false;
-      });
+        setState(() {
+          _isMockLocation = false;
+          _currentPosition = position;
+          _distanceToSchool = distance;
+          _isInRadius = distance <= _allowedRadius;
+          _gpsStatusText = _isInRadius
+              ? 'Anda berada di area sekolah (${distance.toStringAsFixed(1)}m)'
+              : 'Di luar area sekolah (${distance.toStringAsFixed(1)}m)';
+          _isCheckingGps = false;
+        });
+      } else {
+        setState(() {
+          _isMockLocation = false;
+          _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
+          _isCheckingGps = false;
+        });
+      }
+    } catch (e) {
+      if (e.toString().contains('mock_location')) {
+        setState(() {
+          _isMockLocation = true;
+          _isInRadius = false;
+          _currentPosition = null;
+          _gpsStatusText = 'Aplikasi Fake GPS Terdeteksi! Presensi Dinonaktifkan.';
+          _isCheckingGps = false;
+        });
+      } else {
+        setState(() {
+          _isMockLocation = false;
+          _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
+          _isCheckingGps = false;
+        });
+      }
     }
   }
 
-  void _openCameraView(String mode) {
+  /// Deteksi shift berdasarkan profil guru atau jam saat ini (mengikuti Vite L68)
+  String _detectShift() {
+    final profileShift = widget.user['shift']?.toString() ?? '';
+    if (profileShift == 'pagi' || profileShift == 'siang') return profileShift;
+    // Fallback: deteksi otomatis dari jam saat ini (WIT = UTC+9)
+    final now = DateTime.now().toUtc().add(const Duration(hours: 9));
+    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    return timeStr.compareTo('12:00') < 0 ? 'pagi' : 'siang';
+  }
+
+  /// Validasi jendela waktu absen masuk — mengikuti logika Vite handleCheckInSubmit()
+  String? _validateCheckInTime() {
+    final now = DateTime.now().toUtc().add(const Duration(hours: 9));
+    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final shift = _detectShift();
+
+    final checkInOpen   = shift == 'pagi' ? _pagiCheckInOpen   : _siangCheckInOpen;
+    final checkOutStart = shift == 'pagi' ? _pagiCheckOutStart : _siangCheckOutStart;
+    final shiftLabel    = shift == 'pagi' ? 'Pagi' : 'Siang';
+
+    if (timeStr.compareTo(checkInOpen) < 0) {
+      return 'Presensi Shift $shiftLabel belum dibuka (Mulai $checkInOpen WIT).';
+    }
+    if (timeStr.compareTo(checkOutStart) >= 0) {
+      return 'Batas waktu absen masuk Shift $shiftLabel telah berakhir ($checkOutStart WIT).';
+    }
+    return null; // valid
+  }
+
+  /// Validasi jendela waktu absen pulang — mengikuti logika Vite handleCheckOutSubmit()
+  String? _validateCheckOutTime() {
+    final now = DateTime.now().toUtc().add(const Duration(hours: 9));
+    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final shift = _detectShift();
+
+    final checkOutStart = shift == 'pagi' ? _pagiCheckOutStart : _siangCheckOutStart;
+    final checkOutEnd   = shift == 'pagi' ? _pagiCheckOutEnd   : _siangCheckOutEnd;
+
+    if (timeStr.compareTo(checkOutStart) < 0) {
+      return 'Absen pulang belum dibuka (Mulai $checkOutStart WIT).';
+    }
+    if (timeStr.compareTo(checkOutEnd) > 0) {
+      return 'Batas waktu presensi telah berakhir ($checkOutEnd WIT).';
+    }
+    return null; // valid
+  }
+
+  Future<void> _openCameraView(String mode) async {
     if (_currentPosition == null && !_isDinasLuar) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tunggu hingga lokasi GPS terdeteksi.')),
+      );
+      return;
+    }
+
+    // Refresh school settings (jam masuk, pulang, radius) secara real-time tepat sebelum validasi & buka kamera
+    await _loadSchoolSettings();
+
+    // Validasi radius geofence (mengikuti Vite handleCheckInSubmit/handleCheckOutSubmit)
+    if (mode != 'enroll' && !_isDinasLuar && !_isInRadius) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFF111827),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.gpp_maybe_rounded, color: Colors.redAccent, size: 24),
+              SizedBox(width: 8),
+              Text('Gagal Absen', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Text(
+            'Anda berada di luar radius sekolah (${_distanceToSchool.toStringAsFixed(1)}m dari max ${_allowedRadius.toStringAsFixed(1)}m).',
+            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK', style: TextStyle(color: Color(0xFF0A84FF), fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Validasi jendela waktu shift (mengikuti Vite)
+    final String? timeError = mode == 'check_in'
+        ? _validateCheckInTime()
+        : (mode == 'check_out' ? _validateCheckOutTime() : null);
+
+    if (timeError != null) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFF111827),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.access_time_rounded, color: Colors.orangeAccent, size: 24),
+              SizedBox(width: 8),
+              Text('Belum Waktunya', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: Text(timeError, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK', style: TextStyle(color: Color(0xFF0A84FF), fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
       );
       return;
     }
@@ -123,6 +276,11 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           isDinasLuar: _isDinasLuar,
           latitude: _currentPosition?.latitude ?? 0.0,
           longitude: _currentPosition?.longitude ?? 0.0,
+          detectedShift: _detectShift(),
+          schoolSettings: {
+            'pagi_work_start' : _pagiWorkStart,
+            'siang_work_start': _siangWorkStart,
+          },
         ),
       ),
     ).then((success) {
@@ -149,18 +307,24 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           Row(
             children: [
               Icon(
-                _isDinasLuar
-                    ? Icons.work_history_rounded
-                    : (_isInRadius ? Icons.verified_rounded : Icons.gpp_maybe_rounded),
-                color: _isDinasLuar
-                    ? Colors.orangeAccent
-                    : (_isInRadius ? Colors.greenAccent : Colors.redAccent),
+                _isMockLocation
+                    ? Icons.block_rounded
+                    : (_isDinasLuar
+                        ? Icons.work_history_rounded
+                        : (_isInRadius ? Icons.verified_rounded : Icons.gpp_maybe_rounded)),
+                color: _isMockLocation
+                    ? Colors.redAccent
+                    : (_isDinasLuar
+                        ? Colors.orangeAccent
+                        : (_isInRadius ? Colors.greenAccent : Colors.redAccent)),
                 size: 24,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  _isDinasLuar ? 'Mode Dinas Luar Aktif' : _gpsStatusText,
+                  _isMockLocation
+                      ? 'Aplikasi Fake GPS Terdeteksi! Presensi Dinonaktifkan.'
+                      : (_isDinasLuar ? 'Mode Dinas Luar Aktif' : _gpsStatusText),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -200,6 +364,31 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           ),
           const Divider(color: Colors.white12, height: 24),
 
+          // Banner peringatan Fake GPS
+          if (_isMockLocation) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.12),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.block_rounded, color: Colors.redAccent, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '⚠️ Aplikasi Fake GPS / Mock Location terdeteksi! Nonaktifkan aplikasi tersebut dan coba lagi.',
+                      style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // Action Buttons depending on Face Enrollment Status
           if (!_hasFaceMaster) ...[
             // Status jika wajah belum didaftarkan
@@ -214,7 +403,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               child: const Row(
                 children: [
                   Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 20),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Wajah Master belum terdaftar di database. Silakan rekam wajah Anda terlebih dahulu.',
@@ -225,7 +414,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: () => _openCameraView('enroll'),
+              onPressed: _isMockLocation ? null : () => _openCameraView('enroll'),
               icon: const Icon(Icons.face_retouching_natural_rounded, color: Colors.white),
               label: const Text(
                 'Daftarkan Wajah Master',
@@ -233,6 +422,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
+                disabledBackgroundColor: Colors.white.withOpacity(0.05),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -243,7 +433,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: (_isInRadius || _isDinasLuar) ? () => _openCameraView('check_in') : null,
+                    onPressed: _isMockLocation ? null : () => _openCameraView('check_in'),
                     icon: const Icon(Icons.login_rounded, color: Colors.white, size: 20),
                     label: const Text(
                       'Masuk',
@@ -260,7 +450,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: (_isInRadius || _isDinasLuar) ? () => _openCameraView('check_out') : null,
+                    onPressed: _isMockLocation ? null : () => _openCameraView('check_out'),
                     icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
                     label: const Text(
                       'Pulang',
