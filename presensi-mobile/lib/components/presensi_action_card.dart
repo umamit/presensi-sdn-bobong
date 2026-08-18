@@ -44,12 +44,17 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
 
   Timer? _gpsTimer;
 
+  // Status absensi hari ini
+  Map<String, dynamic>? _todayRecord;
+  bool _isLoadingTodayRecord = true;
+
   @override
   void initState() {
     super.initState();
     _checkFaceMasterStatus();
     _loadSchoolSettings();
     _startLocationTracking();
+    _loadTodayRecord();
   }
 
   @override
@@ -63,6 +68,21 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     setState(() {
       _hasFaceMaster = descriptor != null && descriptor.toString().trim().isNotEmpty;
     });
+  }
+
+  Future<void> _loadTodayRecord() async {
+    final nip = widget.user['nip']?.toString() ?? '';
+    if (nip.isEmpty) return;
+    final nowWit = DateTime.now().toUtc().add(const Duration(hours: 9));
+    final dateStr = nowWit.toString().substring(0, 10);
+    setState(() => _isLoadingTodayRecord = true);
+    final record = await _supabaseService.fetchTodayRecord(nip, dateStr);
+    if (mounted) {
+      setState(() {
+        _todayRecord = record;
+        _isLoadingTodayRecord = false;
+      });
+    }
   }
 
   Future<void> _loadSchoolSettings() async {
@@ -302,7 +322,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     ).then((success) {
       if (success == true) {
         widget.onAttendanceSuccess();
-        _checkFaceMasterStatus(); // Segar status wajah master
+        _checkFaceMasterStatus();
+        _loadTodayRecord(); // Refresh status absen hari ini
       }
     });
   }
@@ -444,44 +465,140 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               ),
             ),
           ] else ...[
-            // Status jika wajah sudah terdaftar (Tombol Absen Masuk & Pulang)
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isMockLocation ? null : () => _openCameraView('check_in'),
-                    icon: const Icon(Icons.login_rounded, color: Colors.white, size: 20),
-                    label: const Text(
-                      'Masuk',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0A84FF),
-                      disabledBackgroundColor: Colors.white.withOpacity(0.05),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
+            // Status absensi hari ini
+            if (_isLoadingTodayRecord)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0A84FF)),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isMockLocation ? null : () => _openCameraView('check_out'),
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
-                    label: const Text(
-                      'Pulang',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              )
+            else if (_todayRecord != null) ...[
+              // Banner status absen hari ini
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: (_todayRecord!['check_out_time'] != null
+                          ? Colors.green
+                          : Colors.blue)
+                      .withOpacity(0.12),
+                  border: Border.all(
+                    color: (_todayRecord!['check_out_time'] != null
+                            ? Colors.green
+                            : Colors.blue)
+                        .withOpacity(0.4),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _todayRecord!['check_out_time'] != null
+                          ? Icons.check_circle_rounded
+                          : Icons.login_rounded,
+                      color: _todayRecord!['check_out_time'] != null
+                          ? Colors.greenAccent
+                          : const Color(0xFF0A84FF),
+                      size: 18,
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF30D158),
-                      disabledBackgroundColor: Colors.white.withOpacity(0.05),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _todayRecord!['check_out_time'] != null
+                            ? 'Presensi hari ini selesai. Masuk & pulang sudah tercatat.'
+                            : 'Sudah absen masuk. Tombol masuk dikunci.',
+                        style: TextStyle(
+                          color: _todayRecord!['check_out_time'] != null
+                              ? Colors.greenAccent
+                              : const Color(0xFF0A84FF),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Tombol Masuk & Pulang
+            if (!_isLoadingTodayRecord)
+              Row(
+                children: [
+                  // Tombol Absen Masuk — terkunci jika sudah ada check_in_time
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: (_isMockLocation || _todayRecord != null)
+                          ? null
+                          : () => _openCameraView('check_in'),
+                      icon: Icon(
+                        _todayRecord != null
+                            ? Icons.check_rounded
+                            : Icons.login_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      label: Text(
+                        _todayRecord != null ? 'Sudah Masuk' : 'Masuk',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0A84FF),
+                        disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                        disabledForegroundColor: Colors.white38,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  // Tombol Absen Pulang — aktif hanya jika sudah masuk tapi belum pulang
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: (_isMockLocation ||
+                              _todayRecord == null ||
+                              _todayRecord!['check_out_time'] != null)
+                          ? null
+                          : () => _openCameraView('check_out'),
+                      icon: Icon(
+                        _todayRecord?['check_out_time'] != null
+                            ? Icons.check_rounded
+                            : Icons.logout_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      label: Text(
+                        _todayRecord?['check_out_time'] != null
+                            ? 'Sudah Pulang'
+                            : 'Pulang',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF30D158),
+                        disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                        disabledForegroundColor: Colors.white38,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
           ],
         ],
       ),
