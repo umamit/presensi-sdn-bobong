@@ -106,13 +106,26 @@ export function formatDateIndo(dateStr?: string): string {
 }
 
 /**
- * Mengembalikan tanggal lokal saat ini (YYYY-MM-DD) sesuai zona waktu perangkat
+ * Mengembalikan tanggal lokal saat ini (YYYY-MM-DD) sesuai zona waktu Asia/Jayapura (WIT)
  */
 export function getLocalDateString(date: Date = new Date()): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+  const witDate = new Date(utc + (3600000 * 9));
+  const year = witDate.getFullYear();
+  const month = String(witDate.getMonth() + 1).padStart(2, '0');
+  const day = String(witDate.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Format Date strictly to "HH:mm" in Asia/Jayapura (WIT, UTC+9) timezone
+ */
+export function formatTimeWIT24h(date: Date): string {
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+  const witDate = new Date(utc + (3600000 * 9));
+  const h = String(witDate.getHours()).padStart(2, '0');
+  const m = String(witDate.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
 }
 
 /**

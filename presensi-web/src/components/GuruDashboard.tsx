@@ -13,7 +13,7 @@ import { PersonalHistoryList } from './guru/PersonalHistoryList';
 
 import { useGpsLocation } from '../hooks/useGpsLocation';
 import { useAttendanceTimer, useClockTick } from '../hooks/useAttendanceTimer';
-import { getLocalDateString } from '../utils/haversine';
+import { getLocalDateString, formatTimeWIT24h } from '../utils/haversine';
 import { Fingerprint, History, Menu, Map } from 'lucide-react';
 
 interface GuruDashboardProps {
@@ -64,7 +64,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
     }
 
     const nowISO = new Date().toISOString();
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+    const nowTimeStr = formatTimeWIT24h(currentTime);
     const detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
 
     const checkInOpen   = detectedShift === 'pagi' ? (schoolSettings.pagiCheckInOpen   || '06:00') : (schoolSettings.siangCheckInOpen   || '12:00');
@@ -146,7 +146,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
   const handleCheckOutSubmit = () => {
     if (!userTodayRecord) return;
-    const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+    const nowTimeStr = formatTimeWIT24h(currentTime);
     const userShift = userTodayRecord.shift || 'pagi';
     const targetCheckOutStart = userShift === 'pagi' ? (schoolSettings.pagiCheckOutStart || '11:45') : (schoolSettings.siangCheckOutStart || '16:00');
     const targetCheckOutEnd = userShift === 'pagi' ? (schoolSettings.pagiCheckOutEnd || '12:00') : (schoolSettings.siangCheckOutEnd || '16:45');
@@ -209,7 +209,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
               handleCheckOutSubmit={handleCheckOutSubmit}
               currentTime={currentTime}
               schoolSettings={schoolSettings}
-              userShift={userTodayRecord?.shift || user.shift || (currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':') < '12:00' ? 'pagi' : 'siang')}
+              userShift={userTodayRecord?.shift || user.shift || (formatTimeWIT24h(currentTime) < '12:00' ? 'pagi' : 'siang')}
               isDinasLuar={isDinasLuar}
               onToggleDinasLuar={setIsDinasLuar}
             />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AttendanceRecord, SchoolSettings } from '../../types';
 import { CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import { formatDateIndo, formatTime } from '../../utils/haversine';
+import { formatDateIndo, formatTime, formatTimeWIT24h } from '../../utils/haversine';
 
 interface PresensiActionCardProps {
   todayStr: string;
@@ -32,7 +32,7 @@ export const PresensiActionCard: React.FC<PresensiActionCardProps> = ({
   isDinasLuar = false,
   onToggleDinasLuar
 }) => {
-  const nowTimeStr = currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
+  const nowTimeStr = formatTimeWIT24h(currentTime);
   const openTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckInOpen || '06:00') : (schoolSettings?.siangCheckInOpen || '12:00');
   const workStart = userShift === 'pagi' ? (schoolSettings?.pagiWorkStart || '07:15') : (schoolSettings?.siangWorkStart || '12:45');
   const closeTime = userShift === 'pagi' ? (schoolSettings?.pagiCheckOutStart || '11:45') : (schoolSettings?.siangCheckOutStart || '16:00');
