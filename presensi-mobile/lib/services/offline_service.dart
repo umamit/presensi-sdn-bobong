@@ -78,7 +78,7 @@ class OfflineService {
         // Jika hanya absen pulang (check-out)
         success = await supabaseService.updateCheckOut(
           recordId: record['record_id'] ?? '',
-          checkOutTime: record['time'] ?? '',
+          checkOutTime: record['check_out_time'] ?? record['time'] ?? '',
           selfieUrl: record['selfie_url'],
           notes: record['notes'],
           userNip: record['user_nip'],
