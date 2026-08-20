@@ -77,7 +77,7 @@ Format Jawaban Anda WAJIB mengikuti struktur berikut (gunakan bahasa Indonesia y
         'Authorization': `Bearer ${activeKey}`
       },
       body: JSON.stringify({
-        model: 'groq/compound',
+        model: 'openai/gpt-oss-120b',
         messages: [
           {
             role: 'system',
