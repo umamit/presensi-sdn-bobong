@@ -239,15 +239,32 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
       }
     }
   }
+  int _timeToMinutes(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        final h = int.tryParse(parts[0]) ?? 0;
+        final m = int.tryParse(parts[1]) ?? 0;
+        return h * 60 + m;
+      }
+    } catch (_) {}
+    return 0;
+  }
 
   /// Deteksi shift berdasarkan profil guru atau jam saat ini (mengikuti Vite L68)
   String _detectShift() {
     final profileShift = widget.user['shift']?.toString() ?? '';
     if (profileShift == 'pagi' || profileShift == 'siang') return profileShift;
-    // Fallback: deteksi otomatis dari jam saat ini (WIT = UTC+9)
+    
+    // Fallback: deteksi otomatis dinamis dari jam saat ini (WIT = UTC+9)
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    return timeStr.compareTo('12:00') < 0 ? 'pagi' : 'siang';
+    final currentMin = now.hour * 60 + now.minute;
+
+    final pagiEndMin = _timeToMinutes(_pagiCheckOutEnd);
+    final siangStartMin = _timeToMinutes(_siangCheckInOpen);
+    final cutoffMin = ((pagiEndMin + siangStartMin) / 2).round();
+
+    return currentMin < cutoffMin ? 'pagi' : 'siang';
   }
 
   /// Validasi jendela waktu absen masuk — mengikuti logika Vite handleCheckInSubmit()
@@ -273,7 +290,10 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
   String? _validateCheckOutTime() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    final shift = _detectShift();
+    
+    // Gunakan shift dari data check-in hari ini jika ada, jika tidak baru gunakan deteksi otomatis
+    final savedShift = _todayRecord?['shift']?.toString() ?? '';
+    final shift = savedShift.isNotEmpty ? savedShift.toLowerCase() : _detectShift();
 
     final checkOutStart = shift == 'pagi' ? _pagiCheckOutStart : _siangCheckOutStart;
     final checkOutEnd   = shift == 'pagi' ? _pagiCheckOutEnd   : _siangCheckOutEnd;

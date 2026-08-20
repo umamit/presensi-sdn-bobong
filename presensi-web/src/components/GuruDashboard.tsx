@@ -16,6 +16,34 @@ import { useAttendanceTimer, useClockTick } from '../hooks/useAttendanceTimer';
 import { getLocalDateString, formatTimeWIT24h } from '../utils/haversine';
 import { Fingerprint, History, Menu, Map } from 'lucide-react';
 
+// Helper untuk mengonversi HH:MM ke total menit sejak tengah malam
+const toMinutes = (timeStr: string): number => {
+  try {
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  } catch (_) {
+    return 0;
+  }
+};
+
+// Helper untuk deteksi shift dinamis berdasarkan midpoint jadwal
+export const getDetectedShift = (
+  nowTimeStr: string,
+  userShift: string | undefined,
+  settings: SchoolSettings
+): 'pagi' | 'siang' => {
+  if (userShift === 'pagi' || userShift === 'siang') {
+    return userShift;
+  }
+
+  const pagiEndMin = toMinutes(settings.pagiCheckOutEnd || '12:30');
+  const siangStartMin = toMinutes(settings.siangCheckInOpen || '13:00');
+  const cutoffMin = Math.round((pagiEndMin + siangStartMin) / 2);
+
+  const nowMin = toMinutes(nowTimeStr);
+  return nowMin < cutoffMin ? 'pagi' : 'siang';
+};
+
 interface GuruDashboardProps {
   user: UserProfile;
   schoolSettings: SchoolSettings;
@@ -65,7 +93,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
 
     const nowISO = new Date().toISOString();
     const nowTimeStr = formatTimeWIT24h(currentTime);
-    const detectedShift: 'pagi' | 'siang' = user.shift || (nowTimeStr < '12:00' ? 'pagi' : 'siang');
+    const detectedShift = getDetectedShift(nowTimeStr, user.shift, schoolSettings);
 
     const checkInOpen   = detectedShift === 'pagi' ? (schoolSettings.pagiCheckInOpen   || '06:00') : (schoolSettings.siangCheckInOpen   || '12:00');
     const workStart     = detectedShift === 'pagi' ? (schoolSettings.pagiWorkStart      || '07:15') : (schoolSettings.siangWorkStart      || '12:45');
@@ -209,7 +237,7 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
               handleCheckOutSubmit={handleCheckOutSubmit}
               currentTime={currentTime}
               schoolSettings={schoolSettings}
-              userShift={userTodayRecord?.shift || user.shift || (formatTimeWIT24h(currentTime) < '12:00' ? 'pagi' : 'siang')}
+              userShift={userTodayRecord?.shift || getDetectedShift(formatTimeWIT24h(currentTime), user.shift, schoolSettings)}
               isDinasLuar={isDinasLuar}
               onToggleDinasLuar={setIsDinasLuar}
             />
