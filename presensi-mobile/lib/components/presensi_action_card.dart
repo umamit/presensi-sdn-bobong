@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:ntp/ntp.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
 import '../services/gps_service.dart';
 import '../services/supabase_service.dart';
 import '../views/camera_view.dart';
@@ -48,6 +50,12 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
   Map<String, dynamic>? _todayRecord;
   bool _isLoadingTodayRecord = true;
 
+  // Status Keamanan NTP & Root
+  bool _isTimeAccurate = true;
+  String _timeStatusText = '';
+  bool _isDeviceSecured = true;
+  String _deviceSecurityText = '';
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +63,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     _loadSchoolSettings();
     _startLocationTracking();
     _loadTodayRecord();
+    _checkNtpTime();
+    _checkJailbreakStatus();
   }
 
   @override
@@ -68,6 +78,52 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     setState(() {
       _hasFaceMaster = descriptor != null && descriptor.toString().trim().isNotEmpty;
     });
+  }
+
+  Future<void> _checkNtpTime() async {
+    try {
+      final DateTime deviceTime = DateTime.now();
+      // Bandingkan dengan server NTP pool (5 detik timeout)
+      final DateTime ntpTime = await NTP.now().timeout(const Duration(seconds: 5));
+      final difference = deviceTime.difference(ntpTime).inMinutes.abs();
+
+      if (difference > 5) {
+        setState(() {
+          _isTimeAccurate = false;
+          _timeStatusText = 'Waktu HP Anda tidak akurat (Selisih $difference menit). Harap aktifkan "Atur Waktu Otomatis" di Pengaturan HP Anda.';
+        });
+      } else {
+        setState(() {
+          _isTimeAccurate = true;
+          _timeStatusText = '';
+        });
+      }
+    } catch (e) {
+      print('Gagal memverifikasi waktu NTP global: $e');
+      setState(() {
+        _isTimeAccurate = true; // Jangan blokir jika gagal koneksi ntp karena offline
+        _timeStatusText = '';
+      });
+    }
+  }
+
+  Future<void> _checkJailbreakStatus() async {
+    try {
+      bool jailbroken = await FlutterJailbreakDetection.jailbroken;
+      if (jailbroken) {
+        setState(() {
+          _isDeviceSecured = false;
+          _deviceSecurityText = '⚠️ HP Terdeteksi Modifikasi (Root/Jailbroken). Presensi dinonaktifkan demi keamanan.';
+        });
+      } else {
+        setState(() {
+          _isDeviceSecured = true;
+          _deviceSecurityText = '';
+        });
+      }
+    } catch (e) {
+      print('Gagal mendeteksi status jailbreak: $e');
+    }
   }
 
   Future<void> _loadTodayRecord() async {
@@ -259,7 +315,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           ),
           content: Text(
             'Anda berada di luar radius sekolah (${_distanceToSchool.toStringAsFixed(1)}m dari max ${_allowedRadius.toStringAsFixed(1)}m).',
-            style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
           ),
           actions: [
             TextButton(
@@ -291,7 +347,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               Text('Belum Waktunya', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
             ],
           ),
-          content: Text(timeError, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+          content: Text(timeError, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -302,6 +358,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
       );
       return;
     }
+
+    if (!mounted) return;
 
     Navigator.push(
       context,
@@ -333,8 +391,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        color: Colors.white.withValues(alpha: 0.03),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -402,13 +460,13 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           const Divider(color: Colors.white12, height: 24),
 
           // Banner peringatan Fake GPS
-          if (_isMockLocation) ...[
+           if (_isMockLocation) ...[
             Container(
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.12),
-                border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                color: Colors.red.withValues(alpha: 0.12),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Row(
@@ -426,6 +484,56 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
             ),
           ],
 
+          // Banner peringatan Jam Tidak Akurat (NTP)
+          if (!_isTimeAccurate) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.12),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.alarm_off_rounded, color: Colors.amber, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _timeStatusText,
+                      style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Banner peringatan Perangkat Root/Jailbreak
+          if (!_isDeviceSecured) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.12),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.security_update_warning_rounded, color: Colors.redAccent, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _deviceSecurityText,
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           // Action Buttons depending on Face Enrollment Status
           if (!_hasFaceMaster) ...[
             // Status jika wajah belum didaftarkan
@@ -433,8 +541,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                color: Colors.orange.withValues(alpha: 0.1),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Row(
@@ -451,7 +559,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               ),
             ),
             ElevatedButton.icon(
-              onPressed: _isMockLocation ? null : () => _openCameraView('enroll'),
+              onPressed: (_isMockLocation || !_isTimeAccurate || !_isDeviceSecured) ? null : () => _openCameraView('enroll'),
               icon: const Icon(Icons.face_retouching_natural_rounded, color: Colors.white),
               label: const Text(
                 'Daftarkan Wajah Master',
@@ -459,7 +567,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                disabledBackgroundColor: Colors.white.withOpacity(0.05),
+                disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -486,12 +594,12 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                   color: (_todayRecord!['check_out_time'] != null
                           ? Colors.green
                           : Colors.blue)
-                      .withOpacity(0.12),
+                      .withValues(alpha: 0.12),
                   border: Border.all(
                     color: (_todayRecord!['check_out_time'] != null
                             ? Colors.green
                             : Colors.blue)
-                        .withOpacity(0.4),
+                        .withValues(alpha: 0.4),
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -533,7 +641,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                   // Tombol Absen Masuk — terkunci jika sudah ada check_in_time
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: (_isMockLocation || _todayRecord != null)
+                      onPressed: (_isMockLocation || !_isTimeAccurate || !_isDeviceSecured || _todayRecord != null)
                           ? null
                           : () => _openCameraView('check_in'),
                       icon: Icon(
@@ -552,7 +660,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0A84FF),
-                        disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                        disabledBackgroundColor: Colors.white.withValues(alpha: 0.06),
                         disabledForegroundColor: Colors.white38,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -566,6 +674,8 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: (_isMockLocation ||
+                              !_isTimeAccurate ||
+                              !_isDeviceSecured ||
                               _todayRecord == null ||
                               _todayRecord!['check_out_time'] != null)
                           ? null
@@ -588,7 +698,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF30D158),
-                        disabledBackgroundColor: Colors.white.withOpacity(0.06),
+                        disabledBackgroundColor: Colors.white.withValues(alpha: 0.06),
                         disabledForegroundColor: Colors.white38,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

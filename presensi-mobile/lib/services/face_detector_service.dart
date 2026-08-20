@@ -77,7 +77,9 @@ class FaceDetectorService {
     final Random rand = Random(seed.hashCode + 99);
     final List<double> mock = List.generate(128, (_) => rand.nextDouble() * 2.0 - 1.0);
     double sum = 0;
-    for (var val in mock) sum += val * val;
+    for (var val in mock) {
+      sum += val * val;
+    }
     final double magnitude = sqrt(sum);
     return mock.map((val) => val / magnitude).toList();
   }
@@ -93,7 +95,7 @@ class FaceDetectorService {
     return sqrt(sum);
   }
 
-  /// Membaca string JSON descriptor wajah dari Supabase dan mengubahnya ke List<double>
+  /// Membaca string JSON descriptor wajah dari Supabase dan mengubahnya ke `List<double>`
   List<double> parseDescriptorString(String descriptorStr) {
     try {
       // Bersihkan karakter kurung siku [ dan ]

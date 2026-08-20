@@ -81,8 +81,8 @@ class _LoginViewState extends State<LoginView> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.03),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
+                      color: Colors.white.withValues(alpha: 0.03),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: ClipRRect(
@@ -128,8 +128,8 @@ class _LoginViewState extends State<LoginView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      color: Colors.red.withValues(alpha: 0.1),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -160,11 +160,11 @@ class _LoginViewState extends State<LoginView> {
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.badge_outlined, color: Colors.grey),
                           hintText: 'Masukkan NIP Anda...',
-                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: Colors.white.withValues(alpha: 0.03),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -200,11 +200,11 @@ class _LoginViewState extends State<LoginView> {
                             },
                           ),
                           hintText: 'Masukkan Password...',
-                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.03),
+                          fillColor: Colors.white.withValues(alpha: 0.03),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+                            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -223,7 +223,7 @@ class _LoginViewState extends State<LoginView> {
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0A84FF),
-                    disabledBackgroundColor: const Color(0xFF0A84FF).withOpacity(0.5),
+                    disabledBackgroundColor: const Color(0xFF0A84FF).withValues(alpha: 0.5),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -257,7 +257,7 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(width: 4),
                     Text(
                       'Lupa password? Hubungi Kepala Sekolah / Admin.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
                     ),
                   ],
                 ),

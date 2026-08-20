@@ -74,7 +74,7 @@ export const SmartInsightsSection: React.FC<SmartInsightsSectionProps> = ({
                 fontWeight: 600
               }}
             >
-              LLAMA 3.1 READY
+              GPT OSS 120B READY
             </span>
           )}
         </div>

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../services/supabase_service.dart';
@@ -176,8 +175,8 @@ class _DashboardViewState extends State<DashboardView> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.03),
-                  border: Border.all(color: Colors.white.withOpacity(0.06)),
+                  color: Colors.white.withValues(alpha: 0.03),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -187,7 +186,7 @@ class _DashboardViewState extends State<DashboardView> {
                     Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: const Color(0xFF0A84FF).withOpacity(0.15),
+                          backgroundColor: const Color(0xFF0A84FF).withValues(alpha: 0.15),
                           radius: 24,
                           child: const Icon(Icons.person_outline_rounded, color: Color(0xFF0A84FF)),
                         ),
@@ -208,7 +207,7 @@ class _DashboardViewState extends State<DashboardView> {
                               Text(
                                 'NIP: $nip • $subject',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: Colors.white.withValues(alpha: 0.4),
                                   fontSize: 11,
                                 ),
                               ),
@@ -227,13 +226,13 @@ class _DashboardViewState extends State<DashboardView> {
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: _isOnline
-                                ? Colors.green.withOpacity(0.12)
-                                : Colors.orange.withOpacity(0.12),
+                                ? Colors.green.withValues(alpha: 0.12)
+                                : Colors.orange.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: _isOnline
-                                  ? Colors.greenAccent.withOpacity(0.4)
-                                  : Colors.orangeAccent.withOpacity(0.4),
+                                  ? Colors.greenAccent.withValues(alpha: 0.4)
+                                  : Colors.orangeAccent.withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(
@@ -262,9 +261,9 @@ class _DashboardViewState extends State<DashboardView> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                              border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -311,7 +310,7 @@ class _DashboardViewState extends State<DashboardView> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0A84FF),
-                            disabledBackgroundColor: Colors.white.withOpacity(0.05),
+                            disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
@@ -358,7 +357,7 @@ class _DashboardViewState extends State<DashboardView> {
                   alignment: Alignment.center,
                   child: Text(
                     'Belum ada riwayat presensi.',
-                    style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
                   ),
                 )
               else
@@ -387,8 +386,8 @@ class _DashboardViewState extends State<DashboardView> {
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.02),
-                        border: Border.all(color: Colors.white.withOpacity(0.04)),
+                        color: Colors.white.withValues(alpha: 0.02),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -404,7 +403,7 @@ class _DashboardViewState extends State<DashboardView> {
                               const SizedBox(height: 4),
                               Text(
                                 'Masuk: $checkIn WIT • Pulang: $checkOut WIT',
-                                style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
+                                style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
                               ),
                             ],
                           ),
@@ -412,8 +411,8 @@ class _DashboardViewState extends State<DashboardView> {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: status.contains('HADIR')
-                                  ? Colors.green.withOpacity(0.15)
-                                  : Colors.orange.withOpacity(0.15),
+                                  ? Colors.green.withValues(alpha: 0.15)
+                                  : Colors.orange.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -493,8 +492,8 @@ class _DigitalClockState extends State<DigitalClock> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A84FF).withOpacity(0.06),
-        border: Border.all(color: const Color(0xFF0A84FF).withOpacity(0.15)),
+        color: const Color(0xFF0A84FF).withValues(alpha: 0.06),
+        border: Border.all(color: const Color(0xFF0A84FF).withValues(alpha: 0.15)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

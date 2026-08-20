@@ -55,8 +55,8 @@ class _CameraViewState extends State<CameraView> {
   // Deteksi kedipan & senyuman
   bool _hasBlinked = false;
   bool _hasSmiled = false;
-  double _blinkThreshold = 0.15; // Probabilitas mata terbuka < 15%
-  double _smileThreshold = 0.75; // Probabilitas senyum > 75%
+  final double _blinkThreshold = 0.15; // Probabilitas mata terbuka < 15%
+  final double _smileThreshold = 0.75; // Probabilitas senyum > 75%
 
   int _noFaceFrameCount = 0;
 
@@ -111,7 +111,9 @@ class _CameraViewState extends State<CameraView> {
         if (_isProcessingFrame || 
             _isSubmitting ||
             _currentChallenge == LivenessChallenge.processing ||
-            _currentChallenge == LivenessChallenge.success) return;
+            _currentChallenge == LivenessChallenge.success) {
+          return;
+        }
         
         _processCameraImage(image);
       });
@@ -482,7 +484,7 @@ class _CameraViewState extends State<CameraView> {
             Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
-        content: Text(body, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+        content: Text(body, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () {
@@ -520,7 +522,7 @@ class _CameraViewState extends State<CameraView> {
             const Text('Verifikasi Wajah Gagal', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
-        content: Text(errorText, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+        content: Text(errorText, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () {
@@ -607,7 +609,7 @@ class _CameraViewState extends State<CameraView> {
                     // Custom Circular Cutout Overlay
                     ColorFiltered(
                       colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.8),
+                        Colors.black.withValues(alpha: 0.8),
                         BlendMode.srcOut,
                       ),
                       child: Stack(
@@ -653,7 +655,7 @@ class _CameraViewState extends State<CameraView> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.65),
+                          color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -695,13 +697,13 @@ class _CameraViewState extends State<CameraView> {
                   Expanded(
                     child: Text(
                       'Kamera HP bermasalah? Gunakan bypass darurat.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
                     ),
                   ),
                   ElevatedButton(
                     onPressed: _currentChallenge == LivenessChallenge.processing ? null : _handleEmergencyBypass,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent.withOpacity(0.2),
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                       side: const BorderSide(color: Colors.redAccent, width: 1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

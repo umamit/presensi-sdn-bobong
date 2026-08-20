@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Download, UserCheck, AlertTriangle } from 'lucide-react';
-import { AttendanceRecord } from '../../types';
+import { Search, Download, UserCheck, AlertTriangle, Sparkles } from 'lucide-react';
+import { AttendanceRecord, SchoolSettings } from '../../types';
 import { exportAttendanceCsv } from '../../utils/exportCsv';
 import { formatTime, formatDateIndo } from '../../utils/haversine';
 import { AttendanceSheet } from './AttendanceSheet';
+import { TeacherPerformanceReportModal } from './TeacherPerformanceReportModal';
 
 interface AttendanceTableProps {
   filteredRecords: AttendanceRecord[];
@@ -11,6 +12,7 @@ interface AttendanceTableProps {
   setSearchTerm: (val: string) => void;
   selectedDate: string;
   setSelectedDate: (val: string) => void;
+  schoolSettings: SchoolSettings;
   onRefresh?: () => void;
   onConfirmDinasLuar?: (recordId: string) => void;
 }
@@ -21,10 +23,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   setSearchTerm,
   selectedDate,
   setSelectedDate,
+  schoolSettings,
   onRefresh,
   onConfirmDinasLuar
 }) => {
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
+  const [selectedTeacherForReport, setSelectedTeacherForReport] = useState<string | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Fungsi pembantu untuk memilih warna dot ping status
   const getStatusColor = (status: string) => {
@@ -174,7 +179,38 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '0.7rem', color: 'var(--text-muted)' }}>-</div>
                     )}
                     <div>
-                      <strong style={{ color: '#fff', fontSize: '0.88rem', display: 'block', fontWeight: 600 }}>{rec.userName}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <strong style={{ color: '#fff', fontSize: '0.88rem', display: 'block', fontWeight: 600 }}>{rec.userName}</strong>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTeacherForReport(rec.userName);
+                            setIsReportModalOpen(true);
+                          }}
+                          title="Lihat Evaluasi Kinerja Cerdik AI"
+                          style={{
+                            background: 'rgba(99, 102, 241, 0.1)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            color: 'var(--primary)',
+                            padding: '3px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'background 0.2s, border-color 0.2s'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)';
+                            e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)';
+                            e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.2)';
+                          }}
+                        >
+                          <Sparkles size={11} />
+                        </button>
+                      </div>
                       <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{rec.userNip}</span>
                     </div>
                   </div>
@@ -299,6 +335,20 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         <AttendanceSheet
           record={selectedRecord}
           onClose={() => setSelectedRecord(null)}
+        />
+      )}
+
+      {/* Modal Evaluasi Kinerja Guru (Cerdik AI) */}
+      {selectedTeacherForReport && (
+        <TeacherPerformanceReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => {
+            setIsReportModalOpen(false);
+            setSelectedTeacherForReport(null);
+          }}
+          teacherName={selectedTeacherForReport}
+          records={filteredRecords}
+          schoolSettings={schoolSettings}
         />
       )}
     </>

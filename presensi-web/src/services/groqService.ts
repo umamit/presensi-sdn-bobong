@@ -105,3 +105,102 @@ Format Jawaban Anda WAJIB mengikuti struktur berikut (gunakan bahasa Indonesia y
     throw new Error(error?.message || 'Koneksi ke AI Groq terputus. Pastikan API Key Anda aktif.');
   }
 }
+
+export async function fetchTeacherPerformanceReport(
+  teacherName: string,
+  records: AttendanceRecord[],
+  apiKey: string
+): Promise<string | null> {
+  const activeKey = apiKey || (import.meta.env.VITE_GROQ_API_KEY as string) || '';
+  if (!activeKey) return null;
+
+  // Filter records belonging to this specific teacher
+  const teacherRecords = records.filter(r => r.userName === teacherName);
+
+  const totalHadir = teacherRecords.filter(r => r.status === 'hadir').length;
+  const totalTerlambat = teacherRecords.filter(r => r.status === 'terlambat').length;
+  const totalIzin = teacherRecords.filter(r => r.status === 'izin').length;
+  const totalDinasLuar = teacherRecords.filter(r => r.status === 'dinas_luar_approved' || r.status === 'dinas_luar').length;
+  const totalAbsenDarurat = teacherRecords.filter(r => r.notes && r.notes.includes('Darurat:')).length;
+
+  const summary = teacherRecords.map((r, i) => ({
+    no: i + 1,
+    tanggal: r.date,
+    status: r.status,
+    masuk: r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-',
+    pulang: r.checkOutTime ? new Date(r.checkOutTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-',
+    catatan: r.notes || '-'
+  }));
+
+  const prompt = `Anda adalah Konsultan Manajemen SDM Sekolah dan Asisten AI Kepala Sekolah SDN Bobong yang objektif, bijaksana, dan formal.
+Tugas Anda adalah menganalisis data kehadiran Guru individual untuk menghasilkan "Surat Evaluasi Kinerja Kedisiplinan Guru".
+
+Nama Guru: ${teacherName}
+
+Ringkasan Statistik Kehadiran Guru:
+- Total Kehadiran Tercatat: ${teacherRecords.length} hari
+- Hadir Tepat Waktu: ${totalHadir} hari
+- Terlambat: ${totalTerlambat} hari
+- Izin/Sakit: ${totalIzin} hari
+- Dinas Luar: ${totalDinasLuar} hari
+- Absen Darurat (Gagal Verifikasi Wajah): ${totalAbsenDarurat} kali
+
+Detail Presensi Guru:
+${JSON.stringify(summary, null, 2)}
+
+Format Jawaban Anda WAJIB mengikuti struktur surat resmi evaluasi berikut (gunakan bahasa Indonesia formal, berwibawa, dan santun):
+
+---
+### 📝 SURAT EVALUASI KINERJA KEDISIPLINAN GURU
+
+**Nama Guru:** ${teacherName}
+**Satuan Pendidikan:** SDN Bobong
+
+#### 1. ANALISIS KEDISIPLINAN KEHADIRAN
+(Satu paragraf objektif yang menganalisis kepatuhan guru terhadap jam masuk dan kepulangan berdasarkan data di atas)
+
+#### 2. KEPATUHAN METODE PRESENSI
+(Ulas jika ada catatan khusus mengenai Absen Darurat atau Dinas Luar. Apresiasi jika guru selalu melakukan verifikasi liveness wajah biasa dengan sukses)
+
+#### 3. CATATAN & REKOMENDASI KEPALA SEKOLAH
+(Berikan 1-2 butir saran taktis untuk pembinaan kinerja kedisiplinan guru ini, atau kalimat apresiasi apresiatif jika kinerjanya sudah sangat baik)
+
+---
+*PENTING: Tulis jawaban langsung ke poin-poin di atas. Jangan gunakan jargon asisten AI.*`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${activeKey}`
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-120b',
+        messages: [
+          {
+            role: 'system',
+            content: 'Anda adalah Asisten Evaluator Kedisiplinan Guru SDN Bobong yang profesional dan bijaksana. Tulis surat evaluasi resmi.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.4,
+        max_tokens: 800
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData?.error?.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result?.choices?.[0]?.message?.content || 'Gagal menyusun laporan evaluasi.';
+  } catch (error: any) {
+    console.error('Error calling Groq API for teacher report:', error);
+    throw new Error(error?.message || 'Koneksi ke AI Groq terputus. Pastikan API Key Anda aktif.');
+  }
+}

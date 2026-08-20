@@ -36,18 +36,20 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   supabase_flutter: ^2.6.0
-  geolocator: ^12.0.0
-  latlong2: ^0.9.1
+  geolocator: ^14.0.3
+  latlong2: ^0.10.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  camera: ^0.10.5
-  google_mlkit_face_detection: ^0.11.0
+  camera: ^0.12.0+2
+  google_mlkit_face_detection: ^0.15.1
   tflite_flutter: ^0.12.1
-  share_plus: ^9.0.0
-  csv: ^6.0.0
-  flutter_local_notifications: ^17.0.0
-  connectivity_plus: ^6.1.4
+  share_plus: ^13.3.0
+  csv: ^8.0.0
+  flutter_local_notifications: ^22.3.0
+  connectivity_plus: ^7.3.1
   flutter_image_compress: ^2.3.0
+  ntp: ^2.0.0
+  flutter_jailbreak_detection: ^1.2.0
 
 dev_dependencies:
   flutter_test:

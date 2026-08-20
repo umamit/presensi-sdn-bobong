@@ -199,6 +199,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
             setSearchTerm={setSearchTerm} 
             selectedDate={selectedDate} 
             setSelectedDate={setSelectedDate} 
+            schoolSettings={schoolSettings}
             onRefresh={refetch}
             onConfirmDinasLuar={onConfirmDinasLuar}
           />
@@ -214,6 +215,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
           setSearchTerm={setSearchTerm} 
           selectedDate={selectedDate} 
           setSelectedDate={setSelectedDate} 
+          schoolSettings={schoolSettings}
           onRefresh={refetch}
           onConfirmDinasLuar={onConfirmDinasLuar}
         />
