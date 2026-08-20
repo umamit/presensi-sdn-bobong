@@ -77,7 +77,7 @@ Format Jawaban Anda WAJIB mengikuti struktur berikut (gunakan bahasa Indonesia y
         'Authorization': `Bearer ${activeKey}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-specdec',
+        model: 'groq/compound',
         messages: [
           {
             role: 'system',
