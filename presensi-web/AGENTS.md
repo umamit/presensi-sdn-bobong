@@ -100,3 +100,10 @@ src/
     └── teacher/
         └── TeacherComponents.tsx   # TeacherAddForm + TeacherListItem
 ```
+
+## 8. Aturan Manajemen Versi Aplikasi (Version Management)
+- **Kenaikan Versi Wajib**: Setiap kali melakukan penambahan fitur baru, perbaikan bug, atau perubahan kode penting yang mengharuskan perakitan (build) ulang APK, AI **WAJIB** menaikkan nomor versi aplikasi pada file konfigurasi:
+  - **Flutter Mobile (`presensi-mobile/pubspec.yaml`)**: Naikkan `version: X.Y.Z+K` (contoh: `1.0.0+1` -> `1.0.1+2`).
+  - **Web Capacitor (`presensi-web/package.json`)**: Naikkan `"version": "X.Y.Z"` (contoh: `"1.0.2"` -> `"1.0.3"`).
+- **Pemberitahuan Versi**: Setiap build APK baru yang dikirimkan ke Desktop pengguna harus menginformasikan nomor versi terbarunya dengan jelas pada pesan ringkasan akhir.
+
