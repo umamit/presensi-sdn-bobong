@@ -28,7 +28,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   onConfirmDinasLuar
 }) => {
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
-  const [selectedTeacherForReport, setSelectedTeacherForReport] = useState<string | null>(null);
+  const [selectedTeacherForReport, setSelectedTeacherForReport] = useState<{ name: string; nip: string } | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Fungsi pembantu untuk memilih warna dot ping status
@@ -184,7 +184,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedTeacherForReport(rec.userName);
+                            setSelectedTeacherForReport({ name: rec.userName, nip: rec.userNip });
                             setIsReportModalOpen(true);
                           }}
                           title="Lihat Evaluasi Kinerja Cerdik AI"
@@ -346,7 +346,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             setIsReportModalOpen(false);
             setSelectedTeacherForReport(null);
           }}
-          teacherName={selectedTeacherForReport}
+          teacherName={selectedTeacherForReport.name}
+          teacherNip={selectedTeacherForReport.nip}
           records={filteredRecords}
           schoolSettings={schoolSettings}
         />

@@ -290,5 +290,52 @@ class SupabaseService {
       return null;
     }
   }
+
+  /// Mengambil catatan evaluasi AI terbaru yang belum dibaca milik guru tertentu
+  Future<Map<String, dynamic>?> fetchUnreadFeedback(String nip) async {
+    try {
+      final response = await client
+          .from('ai_feedback_logs')
+          .select()
+          .eq('user_nip', nip)
+          .eq('is_read', false)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      return response;
+    } catch (e) {
+      print('Supabase fetchUnreadFeedback error: $e');
+      return null;
+    }
+  }
+
+  /// Menandai log evaluasi AI tertentu sebagai sudah dibaca (is_read = true)
+  Future<bool> markFeedbackAsRead(dynamic logId) async {
+    try {
+      await client
+          .from('ai_feedback_logs')
+          .update({'is_read': true})
+          .eq('id', logId);
+      return true;
+    } catch (e) {
+      print('Supabase markFeedbackAsRead error: $e');
+      return false;
+    }
+  }
+
+  /// Mengambil seluruh riwayat catatan evaluasi AI milik guru tertentu
+  Future<List<Map<String, dynamic>>> fetchFeedbackHistory(String nip) async {
+    try {
+      final List<dynamic> response = await client
+          .from('ai_feedback_logs')
+          .select()
+          .eq('user_nip', nip)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      print('Supabase fetchFeedbackHistory error: $e');
+      return [];
+    }
+  }
 }
 

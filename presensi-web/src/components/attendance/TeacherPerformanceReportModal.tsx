@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, X, Printer, RefreshCw, AlertTriangle } from 'lucide-react';
 import { AttendanceRecord, SchoolSettings } from '../../types';
 import { fetchTeacherPerformanceReport } from '../../services/groqService';
+import { saveFeedbackLog } from '../../services/aiFeedbackService';
 
 interface TeacherPerformanceReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   teacherName: string;
+  teacherNip: string;
   records: AttendanceRecord[];
   schoolSettings: SchoolSettings;
 }
@@ -15,6 +17,7 @@ export const TeacherPerformanceReportModal: React.FC<TeacherPerformanceReportMod
   isOpen,
   onClose,
   teacherName,
+  teacherNip,
   records,
   schoolSettings
 }) => {
@@ -34,6 +37,9 @@ export const TeacherPerformanceReportModal: React.FC<TeacherPerformanceReportMod
     try {
       const result = await fetchTeacherPerformanceReport(teacherName, records, apiKey);
       setReport(result);
+      if (result) {
+        await saveFeedbackLog(teacherNip, result);
+      }
     } catch (err: any) {
       setError(err?.message || 'Gagal membuat laporan evaluasi.');
     } finally {

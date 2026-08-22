@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { UserProfile, AttendanceRecord, SchoolSettings } from '../types';
+import React, { useState, useEffect } from 'react';
+import { UserProfile, AttendanceRecord, SchoolSettings, AIFeedbackLog } from '../types';
 import { GeofenceMap } from './GeofenceMap';
 import { SelfieModal } from './SelfieModal';
 import { GuideModal } from './GuideModal';
 import { ChangePasswordModal } from './ChangePasswordModal';
+import { AIFeedbackPopup } from './guru/AIFeedbackPopup';
+import { AIFeedbackHistoryModal } from './guru/AIFeedbackHistoryModal';
+import { fetchUnreadFeedback, markFeedbackAsRead, fetchFeedbackHistory } from '../services/aiFeedbackService';
 
 import { GuruHeader } from './guru/GuruHeader';
 import { GpsStatusCard } from './guru/GpsStatusCard';
@@ -14,7 +17,7 @@ import { PersonalHistoryList } from './guru/PersonalHistoryList';
 import { useGpsLocation } from '../hooks/useGpsLocation';
 import { useAttendanceTimer, useClockTick } from '../hooks/useAttendanceTimer';
 import { getLocalDateString, formatTimeWIT24h } from '../utils/haversine';
-import { Fingerprint, History, Menu, Map } from 'lucide-react';
+import { Fingerprint, History, Menu, Map, Sparkles } from 'lucide-react';
 
 // Helper untuk mengonversi HH:MM ke total menit sejak tengah malam
 const toMinutes = (timeStr: string): number => {
@@ -67,6 +70,35 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'absen' | 'riwayat' | 'menu'>('absen');
   const [showMap, setShowMap] = useState(false);
   const [isDinasLuar, setIsDinasLuar] = useState(false);
+  const [unreadFeedback, setUnreadFeedback] = useState<AIFeedbackLog | null>(null);
+  const [feedbackHistory, setFeedbackHistory] = useState<AIFeedbackLog[]>([]);
+  const [isFeedbackHistoryOpen, setIsFeedbackHistoryOpen] = useState(false);
+
+  // Load unread AI feedback on startup
+  useEffect(() => {
+    const loadUnread = async () => {
+      if (user?.nip) {
+        const log = await fetchUnreadFeedback(user.nip);
+        setUnreadFeedback(log);
+      }
+    };
+    loadUnread();
+  }, [user.nip]);
+
+  // Load feedback history
+  const loadHistory = async () => {
+    if (user?.nip) {
+      const list = await fetchFeedbackHistory(user.nip);
+      setFeedbackHistory(list);
+    }
+  };
+
+  const handleConfirmFeedback = async () => {
+    if (unreadFeedback) {
+      await markFeedbackAsRead(unreadFeedback.id);
+      setUnreadFeedback(null);
+    }
+  };
 
   const todayStr = getLocalDateString();
   const userTodayRecord = attendanceRecords.find(r => r.userNip === user.nip && r.date === todayStr);
@@ -255,6 +287,33 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.5rem 0' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem', paddingLeft: '0.25rem' }}>PILIHAN MENU</div>
             <QuickActionButtons setIsChangePassOpen={setIsChangePassOpen} setIsGuideOpen={setIsGuideOpen} onOpenLeaveModal={onOpenLeaveModal} />
+            
+            <button 
+              onClick={() => {
+                loadHistory();
+                setIsFeedbackHistoryOpen(true);
+              }}
+              className="btn btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                fontSize: '0.82rem',
+                padding: '0.65rem',
+                width: '100%',
+                borderRadius: '12px',
+                background: 'rgba(99, 102, 241, 0.1)',
+                border: '1px solid rgba(99, 102, 241, 0.2)',
+                color: 'var(--primary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                marginTop: '0.25rem'
+              }}
+            >
+              <Sparkles size={14} />
+              <span>Riwayat Catatan AI Saya</span>
+            </button>
           </div>
         )}
       </div>
@@ -341,6 +400,8 @@ export const GuruDashboard: React.FC<GuruDashboardProps> = ({
       {isSelfieOpen && <SelfieModal guruName={user.fullName} faceDescriptor={user.faceDescriptor} onCapture={handleSelfieCapture} onClose={() => { setPendingCheckIn(null); setIsSelfieOpen(false); }} />}
       {isGuideOpen && <GuideModal schoolSettings={schoolSettings} onClose={() => setIsGuideOpen(false)} />}
       {isChangePassOpen && <ChangePasswordModal currentUser={user} onClose={() => setIsChangePassOpen(false)} onUpdatePassword={onUpdatePassword} />}
+      {unreadFeedback && <AIFeedbackPopup log={unreadFeedback} onConfirm={handleConfirmFeedback} />}
+      {isFeedbackHistoryOpen && <AIFeedbackHistoryModal isOpen={isFeedbackHistoryOpen} onClose={() => setIsFeedbackHistoryOpen(false)} logs={feedbackHistory} />}
     </>
   );
 };

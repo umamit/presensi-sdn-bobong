@@ -75,3 +75,11 @@ export interface LeaveRequest {
   status: LeaveStatus;
   createdAt: string;
 }
+
+export interface AIFeedbackLog {
+  id: string;
+  userNip: string;
+  feedbackText: string;
+  isRead: boolean;
+  createdAt: string;
+}
