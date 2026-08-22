@@ -68,7 +68,7 @@ export const TeacherPerformanceReportModal: React.FC<TeacherPerformanceReportMod
           <title>Rapor Kinerja - ${teacherName}</title>
           <style>
             body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 2rem; color: #333; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 2rem; border-bottom: 2px double #333; padding-bottom: 1rem; }
+            .header { margin-bottom: 2rem; }
             .content { font-size: 14px; }
             h3 { font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px; }
             h4 { font-size: 15px; }
@@ -80,9 +80,20 @@ export const TeacherPerformanceReportModal: React.FC<TeacherPerformanceReportMod
           </style>
         </head>
         <body>
-          <div class="header">
-            <h2 style="margin: 0;">SDN BOBONG</h2>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Kec. Taliabu Barat, Kab. Pulau Taliabu, Maluku Utara</p>
+          <div class="header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 4px double #000; padding-bottom: 8px; margin-bottom: 2rem;">
+            <div style="flex: 0 0 75px; text-align: left;">
+              <img src="/logo-taliabu.png" style="width: 70px; height: auto;" />
+            </div>
+            <div style="flex: 1; text-align: center; font-family: 'Times New Roman', Times, serif; color: #000; padding: 0 10px;">
+              <h3 style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase; line-height: 1.2;">PEMERINTAH KABUPATEN PULAU TALIABU</h3>
+              <h2 style="margin: 3px 0 2px 0; font-size: 19px; font-weight: bold; text-transform: uppercase; line-height: 1.2;">SD NEGERI BOBONG</h2>
+              <p style="margin: 0; font-size: 11px; line-height: 1.3;">Jalan. Mansur Sou Desa Wayo Kecamatan Taliabu Barat</p>
+              <p style="margin: 0; font-size: 11px; line-height: 1.3;">Pulau Taliabu, Maluku Utara</p>
+              <p style="margin: 0; font-size: 11px; line-height: 1.3; font-weight: bold;">Kode Pos. 97794 Laman sdnegeribobong.sch.id</p>
+            </div>
+            <div style="flex: 0 0 75px; text-align: right;">
+              <img src="/logo-sdn-bobong-hd.png" style="width: 70px; height: auto;" />
+            </div>
           </div>
           <div class="content">
             ${formattedReport}
@@ -99,8 +110,10 @@ export const TeacherPerformanceReportModal: React.FC<TeacherPerformanceReportMod
           </div>
           <script>
             window.onload = function() {
-              window.print();
-              window.onafterprint = function() { window.close(); };
+              setTimeout(function() {
+                window.print();
+                window.onafterprint = function() { window.close(); };
+              }, 500);
             }
           </script>
         </body>
