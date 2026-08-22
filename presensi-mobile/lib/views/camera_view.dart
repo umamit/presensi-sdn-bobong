@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -35,6 +36,8 @@ enum LivenessChallenge {
   centerFace,
   blink,
   smile,
+  turnLeft,
+  turnRight,
   processing,
   success,
   failed,
@@ -53,11 +56,58 @@ class _CameraViewState extends State<CameraView> {
   LivenessChallenge _currentChallenge = LivenessChallenge.centerFace;
   String _instructionText = 'Posisikan wajah Anda di tengah lingkaran';
   
-  // Deteksi kedipan & senyuman
+  // Deteksi kedipan, senyuman, & gerakan kepala
   bool _hasBlinked = false;
   bool _hasSmiled = false;
+  bool _hasTurnedLeft = false;
+  bool _hasTurnedRight = false;
   final double _blinkThreshold = 0.15; // Probabilitas mata terbuka < 15%
   final double _smileThreshold = 0.75; // Probabilitas senyum > 75%
+
+  final List<LivenessChallenge> _challenges = [
+    LivenessChallenge.blink,
+    LivenessChallenge.smile,
+    LivenessChallenge.turnLeft,
+    LivenessChallenge.turnRight,
+  ];
+
+  void _selectRandomChallenge() {
+    final random = math.Random();
+    final challenge = _challenges[random.nextInt(_challenges.length)];
+    setState(() {
+      _currentChallenge = challenge;
+      _hasBlinked = false;
+      _hasSmiled = false;
+      _hasTurnedLeft = false;
+      _hasTurnedRight = false;
+
+      switch (challenge) {
+        case LivenessChallenge.blink:
+          _instructionText = 'Silakan Berkedip cepat...';
+          break;
+        case LivenessChallenge.smile:
+          _instructionText = 'Silakan Tersenyum lebar...';
+          break;
+        case LivenessChallenge.turnLeft:
+          _instructionText = 'Silakan Geleng Kepala ke Kiri...';
+          break;
+        case LivenessChallenge.turnRight:
+          _instructionText = 'Silakan Geleng Kepala ke Kanan...';
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  void _goToProcessingState(CameraImage? image, Face? face) {
+    setState(() {
+      _instructionText = 'Mencocokkan wajah dengan database...';
+      _currentChallenge = LivenessChallenge.processing;
+    });
+    // Liveness Sukses! Lanjut verifikasi biometrik FaceNet
+    _verifyFaceBiometric(image, face);
+  }
 
   int _noFaceFrameCount = 0;
 
@@ -162,45 +212,46 @@ class _CameraViewState extends State<CameraView> {
       _noFaceFrameCount = 0;
       final Face face = faces.first;
 
-      // 2. State Machine Liveness (Tantangan Keaktifan)
+      // 2. State Machine Liveness (Tantangan Keaktifan Acak)
       switch (_currentChallenge) {
         case LivenessChallenge.centerFace:
           // Pastikan wajah menghadap lurus di tengah layar
-          setState(() {
-            _instructionText = 'Silakan Berkedip cepat...';
-            _currentChallenge = LivenessChallenge.blink;
-          });
+          _selectRandomChallenge();
           break;
 
         case LivenessChallenge.blink:
           final double leftEye = face.leftEyeOpenProbability ?? 1.0;
           final double rightEye = face.rightEyeOpenProbability ?? 1.0;
           
-          // Jika mata tertutup (kedipan terdeteksi)
           if (leftEye < _blinkThreshold && rightEye < _blinkThreshold) {
             _hasBlinked = true;
           }
           
-          // Jika sudah berkedip lalu mata terbuka kembali
           if (_hasBlinked && leftEye > 0.6 && rightEye > 0.6) {
-            setState(() {
-              _instructionText = 'Silakan Tersenyum lebar...';
-              _currentChallenge = LivenessChallenge.smile;
-            });
+            _goToProcessingState(image, face);
           }
           break;
 
         case LivenessChallenge.smile:
           final double smileProb = face.smilingProbability ?? 0.0;
           if (smileProb > _smileThreshold) {
-            _hasSmiled = true;
-            setState(() {
-              _instructionText = 'Mencocokkan wajah dengan database...';
-              _currentChallenge = LivenessChallenge.processing;
-            });
-            
-            // Liveness Sukses! Lanjut verifikasi biometrik FaceNet
-            _verifyFaceBiometric(image, face);
+            _goToProcessingState(image, face);
+          }
+          break;
+
+        case LivenessChallenge.turnLeft:
+          final double yaw = face.headEulerAngleY ?? 0.0;
+          // Di MLKit, Y-angle (yaw) positif artinya wajah menghadap ke kiri relative to sensor
+          if (yaw > 20.0) {
+            _goToProcessingState(image, face);
+          }
+          break;
+
+        case LivenessChallenge.turnRight:
+          final double yaw = face.headEulerAngleY ?? 0.0;
+          // Di MLKit, Y-angle (yaw) negatif artinya wajah menghadap ke kanan relative to sensor
+          if (yaw < -20.0) {
+            _goToProcessingState(image, face);
           }
           break;
 
@@ -221,26 +272,15 @@ class _CameraViewState extends State<CameraView> {
     if (_currentChallenge == LivenessChallenge.centerFace) {
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
-        setState(() {
-          _instructionText = 'Silakan Berkedip cepat...';
-          _currentChallenge = LivenessChallenge.blink;
-        });
+        _selectRandomChallenge();
         
-        Future.delayed(const Duration(seconds: 2), () {
+        Future.delayed(const Duration(seconds: 3), () {
           if (!mounted) return;
           setState(() {
-            _instructionText = 'Silakan Tersenyum lebar...';
-            _currentChallenge = LivenessChallenge.smile;
+            _instructionText = 'Mencocokkan wajah dengan database...';
+            _currentChallenge = LivenessChallenge.processing;
           });
-          
-          Future.delayed(const Duration(seconds: 2), () {
-            if (!mounted) return;
-            setState(() {
-              _instructionText = 'Mencocokkan wajah dengan database...';
-              _currentChallenge = LivenessChallenge.processing;
-            });
-            _verifyFaceBiometric(null, null);
-          });
+          _verifyFaceBiometric(null, null);
         });
       });
     }
@@ -655,7 +695,7 @@ class _CameraViewState extends State<CameraView> {
                       ),
                     ),
 
-                    // Indicator visual liveness challenges (Blink/Smile checkbox list)
+                    // Indicator visual liveness challenges (Dinamis sesuai tantangan aktif)
                     Positioned(
                       bottom: 24,
                       child: Container(
@@ -666,21 +706,51 @@ class _CameraViewState extends State<CameraView> {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              _hasBlinked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                              color: _hasBlinked ? Colors.greenAccent : Colors.grey,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 6),
-                            const Text('Mata Berkedip', style: TextStyle(color: Colors.white, fontSize: 11)),
-                            const SizedBox(width: 16),
-                            Icon(
-                              _hasSmiled ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                              color: _hasSmiled ? Colors.greenAccent : Colors.grey,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 6),
-                            const Text('Bibir Tersenyum', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            if (_currentChallenge == LivenessChallenge.centerFace) ...[
+                              const Icon(Icons.face_retouching_natural_rounded, color: Colors.blueAccent, size: 18),
+                              const SizedBox(width: 6),
+                              const Text('Posisikan Wajah Anda', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ] else if (_currentChallenge == LivenessChallenge.blink) ...[
+                              Icon(
+                                _hasBlinked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                color: _hasBlinked ? Colors.greenAccent : Colors.grey,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text('Mata Berkedip', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ] else if (_currentChallenge == LivenessChallenge.smile) ...[
+                              Icon(
+                                _hasSmiled ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                color: _hasSmiled ? Colors.greenAccent : Colors.grey,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text('Bibir Tersenyum', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ] else if (_currentChallenge == LivenessChallenge.turnLeft) ...[
+                              Icon(
+                                _hasTurnedLeft ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                color: _hasTurnedLeft ? Colors.greenAccent : Colors.grey,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text('Geleng Kepala Kiri', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ] else if (_currentChallenge == LivenessChallenge.turnRight) ...[
+                              Icon(
+                                _hasTurnedRight ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                color: _hasTurnedRight ? Colors.greenAccent : Colors.grey,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text('Geleng Kepala Kanan', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ] else ...[
+                              const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.blueAccent),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Memverifikasi Wajah...', style: TextStyle(color: Colors.white, fontSize: 11)),
+                            ],
                           ],
                         ),
                       ),
