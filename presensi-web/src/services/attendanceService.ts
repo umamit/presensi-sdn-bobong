@@ -40,7 +40,8 @@ export async function fetchAttendanceLive(): Promise<AttendanceRecord[] | null> 
       notes: item.notes,
       selfieUrl: extractedSelfie,
       selfieOutUrl: item.selfie_out_url || undefined,
-      shift: extractedShift
+      shift: extractedShift,
+      appVersion: item.app_version || undefined
     };
   });
 }
@@ -74,7 +75,8 @@ export async function saveAttendanceLive(rec: AttendanceRecord): Promise<boolean
     status: rec.status,
     notes: rec.notes || 'Presensi Verified',
     selfie_url: rec.selfieUrl || null,
-    shift: rec.shift || null // Simpan langsung ke kolom baru di Supabase
+    shift: rec.shift || null,
+    app_version: rec.appVersion || null
   };
 
   if (isUuid) payload.user_id = rec.userId;

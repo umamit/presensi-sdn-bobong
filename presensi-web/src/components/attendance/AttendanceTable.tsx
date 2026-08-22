@@ -241,7 +241,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 </div>
 
                 {/* Bawah: Info presensi dengan Tooltip interaktif */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.01)', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.02)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 0.9fr 0.9fr', gap: '0.5rem', background: 'rgba(255, 255, 255, 0.01)', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.02)' }}>
                   {/* Jam Masuk */}
                   <div className="has-tooltip">
                     <span style={{ color: 'var(--text-dim)', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>MASUK</span>
@@ -266,6 +266,15 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                     <span style={{ color: 'var(--secondary)', fontSize: '0.8rem', fontWeight: 500 }}>{rec.distanceMeters ?? 0}m</span>
                     <span className="tooltip-box">
                       Akurasi jarak {rec.distanceMeters ?? 0} meter dari koordinat resmi sekolah
+                    </span>
+                  </div>
+
+                  {/* Versi App */}
+                  <div className="has-tooltip">
+                    <span style={{ color: 'var(--text-dim)', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>VERSI APP</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 500 }}>{rec.appVersion ? `v${rec.appVersion}` : '-'}</span>
+                    <span className="tooltip-box">
+                      Versi aplikasi APK yang digunakan saat absensi: {rec.appVersion ? `v${rec.appVersion}` : 'Tidak diketahui'}
                     </span>
                   </div>
                 </div>

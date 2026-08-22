@@ -5,6 +5,7 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../services/face_detector_service.dart';
 import '../services/supabase_service.dart';
 import '../services/offline_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class CameraView extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -383,6 +384,10 @@ class _CameraViewState extends State<CameraView> {
       'selfie_url' : selfieUrl,
     };
 
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final String localVersion = packageInfo.version;
+    record['app_version'] = localVersion;
+
     if (widget.mode == 'check_in') {
       record['check_in_time'] = timeStr;
       record['type'] = 'in';
@@ -411,6 +416,7 @@ class _CameraViewState extends State<CameraView> {
           notes: bypassWajah ? 'Bypass Wajah Darurat (Foto Terlampir)' : null,
           userNip: nip,
           date: dateStr,
+          appVersion: localVersion,
         );
 
         if (success) {

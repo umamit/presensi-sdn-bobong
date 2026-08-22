@@ -58,7 +58,8 @@ export function parseSchoolSettingsRow(data: any): SchoolSettings {
     siangWorkStart,
     siangCheckOutStart,
     siangCheckOutEnd,
-    groqApiKey
+    groqApiKey,
+    minAppVersion: data.min_app_version || '1.0.0'
   };
 }
 
@@ -121,7 +122,8 @@ export async function saveSchoolSettingsLive(s: SchoolSettings): Promise<boolean
     longitude: s.longitude,
     radius_meters: s.radiusMeters,
     work_start_time: formattedWorkStart,
-    work_end_time: formattedWorkEnd
+    work_end_time: formattedWorkEnd,
+    min_app_version: s.minAppVersion || '1.0.0'
   };
 
   if (s.polygonCoords) payload.polygon_coords = s.polygonCoords;

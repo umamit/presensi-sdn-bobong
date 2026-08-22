@@ -125,6 +125,22 @@ export const SchoolSettingsModal: React.FC<SchoolSettingsModalProps> = ({ settin
             </span>
           </div>
 
+          <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '1rem', marginBottom: '0.5rem' }}>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
+              Versi Minimum Aplikasi Android (APK)
+            </label>
+            <input 
+              type="text" 
+              placeholder="1.0.0" 
+              value={formData.minAppVersion || ''} 
+              onChange={(e) => setFormData({ ...formData, minAppVersion: e.target.value })} 
+              className="glass-input" 
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.25rem', display: 'block' }}>
+              Batasi guru agar tidak dapat absen jika menggunakan APK dengan versi di bawah nilai ini (contoh: 1.0.3).
+            </span>
+          </div>
+
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
             <button type="button" onClick={onClose} className="btn btn-secondary" style={{ flex: 1 }}>Batal</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 1 }}><Save size={16} /> Simpan Setelan GPS</button>

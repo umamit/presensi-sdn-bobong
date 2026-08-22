@@ -83,6 +83,7 @@ class OfflineService {
           notes: record['notes'],
           userNip: record['user_nip'],
           date: record['date'],
+          appVersion: record['app_version'],
         );
       } else {
         // Jika absen masuk (check-in)

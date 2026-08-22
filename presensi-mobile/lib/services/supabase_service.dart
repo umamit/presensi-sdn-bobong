@@ -86,6 +86,7 @@ class SupabaseService {
         'check_in_lng': payload['check_in_lng'] ?? payload['longitude'],
         'distance_meters': payload['distance_meters'] ?? 0,
         'selfie_url': payload['selfie_url'] ?? payload['selfie_in_url'],
+        'app_version': payload['app_version'],
       };
 
       // Query nama guru dan ID guru dari users agar data di record lengkap
@@ -123,12 +124,14 @@ class SupabaseService {
     String? notes,
     String? userNip,
     String? date,
+    String? appVersion,
   }) async {
     try {
       final Map<String, dynamic> updateData = {
         'check_out_time': checkOutTime,
       };
       if (selfieUrl != null) updateData['selfie_out_url'] = selfieUrl;
+      if (appVersion != null) updateData['app_version'] = appVersion;
 
       // Cari ID UUID asli jika recordId yang masuk berupa custom ID lokal
       String? targetId;

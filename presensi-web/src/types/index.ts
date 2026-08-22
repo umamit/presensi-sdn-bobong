@@ -34,6 +34,7 @@ export interface AttendanceRecord {
   selfieUrl?: string;
   selfieOutUrl?: string;
   shift?: ShiftType;
+  appVersion?: string;
 }
 
 export interface SchoolSettings {
@@ -57,6 +58,7 @@ export interface SchoolSettings {
   siangCheckOutStart: string; // "16:00"
   siangCheckOutEnd: string;   // "16:45"
   groqApiKey?: string;
+  minAppVersion?: string;
 }
 
 export type LeaveType = 'sakit' | 'izin' | 'cuti';

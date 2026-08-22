@@ -5,6 +5,7 @@ import '../services/supabase_service.dart';
 import '../services/offline_service.dart';
 import '../components/presensi_action_card.dart';
 import 'login_view.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class DashboardView extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -23,6 +24,9 @@ class _DashboardViewState extends State<DashboardView> {
   bool _isOnline = true;
   int _offlineQueueCount = 0;
   List<Map<String, dynamic>> _history = [];
+  String _appVersion = '1.0.0';
+  bool _isAppVersionBlocked = false;
+  String _requiredVersion = '1.0.0';
 
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
@@ -30,6 +34,7 @@ class _DashboardViewState extends State<DashboardView> {
   void initState() {
     super.initState();
     _currentUser = Map<String, dynamic>.from(widget.user);
+    _checkAppVersion();
     _loadHistory();
     _refreshOfflineCount();
     _initConnectivity();
@@ -324,12 +329,49 @@ class _DashboardViewState extends State<DashboardView> {
               const SizedBox(height: 16),
               const DigitalClock(),
               const SizedBox(height: 16),
-              PresensiActionCard(
-                user: _currentUser,
-                onAttendanceSuccess: () {
-                  _refreshOfflineCount();
-                  _loadHistory();
-                },
+              if (_isAppVersionBlocked) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.15),
+                    border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'APLIKASI TERKUNCI (VERSI USANG)',
+                            style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Versi aplikasi Anda ($_appVersion) sudah usang. Kepala Sekolah mewajibkan versi minimal $_requiredVersion.\n\nSilakan unduh APK rilis terbaru di Desktop Anda untuk melanjutkan presensi!',
+                        style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              AbsorbPointer(
+                absorbing: _isAppVersionBlocked,
+                child: Opacity(
+                  opacity: _isAppVersionBlocked ? 0.4 : 1.0,
+                  child: PresensiActionCard(
+                    user: _currentUser,
+                    onAttendanceSuccess: () {
+                      _refreshOfflineCount();
+                      _loadHistory();
+                    },
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -488,6 +530,44 @@ class _DashboardViewState extends State<DashboardView> {
         );
       },
     );
+  }
+
+  Future<void> _checkAppVersion() async {
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final String localVersion = packageInfo.version;
+      
+      final Map<String, dynamic>? settings = await _supabaseService.fetchSchoolSettings();
+      final String minVersion = settings?['min_app_version']?.toString() ?? '1.0.0';
+
+      final bool isBlocked = _isVersionOlder(localVersion, minVersion);
+      
+      if (mounted) {
+        setState(() {
+          _appVersion = localVersion;
+          _requiredVersion = minVersion;
+          _isAppVersionBlocked = isBlocked;
+        });
+      }
+    } catch (e) {
+      print('Error checking app version: $e');
+    }
+  }
+
+  bool _isVersionOlder(String current, String required) {
+    try {
+      final curParts = current.split('.').map(int.parse).toList();
+      final reqParts = required.split('.').map(int.parse).toList();
+      for (var i = 0; i < 3; i++) {
+        final curVal = i < curParts.length ? curParts[i] : 0;
+        final reqVal = i < reqParts.length ? reqParts[i] : 0;
+        if (curVal < reqVal) return true;
+        if (curVal > reqVal) return false;
+      }
+      return false;
+    } catch (e) {
+      return current.compareTo(required) < 0;
+    }
   }
 }
 
