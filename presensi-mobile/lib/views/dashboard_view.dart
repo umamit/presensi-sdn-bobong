@@ -491,45 +491,47 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   void _showAIFeedbackDialog(Map<String, dynamic> log) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1C1C1E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Row(
-            children: const [
-              Icon(Icons.auto_awesome, color: Colors.blueAccent, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Evaluasi Kinerja AI',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1C1C1E),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: const [
+                Icon(Icons.auto_awesome, color: Colors.blueAccent, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'Evaluasi Kinerja AI',
+                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                (log['feedback_text'] ?? '').toString().replaceAll('**', ''),
+                style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  // Tandai sebagai dibaca di database Supabase
+                  await _supabaseService.markFeedbackAsRead(log['id']);
+                },
+                child: const Text(
+                  'Saya Paham & Mengerti',
+                  style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
-          ),
-          content: SingleChildScrollView(
-            child: Text(
-              (log['feedback_text'] ?? '').toString().replaceAll('**', ''),
-              style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                // Tandai sebagai dibaca di database Supabase
-                await _supabaseService.markFeedbackAsRead(log['id']);
-              },
-              child: const Text(
-                'Saya Paham & Mengerti',
-                style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 
   Future<void> _checkAppVersion() async {
