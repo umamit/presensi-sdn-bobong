@@ -36,7 +36,12 @@
 - **Desain Khusus Smartphone**: Sebelum membuat/mengubah UI (halaman, modal, tombol, tabel, atau form), SELALU rancang dan uji untuk layar smartphone HP (width 320px–430px) terlebih dahulu.
 - **Tanpa Overlap & Tanpa Horizontal Scroll Liar**: Komponen harus fleksibel (flex-col/responsive grid), tombol minimal 44px, dan modal harus muat tanpa terpotong di HP.
 
-## 7. Struktur Folder Modular (Wajib Diikuti)
+## 7. Estetika Desain Profesional & Fungsional (Anti-Desain Ala AI)
+- **Anti-Desain Ala AI (No Over-Decorated/Neon UI)**: Hindari penggunaan efek glassmorphism berlebihan, gradasi neon yang mencolok, bayangan glow yang tidak realistis, atau tata letak futuristik yang mengorbankan keterbacaan (readability).
+- **Bersih & Fungsional (Clean & Minimalist)**: UI harus terlihat bersih, rapi, elegan, dengan kontras teks yang tinggi dan tata letak yang proporsional (human-centric premium design).
+- **Konsistensi Warna & Tema**: Jaga agar warna komponen tetap konsisten menggunakan tema gelap elegan yang sudah ada (hitam, abu-abu tua, aksen biru/indigo/merah bahaya). Jangan asal menambahkan warna gradasi baru tanpa tujuan fungsional yang jelas.
+
+## 8. Struktur Folder Modular (Wajib Diikuti)
 ```
 src/
 ├── App.tsx                        # Shell utama (state modal & routing saja, <100 baris)
@@ -103,7 +108,7 @@ src/
         └── TeacherComponents.tsx   # TeacherAddForm + TeacherListItem
 ```
 
-## 8. Aturan Manajemen Versi Aplikasi (Version Management)
+## 9. Aturan Manajemen Versi Aplikasi (Version Management)
 - **Kenaikan Versi Wajib**: Setiap kali melakukan penambahan fitur baru, perbaikan bug, atau perubahan kode penting yang mengharuskan perakitan (build) ulang APK, AI **WAJIB** menaikkan nomor versi aplikasi pada file konfigurasi:
   - **Flutter Mobile (`presensi-mobile/pubspec.yaml`)**: Naikkan `version: X.Y.Z+K` (contoh: `1.0.0+1` -> `1.0.1+2`).
   - **Web Capacitor (`presensi-web/package.json`)**: Naikkan `"version": "X.Y.Z"` (contoh: `"1.0.2"` -> `"1.0.3"`).
