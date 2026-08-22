@@ -13,12 +13,14 @@
 - **Hindari baca file utuh secara berulang**: Baca bagian kode yang akan diubah saja.
 - **Gunakan edit bertarget (`replace_file_content`)**: Jangan mengganti seluruh isi file jika hanya mengubah 5-10 baris kode.
 
-## 3. Komunikasi Ringkas & Padat
+## 3. Komunikasi Ringkas, Akurat, & Anti-Halusinasi (Anti-Asal Bunyi)
 - **Gunakan Token AI Sehemat Mungkin**: Batasi pemanggilan pembacaan berkas secara berulang, batasi run command yang tidak perlu, dan selalu berikan respon sependek dan seefisien mungkin demi menghemat kuota token.
 - **Jawaban to-the-point**: Berikan tanggapan yang singkat, lugas, dan jelas tanpa penjelasan bertele-tele.
 - **Tanpa Pengulangan Ringkasan**: Jangan mengulang kembali seluruh kode yang sudah diubah jika tidak diminta.
-- **Gunakan Bahasa Indonesia yang Efisien**: Singkat dan jelas.
-- **Verifikasi Sebelum Merespon**: WAJIB melakukan inspeksi/pemindaian menyeluruh terlebih dahulu ke seluruh file untuk memastikan apakah suatu fitur/masalah sudah ada atau belum, SEBELUM memberikan laporan atau respon kepada pengguna.
+- **Gunakan Bahasa Indonesia yang Efisien**: Singkat, jelas, dan profesional.
+- **Anti-Asal Bunyi (No Guesswork/Hallucination)**: Dilarang keras berasumsi atau membuat pernyataan bahwa suatu fitur "sudah terpasang", "sedang berjalan", "aman", atau "mengalami error" tanpa melakukan verifikasi langsung ke file target di workspace terlebih dahulu.
+- **Wajib Rujukan Kode**: Setiap penjelasan teknis mengenai fungsionalitas wajib menyertakan tautan file (`file:///...`) dan baris kode nyata yang ada di dalam proyek. Jangan pernah mengarang kode, nama fungsi, nama tabel database, atau parameter API yang tidak ada di workspace.
+- **Verifikasi Sebelum Merespon**: WAJIB melakukan inspeksi/pemindaian menyeluruh terlebih dahulu ke seluruh file terkait untuk memastikan apakah suatu fitur/masalah sudah ada atau belum, SEBELUM memberikan laporan atau respon kepada pengguna.
 
 ## 4. Eksekusi Terminal & Log
 - **Batasi output log terminal**: Gunakan filter seperti `head -n 20` atau `tail -n 20` saat menjalankan perintah terminal untuk mencegah output besar memenuhi konteks token.
