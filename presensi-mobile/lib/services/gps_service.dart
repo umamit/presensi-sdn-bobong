@@ -80,4 +80,28 @@ class GpsService {
       rethrow; // Lempar ulang agar caller bisa membedakan error mock_location
     }
   }
+
+  /// Membaca koordinat GPS terakhir yang tersimpan di cache HP (instan)
+  Future<Position?> getLastKnownPosition() async {
+    try {
+      final position = await Geolocator.getLastKnownPosition();
+      if (position != null && position.isMocked) {
+        throw Exception('mock_location');
+      }
+      return position;
+    } catch (e) {
+      print('getLastKnownPosition error: $e');
+      return null;
+    }
+  }
+
+  /// Aliran data lokasi GPS real-time (Agresif / Stream)
+  Stream<Position> getPositionStream() {
+    return Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1, // Update setiap perubahan jarak 1 meter
+      ),
+    );
+  }
 }

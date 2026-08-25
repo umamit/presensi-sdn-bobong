@@ -44,7 +44,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
   String _siangCheckOutStart = '16:00';
   String _siangCheckOutEnd   = '16:45';
 
-  Timer? _gpsTimer;
+  StreamSubscription<Position>? _gpsSubscription;
 
   // Status absensi hari ini
   Map<String, dynamic>? _todayRecord;
@@ -69,7 +69,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
 
   @override
   void dispose() {
-    _gpsTimer?.cancel();
+    _gpsSubscription?.cancel();
     super.dispose();
   }
 
@@ -180,63 +180,63 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
   }
 
   void _startLocationTracking() {
-    _updateLocation();
-    // Refresh lokasi GPS setiap 15 detik secara real-time
-    _gpsTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
-      _updateLocation();
+    // 1. Ambil lokasi terakhir dari cache untuk penayangan instan (<50ms)
+    _gpsService.getLastKnownPosition().then((pos) {
+      if (pos != null && mounted) {
+        _processNewPosition(pos);
+      }
+    }).catchError((e) {
+      print('Failed to get cached location: $e');
+    });
+
+    // 2. Berlangganan ke stream GPS real-time untuk pembaruan agresif & instan
+    _gpsSubscription = _gpsService.getPositionStream().listen(
+      (Position position) {
+        if (mounted) {
+          _processNewPosition(position);
+        }
+      },
+      onError: (e) {
+        _handleGpsError(e);
+      },
+    );
+  }
+
+  void _processNewPosition(Position position) {
+    final distance = _gpsService.calculateDistanceMeters(
+      position.latitude,
+      position.longitude,
+      _schoolLat,
+      _schoolLng,
+    );
+
+    setState(() {
+      _isMockLocation = false;
+      _currentPosition = position;
+      _distanceToSchool = distance;
+      _isInRadius = distance <= _allowedRadius;
+      _gpsStatusText = _isInRadius
+          ? 'Anda berada di area sekolah (${distance.toStringAsFixed(1)}m)'
+          : 'Di luar area sekolah (${distance.toStringAsFixed(1)}m)';
+      _isCheckingGps = false;
     });
   }
 
-  Future<void> _updateLocation() async {
-    if (_isCheckingGps) return;
-    setState(() {
-      _isCheckingGps = true;
-    });
-
-    try {
-      final position = await _gpsService.getCurrentPosition();
-
-      if (position != null) {
-        final distance = _gpsService.calculateDistanceMeters(
-          position.latitude,
-          position.longitude,
-          _schoolLat,
-          _schoolLng,
-        );
-
-        setState(() {
-          _isMockLocation = false;
-          _currentPosition = position;
-          _distanceToSchool = distance;
-          _isInRadius = distance <= _allowedRadius;
-          _gpsStatusText = _isInRadius
-              ? 'Anda berada di area sekolah (${distance.toStringAsFixed(1)}m)'
-              : 'Di luar area sekolah (${distance.toStringAsFixed(1)}m)';
-          _isCheckingGps = false;
-        });
-      } else {
-        setState(() {
-          _isMockLocation = false;
-          _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
-          _isCheckingGps = false;
-        });
-      }
-    } catch (e) {
-      if (e.toString().contains('mock_location')) {
-        setState(() {
-          _isMockLocation = true;
-          _isInRadius = false;
-          _currentPosition = null;
-          _gpsStatusText = 'Aplikasi Fake GPS Terdeteksi! Presensi Dinonaktifkan.';
-          _isCheckingGps = false;
-        });
-      } else {
-        setState(() {
-          _isMockLocation = false;
-          _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
-          _isCheckingGps = false;
-        });
-      }
+  void _handleGpsError(dynamic e) {
+    if (e.toString().contains('mock_location')) {
+      setState(() {
+        _isMockLocation = true;
+        _isInRadius = false;
+        _currentPosition = null;
+        _gpsStatusText = 'Aplikasi Fake GPS Terdeteksi! Presensi Dinonaktifkan.';
+        _isCheckingGps = false;
+      });
+    } else {
+      setState(() {
+        _isMockLocation = false;
+        _gpsStatusText = 'Gagal membaca GPS. Aktifkan GPS Anda.';
+        _isCheckingGps = false;
+      });
     }
   }
   int _timeToMinutes(String timeStr) {
