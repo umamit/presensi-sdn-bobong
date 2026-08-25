@@ -179,27 +179,42 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
     }
   }
 
-  void _startLocationTracking() {
-    // 1. Ambil lokasi terakhir dari cache untuk penayangan instan (<50ms)
-    _gpsService.getLastKnownPosition().then((pos) {
+  Future<void> _startLocationTracking() async {
+    setState(() {
+      _isCheckingGps = true;
+      _gpsStatusText = 'Mengecek izin lokasi & GPS...';
+    });
+
+    try {
+      final hasPermission = await _gpsService.checkAndRequestPermissions();
+      if (!hasPermission) {
+        setState(() {
+          _isCheckingGps = false;
+          _gpsStatusText = 'GPS tidak aktif atau izin ditolak.';
+        });
+        return;
+      }
+
+      // 1. Ambil lokasi terakhir dari cache untuk penayangan instan (<50ms)
+      final pos = await _gpsService.getLastKnownPosition();
       if (pos != null && mounted) {
         _processNewPosition(pos);
       }
-    }).catchError((e) {
-      print('Failed to get cached location: $e');
-    });
 
-    // 2. Berlangganan ke stream GPS real-time untuk pembaruan agresif & instan
-    _gpsSubscription = _gpsService.getPositionStream().listen(
-      (Position position) {
-        if (mounted) {
-          _processNewPosition(position);
-        }
-      },
-      onError: (e) {
-        _handleGpsError(e);
-      },
-    );
+      // 2. Berlangganan ke stream GPS real-time untuk pembaruan agresif & instan
+      _gpsSubscription = _gpsService.getPositionStream().listen(
+        (Position position) {
+          if (mounted) {
+            _processNewPosition(position);
+          }
+        },
+        onError: (e) {
+          _handleGpsError(e);
+        },
+      );
+    } catch (e) {
+      _handleGpsError(e);
+    }
   }
 
   void _processNewPosition(Position position) {
