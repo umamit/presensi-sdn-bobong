@@ -15,6 +15,7 @@ interface AttendanceTableProps {
   schoolSettings: SchoolSettings;
   onRefresh?: () => void;
   onConfirmDinasLuar?: (recordId: string) => void;
+  onExport?: (range: 'day' | 'month' | 'year' | 'all') => void;
 }
 
 export const AttendanceTable: React.FC<AttendanceTableProps> = ({
@@ -25,7 +26,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   setSelectedDate,
   schoolSettings,
   onRefresh,
-  onConfirmDinasLuar
+  onConfirmDinasLuar,
+  onExport
 }) => {
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [selectedTeacherForReport, setSelectedTeacherForReport] = useState<{ name: string; nip: string } | null>(null);
@@ -78,13 +80,45 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               />
               <Search size={14} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
-            <button
-              onClick={() => exportAttendanceCsv(filteredRecords)}
-              className="btn btn-secondary"
-              style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', gap: '0.4rem', whiteSpace: 'nowrap', borderRadius: '8px' }}
-            >
-              <Download size={14} /> <span>Ekspor CSV</span>
-            </button>
+            {onExport ? (
+              <div style={{ display: 'flex', alignItems: 'center', background: 'var(--success)', borderRadius: '8px', padding: '0 0.5rem', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }}>
+                <Download size={14} color="#fff" />
+                <select
+                  onChange={(e) => {
+                    const val = e.target.value as 'day' | 'month' | 'year' | 'all';
+                    if (val) {
+                      onExport(val);
+                      e.target.value = ''; // Reset ke placeholder
+                    }
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '0.82rem',
+                    padding: '0.55rem 0.35rem',
+                    fontWeight: 600,
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                  defaultValue=""
+                >
+                  <option value="" disabled style={{ background: '#1c1c1e', color: '#fff' }}>Ekspor CSV</option>
+                  <option value="day" style={{ background: '#1c1c1e', color: '#fff' }}>Hari Ini</option>
+                  <option value="month" style={{ background: '#1c1c1e', color: '#fff' }}>Bulan Ini</option>
+                  <option value="year" style={{ background: '#1c1c1e', color: '#fff' }}>Tahun Ini</option>
+                  <option value="all" style={{ background: '#1c1c1e', color: '#fff' }}>Semua Data</option>
+                </select>
+              </div>
+            ) : (
+              <button
+                onClick={() => exportAttendanceCsv(filteredRecords)}
+                className="btn btn-secondary"
+                style={{ padding: '0.55rem 0.85rem', fontSize: '0.82rem', gap: '0.4rem', whiteSpace: 'nowrap', borderRadius: '8px' }}
+              >
+                <Download size={14} /> <span>Ekspor CSV</span>
+              </button>
+            )}
           </div>
         </div>
 

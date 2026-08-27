@@ -202,6 +202,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
             schoolSettings={schoolSettings}
             onRefresh={refetch}
             onConfirmDinasLuar={onConfirmDinasLuar}
+            onExport={handleExportWithRange}
           />
           <EmptyState 
             onRefresh={refetch} 
@@ -218,6 +219,7 @@ export const AdminDashboard: React.FC<React.PropsWithChildren<AdminDashboardProp
           schoolSettings={schoolSettings}
           onRefresh={refetch}
           onConfirmDinasLuar={onConfirmDinasLuar}
+          onExport={handleExportWithRange}
         />
       )}
 
