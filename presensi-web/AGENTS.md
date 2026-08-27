@@ -109,12 +109,14 @@ src/
 ```
 
 ## 9. Aturan Manajemen Versi Aplikasi (Version Management)
-- **Kenaikan Versi Wajib**: Setiap kali melakukan penambahan fitur baru, perbaikan bug, atau perubahan kode penting yang mengharuskan perakitan (build) ulang APK, AI **WAJIB** menaikkan nomor versi aplikasi pada file konfigurasi:
-  - **Flutter Mobile (`presensi-mobile/pubspec.yaml`)**: Naikkan `version: X.Y.Z+K` (contoh: `1.0.0+1` -> `1.0.1+2`).
-  - **Web Capacitor (`presensi-web/package.json`)**: Naikkan `"version": "X.Y.Z"` (contoh: `"1.0.2"` -> `"1.0.3"`).
+- **Kenaikan Versi Wajib & Sinkronisasi Total**: Setiap kali melakukan penambahan fitur baru, perbaikan bug, atau perubahan kode penting yang mengharuskan perakitan (build) ulang APK, AI **WAJIB** menaikkan dan menyinkronkan nomor versi aplikasi di seluruh file konfigurasi:
+  - **Flutter Mobile (`presensi-mobile/pubspec.yaml`)**: Naikkan `version: X.Y.Z+K` (contoh: `1.0.6+7` -> `1.0.7+8`).
+  - **Web App (`presensi-web/package.json`)**: Naikkan `"version": "X.Y.Z"` (contoh: `"1.0.6"` -> `"1.0.7"`).
+  - **Capacitor Android Native (`presensi-web/android/app/build.gradle`)**: WAJIB selalu menyamakan `versionName "X.Y.Z"` dan menaikkan `versionCode` agar identik dengan versi web & Flutter (contoh: `versionName "1.0.7"` & `versionCode 4`).
 - **Wajib Build 3 Versi APK Sekaligus**: Setiap kali melakukan perakitan ulang APK, AI **WAJIB** selalu membangun dan menyalin **3 versi berkas APK sekaligus** ke Desktop pengguna secara lengkap:
   1. `PresensiMobile_SDNBobong_arm64.apk` (Flutter Android ARM 64-bit)
   2. `PresensiMobile_SDNBobong_arm32.apk` (Flutter Android ARM 32-bit/v7a)
   3. `Presensi_SDN_Bobong.apk` (Vite Web Capacitor APK)
 - **Pemberitahuan Versi**: Setiap build APK baru yang dikirimkan ke Desktop pengguna harus menginformasikan nomor versi terbarunya dengan jelas pada pesan ringkasan akhir.
+
 
