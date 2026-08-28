@@ -56,6 +56,9 @@ class _CameraViewState extends State<CameraView> {
   LivenessChallenge _currentChallenge = LivenessChallenge.centerFace;
   String _instructionText = 'Posisikan wajah Anda di tengah lingkaran';
   
+  // Throttle frame untuk HP High-end (Samsung S25 Ultra) & HP Low-end (mengurangi panas/beban NPU)
+  DateTime? _lastFrameProcessedTime;
+  
   // Deteksi kedipan, senyuman, & gerakan kepala
   bool _hasBlinked = false;
   bool _hasSmiled = false;
@@ -165,6 +168,15 @@ class _CameraViewState extends State<CameraView> {
             _currentChallenge == LivenessChallenge.success) {
           return;
         }
+
+        // Batasi pemrosesan maksimal 1 frame per 150ms untuk menghindari penumpukan antrean
+        // (Sangat membantu performa di HP low-end & mencegah overflow di HP high-end)
+        final now = DateTime.now();
+        if (_lastFrameProcessedTime != null &&
+            now.difference(_lastFrameProcessedTime!).inMilliseconds < 150) {
+          return;
+        }
+        _lastFrameProcessedTime = now;
         
         _processCameraImage(image);
       });
