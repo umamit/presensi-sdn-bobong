@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -58,6 +59,11 @@ class _CameraViewState extends State<CameraView> {
   
   // Throttle frame untuk HP High-end (Samsung S25 Ultra) & HP Low-end (mengurangi panas/beban NPU)
   DateTime? _lastFrameProcessedTime;
+
+  // Liveness Time-Based & UI Progress State
+  DateTime? _challengeStartTime;
+  double _challengeProgress = 0.0; // 0.0 sampai 1.0
+  Timer? _challengeTimeoutTimer;
   
   // Deteksi kedipan, senyuman, & gerakan kepala
   bool _hasBlinked = false;
@@ -75,6 +81,10 @@ class _CameraViewState extends State<CameraView> {
   ];
 
   void _selectRandomChallenge() {
+    _challengeTimeoutTimer?.cancel();
+    _challengeStartTime = null;
+    _challengeProgress = 0.0;
+    
     final random = math.Random();
     final challenge = _challenges[random.nextInt(_challenges.length)];
     setState(() {
@@ -101,10 +111,22 @@ class _CameraViewState extends State<CameraView> {
           break;
       }
     });
+
+    // Setel timer 5 detik: jika guru gagal menyelesaikan tantangan ini,
+    // sistem akan otomatis memutar ke tantangan acak lainnya agar tidak membeku
+    _challengeTimeoutTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted && 
+          _currentChallenge != LivenessChallenge.processing && 
+          _currentChallenge != LivenessChallenge.success) {
+        _selectRandomChallenge();
+      }
+    });
   }
 
   void _goToProcessingState(CameraImage? image, Face? face) {
+    _challengeTimeoutTimer?.cancel();
     setState(() {
+      _challengeProgress = 1.0;
       _instructionText = 'Mencocokkan wajah dengan database...';
       _currentChallenge = LivenessChallenge.processing;
     });
@@ -123,6 +145,7 @@ class _CameraViewState extends State<CameraView> {
 
   @override
   void dispose() {
+    _challengeTimeoutTimer?.cancel();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -226,9 +249,11 @@ class _CameraViewState extends State<CameraView> {
       final Face face = faces.first;
 
       // 2. State Machine Liveness (Tantangan Keaktifan Acak)
+      bool isMatch = false;
+
       switch (_currentChallenge) {
         case LivenessChallenge.centerFace:
-          // Pastikan wajah menghadap lurus di tengah layar
+          // Wajah menghadap lurus di tengah layar
           _selectRandomChallenge();
           break;
 
@@ -241,35 +266,62 @@ class _CameraViewState extends State<CameraView> {
           }
           
           if (_hasBlinked && leftEye > 0.6 && rightEye > 0.6) {
-            _goToProcessingState(image, face);
+            isMatch = true;
           }
           break;
 
         case LivenessChallenge.smile:
           final double smileProb = face.smilingProbability ?? 0.0;
           if (smileProb > _smileThreshold) {
-            _goToProcessingState(image, face);
+            isMatch = true;
           }
           break;
 
         case LivenessChallenge.turnLeft:
           final double yaw = face.headEulerAngleY ?? 0.0;
-          // Di MLKit, Y-angle (yaw) positif artinya wajah menghadap ke kiri relative to sensor
           if (yaw > 20.0) {
-            _goToProcessingState(image, face);
+            isMatch = true;
           }
           break;
 
         case LivenessChallenge.turnRight:
           final double yaw = face.headEulerAngleY ?? 0.0;
-          // Di MLKit, Y-angle (yaw) negatif artinya wajah menghadap ke kanan relative to sensor
           if (yaw < -20.0) {
-            _goToProcessingState(image, face);
+            isMatch = true;
           }
           break;
 
         default:
           break;
+      }
+
+      // Evaluasi Liveness berbasis waktu nyata (wajib ditahan minimal 500 milidetik)
+      if (isMatch) {
+        final now = DateTime.now();
+        if (_challengeStartTime == null) {
+          _challengeStartTime = now;
+          setState(() {
+            _challengeProgress = 0.0;
+          });
+        } else {
+          final elapsed = now.difference(_challengeStartTime!).inMilliseconds;
+          final double progress = (elapsed / 500.0).clamp(0.0, 1.0);
+          setState(() {
+            _challengeProgress = progress;
+          });
+          
+          if (elapsed >= 500) {
+            _goToProcessingState(image, face);
+          }
+        }
+      } else {
+        // Reset waktu mulai jika kondisi tantangan terputus
+        if (_challengeStartTime != null) {
+          _challengeStartTime = null;
+          setState(() {
+            _challengeProgress = 0.0;
+          });
+        }
       }
     } catch (e, stack) {
       print('DEBUG MLKIT ERROR: $e');
@@ -693,18 +745,17 @@ class _CameraViewState extends State<CameraView> {
                       ),
                     ),
 
-                    // Circular Border Ring
+                    // Circular Border Ring & Progres Interaktif
                     Center(
-                      child: Container(
+                      child: SizedBox(
                         width: 260,
                         height: 260,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
+                        child: CustomPaint(
+                          painter: LivenessProgressPainter(
+                            progress: _challengeProgress,
                             color: _currentChallenge == LivenessChallenge.success
                                 ? Colors.greenAccent
                                 : const Color(0xFF0A84FF),
-                            width: 3.5,
                           ),
                         ),
                       ),
@@ -810,5 +861,52 @@ class _CameraViewState extends State<CameraView> {
         ],
       ),
     );
+  }
+}
+
+/// CustomPainter untuk menggambar Ring Lingkaran Progres Liveness secara dinamis
+class LivenessProgressPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  LivenessProgressPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    const strokeWidth = 3.5;
+
+    // 1. Gambar Ring Latar Belakang (Transparan tipis)
+    final bgPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // 2. Gambar Ring Progres Aktif (Melengkung searah jarum jam dari atas)
+    if (progress > 0) {
+      final progressPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = strokeWidth;
+
+      const startAngle = -math.pi / 2; // Mulai dari atas (jam 12)
+      final sweepAngle = 2 * math.pi * progress;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
+        progressPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant LivenessProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
