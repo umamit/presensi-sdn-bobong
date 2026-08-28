@@ -140,6 +140,7 @@ class _CameraViewState extends State<CameraView> {
         frontCamera,
         ResolutionPreset.medium, // Resolusi sedang (160x120 / 640x480) untuk menghemat baterai HP guru
         enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.nv21,
       );
 
       await _cameraController!.initialize();
