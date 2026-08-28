@@ -270,7 +270,9 @@ class _CameraViewState extends State<CameraView> {
         default:
           break;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      print('DEBUG MLKIT ERROR: $e');
+      print(stack);
       // Fallback Simulasi Otomatis (Anti-Crash di Simulator Laptop)
       // Membantu proses pengujian agar instruksi visual tetap berjalan mengalir otomatis
       _handleSimulationFallback();
