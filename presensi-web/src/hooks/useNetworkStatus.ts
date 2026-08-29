@@ -1,22 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Network } from '@capacitor/network';
-import { syncOfflineAttendanceQueue, getOfflineAttendanceQueue } from '../services/offlineSyncService';
 
 interface UseNetworkStatusResult {
   isOnline: boolean;
-  pendingSyncCount: number;
-  syncOfflineData: () => Promise<number>;
 }
 
 export function useNetworkStatus(): UseNetworkStatusResult {
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-  const [pendingSyncCount, setPendingSyncCount] = useState<number>(() => getOfflineAttendanceQueue().length);
-
-  const syncOfflineData = async (): Promise<number> => {
-    const count = await syncOfflineAttendanceQueue();
-    setPendingSyncCount(getOfflineAttendanceQueue().length);
-    return count;
-  };
 
   useEffect(() => {
     const checkInitial = async () => {
@@ -34,15 +24,9 @@ export function useNetworkStatus(): UseNetworkStatusResult {
     try {
       networkListener = Network.addListener('networkStatusChange', (status) => {
         setIsOnline(status.connected);
-        if (status.connected) {
-          syncOfflineData();
-        }
       });
     } catch (e) {
-      const handleOnline = () => {
-        setIsOnline(true);
-        syncOfflineData();
-      };
+      const handleOnline = () => setIsOnline(true);
       const handleOffline = () => setIsOnline(false);
 
       window.addEventListener('online', handleOnline);
@@ -61,5 +45,5 @@ export function useNetworkStatus(): UseNetworkStatusResult {
     };
   }, []);
 
-  return { isOnline, pendingSyncCount, syncOfflineData };
+  return { isOnline };
 }

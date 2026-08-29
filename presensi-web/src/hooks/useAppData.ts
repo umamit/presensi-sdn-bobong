@@ -12,7 +12,6 @@ import {
 
 import { getSessionUser, saveSessionUser } from '../services/sessionService';
 import { subscribeAttendanceRealtime } from '../services/attendanceRealtimeService';
-import { saveOfflineAttendanceItem } from '../services/offlineSyncService';
 import { detectAppType } from '../utils/haversine';
 
 export function useAppData() {
@@ -168,26 +167,7 @@ export function useAppData() {
         setAttendanceRecords(prev => [fullRecord, ...prev]);
         alert('Presensi masuk berhasil tersimpan dan tersinkronisasi ke server cloud.');
       } else {
-        // Simpan ke antrean offline jika gagal (misal koneksi down)
-        const offlineItem = {
-          id: fullRecord.id,
-          userId: fullRecord.userId,
-          userName: fullRecord.userName,
-          userNip: fullRecord.userNip,
-          date: fullRecord.date,
-          time: fullRecord.checkInTime || new Date().toISOString(),
-          type: 'in' as const,
-          selfieBase64: newRecord.selfieUrl || '',
-          distanceMeters: fullRecord.distanceMeters || 0,
-          notes: fullRecord.notes,
-          timestamp: Date.now(),
-          shift: fullRecord.shift,
-          status: fullRecord.status
-        };
-        saveOfflineAttendanceItem(offlineItem);
-        
-        setAttendanceRecords(prev => [fullRecord, ...prev]);
-        alert('Jaringan terganggu. Presensi disimpan sementara di HP lokal dan akan otomatis tersinkronisasi saat sinyal kembali pulih.');
+        alert('Gagal mengirim presensi masuk: Koneksi internet lambat atau terputus. Silakan cari sinyal internet yang stabil dan coba lagi.');
       }
     } else {
       setAttendanceRecords(prev => [fullRecord, ...prev]);
@@ -227,31 +207,7 @@ export function useAppData() {
         } : r)));
         alert('Presensi pulang berhasil tersimpan dan tersinkronisasi ke server cloud.');
       } else {
-        // Simpan ke antrean offline jika gagal (offline)
-        const offlineItem = {
-          id: recordId,
-          userId: targetRecord?.userId || 'unknown',
-          userName: targetRecord?.userName || 'unknown',
-          userNip: targetRecord?.userNip || 'unknown',
-          date: targetRecord?.date || new Date().toISOString().split('T')[0],
-          time: checkOutTime,
-          type: 'out' as const,
-          selfieBase64: selfieUrl || '',
-          distanceMeters: targetRecord?.distanceMeters || 0,
-          notes: bypassNote,
-          timestamp: Date.now(),
-          shift: targetRecord?.shift,
-          status: targetRecord?.status
-        };
-        saveOfflineAttendanceItem(offlineItem);
-
-        setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
-          ...r, 
-          checkOutTime, 
-          selfieOutUrl: selfieUrl,
-          notes: bypassNote ? `${r.notes || ''} | ${bypassNote}` : r.notes
-        } : r)));
-        alert('Jaringan terganggu. Presensi pulang disimpan sementara di HP lokal dan akan otomatis tersinkronisasi saat sinyal kembali pulih.');
+        alert('Gagal mengirim presensi pulang: Koneksi internet lambat atau terputus. Silakan cari sinyal internet yang stabil dan coba kembali.');
       }
     } else {
       setAttendanceRecords(prev => prev.map(r => (r.id === recordId ? { 
