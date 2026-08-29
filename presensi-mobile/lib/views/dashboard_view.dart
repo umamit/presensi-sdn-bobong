@@ -517,10 +517,10 @@ class _DashboardViewState extends State<DashboardView> {
             ),
             actions: [
               TextButton(
-                onPressed: () async {
+                onPressed: () {
                   Navigator.of(context).pop();
-                  // Tandai sebagai dibaca di database Supabase
-                  await _supabaseService.markFeedbackAsRead(log['id']);
+                  // Sesuai permintaan user: jangan tandai sebagai dibaca di database Supabase
+                  // agar feedback ini tetap muncul kembali saat masuk aplikasi berikutnya.
                 },
                 child: const Text(
                   'Saya Paham & Mengerti',
