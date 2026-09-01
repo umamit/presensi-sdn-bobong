@@ -15,6 +15,7 @@ class CameraView extends StatefulWidget {
   final bool isDinasLuar;
   final double latitude;
   final double longitude;
+  final double distanceMeters;
   final String detectedShift;           // 'pagi' atau 'siang' — dikirim dari PresensiActionCard
   final Map<String, String> schoolSettings; // jam kerja shift dari Supabase
 
@@ -25,6 +26,7 @@ class CameraView extends StatefulWidget {
     required this.isDinasLuar,
     required this.latitude,
     required this.longitude,
+    this.distanceMeters = 0.0,
     this.detectedShift = 'pagi',
     this.schoolSettings = const {},
   });
@@ -486,6 +488,7 @@ class _CameraViewState extends State<CameraView> {
       'notes'      : attendanceNotes,
       'latitude'   : widget.latitude,
       'longitude'  : widget.longitude,
+      'distance_meters': widget.distanceMeters.round(),
       'device_info': 'Flutter Android APK',
       'bypass_wajah': bypassWajah,
       'selfie_url' : selfieUrl,

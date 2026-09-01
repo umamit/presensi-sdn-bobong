@@ -405,6 +405,7 @@ class _PresensiActionCardState extends State<PresensiActionCard> {
           isDinasLuar: _isDinasLuar,
           latitude: _currentPosition?.latitude ?? 0.0,
           longitude: _currentPosition?.longitude ?? 0.0,
+          distanceMeters: _distanceToSchool,
           detectedShift: _detectShift(),
           schoolSettings: {
             'pagi_work_start' : _pagiWorkStart,
