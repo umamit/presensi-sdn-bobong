@@ -297,9 +297,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                   {/* Jarak GPS */}
                   <div className="has-tooltip">
                     <span style={{ color: 'var(--text-dim)', display: 'block', fontSize: '0.65rem', fontWeight: 600 }}>JARAK GPS</span>
-                    <span style={{ color: 'var(--secondary)', fontSize: '0.8rem', fontWeight: 500 }}>{rec.distanceMeters ?? 0}m</span>
+                    <span style={{ color: rec.distanceMeters && rec.distanceMeters > 0 ? 'var(--secondary)' : 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 500 }}>
+                      {rec.distanceMeters !== undefined && rec.distanceMeters !== null && rec.distanceMeters > 0 ? `${rec.distanceMeters}m` : (rec.status === 'dinas_luar' || rec.status === 'dinas_luar_approved' ? 'Dinas Luar' : '0m')}
+                    </span>
                     <span className="tooltip-box">
-                      Akurasi jarak {rec.distanceMeters ?? 0} meter dari koordinat resmi sekolah
+                      {rec.distanceMeters !== undefined && rec.distanceMeters !== null && rec.distanceMeters > 0
+                        ? `Akurasi jarak ${rec.distanceMeters} meter dari koordinat resmi sekolah`
+                        : (rec.status === 'dinas_luar' || rec.status === 'dinas_luar_approved' ? 'Tugas Dinas Luar (GPS dikecualikan)' : 'Akurasi jarak 0 meter (Lokasi di titik pusat sekolah atau Web PWA)')}
                     </span>
                   </div>
 
